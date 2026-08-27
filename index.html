@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS Smart Grid สมุทรปราการ (Monthly Planner & History Archive)</title>
+<title>CMMS Smart Grid สมุทรปราการ (Site Photo Attachment Edition)</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -372,7 +372,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
 .fm-label{font-size:10px; color:var(--text-dim); text-transform:uppercase; font-family:var(--font-num); font-weight:600;}
 .fm-val{font-family:var(--font-num); font-size:16px; font-weight:700; margin-top:2px;}
 
-/* FORM & ANOMALY */
+/* FORM WITH PHOTO UPLOAD & PREVIEW */
 .form-wrap{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; max-width:840px; box-shadow:var(--shadow-sm);}
 .form-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px;}
 .form-field{display:flex; flex-direction:column; gap:6px;}
@@ -383,6 +383,27 @@ table.data-table tr:hover td{background:var(--orange-light);}
 }
 .form-field input:focus, .form-field select:focus, .form-field textarea:focus{border-color:var(--orange-pri); outline:none; box-shadow:0 0 0 2px var(--orange-glow);}
 
+/* PHOTO UPLOAD BOX */
+.photo-upload-zone{
+  border:2px dashed #FDBA74; background:var(--bg-card-alt); border-radius:var(--radius-sm);
+  padding:18px; text-align:center; cursor:pointer; transition:.2s;
+}
+.photo-upload-zone:hover{border-color:var(--orange-pri); background:var(--orange-light);}
+.photo-upload-zone svg{width:32px; height:32px; stroke:var(--orange-pri); margin-bottom:6px;}
+.photo-preview-grid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(90px, 1fr)); gap:10px; margin-top:12px;
+}
+.photo-preview-item{
+  position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; border:1px solid var(--border);
+}
+.photo-preview-item img{width:100%; height:100%; object-fit:cover;}
+.photo-preview-item .btn-remove-photo{
+  position:absolute; top:2px; right:2px; background:rgba(220,38,38,0.85); color:#fff;
+  border:none; width:18px; height:18px; border-radius:50%; font-size:10px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* ANOMALY */
 .anomaly-cards{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px;}
 .anomaly-item{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; border-top:3px solid var(--red-neon); box-shadow:var(--shadow-sm);}
 .anomaly-item.mid{border-top-color:var(--amber-soft);}
@@ -399,7 +420,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
 /* MODAL */
 .modal{position:fixed; inset:0; background:rgba(15, 23, 42, 0.5); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:100; padding:16px;}
 .modal.open{display:flex;}
-.modal-box{background:var(--bg-surface); border:1px solid #FED7AA; border-radius:var(--radius); width:100%; max-width:540px; padding:22px; box-shadow:0 10px 25px -5px rgba(0, 0, 0, 0.1);}
+.modal-box{background:var(--bg-surface); border:1px solid #FED7AA; border-radius:var(--radius); width:100%; max-width:580px; max-height:90vh; overflow-y:auto; padding:22px; box-shadow:0 10px 25px -5px rgba(0, 0, 0, 0.1);}
 .modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
 .modal-head h3{font-size:16px; font-weight:700; color:var(--orange-pri);}
 .btn-x{background:none; border:none; font-size:22px; color:var(--text-muted); cursor:pointer;}
@@ -447,7 +468,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>MONTHLY PLANNER v5.3</span>
+        <span>SITE PHOTO ATTACH v5.4</span>
       </div>
     </div>
 
@@ -577,7 +598,6 @@ table.data-table tr:hover td{background:var(--orange-light);}
 
       <!-- TAB 1: MONTHLY MAINTENANCE PLANNER -->
       <div id="tab-plan" class="tab-content active">
-        <!-- MONTH SELECTOR BAR -->
         <div class="month-selector-bar">
           <div class="month-nav-controls">
             <button class="btn-mini" onclick="navigateMonth(-1)">◀ เดือนก่อน</button>
@@ -585,17 +605,14 @@ table.data-table tr:hover td{background:var(--orange-light);}
             <button class="btn-mini" onclick="navigateMonth(1)">เดือนถัดไป ▶</button>
           </div>
 
-          <!-- Quick Month Chips -->
           <div class="month-chips-scroll" id="monthChipsContainer"></div>
 
-          <!-- Toggle Table / Calendar View -->
           <div class="view-toggle-btns">
             <button class="btn-toggle active" id="btnViewTable" onclick="setPlannerView('table')">📋 ตารางรายการ</button>
             <button class="btn-toggle" id="btnViewCalendar" onclick="setPlannerView('calendar')">📅 ปฏิทินรายวัน</button>
           </div>
         </div>
 
-        <!-- 1. TABLE LIST VIEW -->
         <div class="table-card" id="plannerTableView">
           <table class="data-table">
             <thead>
@@ -614,7 +631,6 @@ table.data-table tr:hover td{background:var(--orange-light);}
           </table>
         </div>
 
-        <!-- 2. MONTHLY CALENDAR GRID VIEW -->
         <div class="calendar-view-container" id="plannerCalendarView">
           <div class="month-cal-grid" id="monthCalendarGrid"></div>
         </div>
@@ -757,11 +773,11 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </div>
 
-      <!-- TAB 7: FORM -->
+      <!-- TAB 7: FORM WITH PHOTO UPLOAD -->
       <div id="tab-form" class="tab-content">
         <div class="section-head">
           <h3>แบบฟอร์มเอกสารบันทึกผลการบำรุงรักษา (e-Work Order)</h3>
-          <span class="sub">บันทึกข้อมูลและ Push เข้าสู่ระบบแบบ Real-time ทันที</span>
+          <span class="sub">บันทึกข้อมูลหน้างานและแนบรูปถ่ายประกอบเพื่อส่งให้หัวหน้างานตรวจรับ</span>
         </div>
         <div class="form-wrap">
           <form id="woForm" onsubmit="handleFormSubmit(event)">
@@ -807,6 +823,19 @@ table.data-table tr:hover td{background:var(--orange-light);}
                 <label>ค่าความต้านทานกราวด์ดิน (Ω)</label>
                 <input type="number" step="0.01" id="f_ground" placeholder="เช่น 2.45">
               </div>
+
+              <!-- PHOTO ATTACHMENT SECTION -->
+              <div class="form-field full">
+                <label>📸 รูปถ่ายหน้างาน / ภาพประกอบสภาพอุปกรณ์ (Photo Attachments)</label>
+                <div class="photo-upload-zone" onclick="document.getElementById('photoFileInput').click()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <div style="font-weight:700; color:var(--orange-pri); font-size:13px;">แตะเพื่อถ่ายรูปจากกล้อง หรือเลือกรูปภาพจากเครื่อง</div>
+                  <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">รองรับไฟล์ JPG, PNG (สามารถแนบได้หลายรูป)</div>
+                  <input type="file" id="photoFileInput" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(event)">
+                </div>
+                <div class="photo-preview-grid" id="photoPreviewContainer"></div>
+              </div>
+
               <div class="form-field full">
                 <label>บันทึกการซ่อมบำรุง / อะไหล่ที่เปลี่ยน</label>
                 <textarea rows="3" id="f_desc" placeholder="ระบุการปฏิบัติงานอย่างละเอียด..."></textarea>
@@ -822,7 +851,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
               </div>
             </div>
             <button type="submit" class="btn primary" id="btnSubmitForm" style="margin-top:16px; width:100%; justify-content:center; padding:12px;">
-              บันทึกข้อมูลและส่งขึ้น Live Grid
+              บันทึกข้อมูลและแนบรูปภาพขึ้น Live Grid
             </button>
           </form>
         </div>
@@ -875,9 +904,10 @@ table.data-table tr:hover td{background:var(--orange-light);}
 /* ---------------- DATA & STATE ---------------- */
 let currentRole = 'admin';
 let currentSelectedYear = '2026';
-let currentSelectedMonth = 7; // สิงหาคม (0-indexed)
+let currentSelectedMonth = 7;
 let currentPlannerYear = 2026;
 let currentPlannerViewMode = 'table';
+let uploadedPhotos = []; // เก็บ Base64 ของรูปที่ช่างแนบ
 
 const THAI_MONTHS = [
   'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -885,51 +915,114 @@ const THAI_MONTHS = [
 ];
 
 let WORK_ORDERS = [
-  {id:'WO-SP-69083', asset:'โคมไฟถนน LED ถ.สุขสวัสดิ์-ป้อมพระจุล', district:'อ.พระสมุทรเจดีย์', type:'เปลี่ยน Photo Switch & โคมไฟ', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมไฟสาธารณะ', status:'done', temp:'32.0', ground:'1.95'},
-  {id:'WO-SP-69085', asset:'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', district:'อ.บางพลี', type:'แก้ไขจุดต่อร้อน (Hotspot)', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมฉุกเฉิน 24ชม.', status:'high', temp:'78.4', ground:'4.80'},
-  {id:'WO-SP-69086', asset:'สายป้อน Feeder 04 ถนนท้ายบ้าน', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบฉนวนสายส่ง', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมสายส่ง 01', status:'done', temp:'35.6', ground:'2.00'},
-  {id:'WO-SP-69081', asset:'หม้อแปลง TR-250kVA นิคมบางปู ซ.12', district:'อ.เมืองสมุทรปราการ', type:'ตรวจวัดค่าฉนวนน้ำมัน (DGA)', isoDate:'2026-08-28', date:'28 ส.ค. 69', team:'ทีมหม้อแปลง 01', status:'doing', temp:'48.5', ground:'2.40'},
-  {id:'WO-SP-69082', asset:'เสาแรงสูง Feeder 11 เทพารักษ์ กม.8', district:'อ.บางพลี', type:'ล้างลูกถ้วยฉนวนกันคราบไอเกลือ', isoDate:'2026-08-29', date:'29 ส.ค. 69', team:'ทีมสายส่ง 02', status:'pending', temp:'38.2', ground:'3.10'},
-  {id:'WO-SP-69084', asset:'RMU สวิตช์เกียร์ ซ.วัดด่านสำโรง', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบ Ring Main Unit', isoDate:'2026-08-30', date:'30 ส.ค. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'41.0', ground:'2.15'},
-
-  {id:'WO-SP-69091', asset:'หม้อแปลง TR-400kVA นิคมบางพลี ซ.4', district:'อ.บางพลี', type:'ตรวจสอบระบบระบายความร้อน', isoDate:'2026-09-04', date:'4 ก.ย. 69', team:'ทีมหม้อแปลง 02', status:'pending', temp:'42.0', ground:'2.10'},
-  {id:'WO-SP-69092', asset:'เสาไฟฟ้าแรงสูง ถ.สุขสวัสดิ์ กม.12', district:'อ.พระสมุทรเจดีย์', type:'ล้างลูกถ้วยฉนวนกันคราบเกลือ', isoDate:'2026-09-12', date:'12 ก.ย. 69', team:'ทีมสายส่ง 01', status:'pending', temp:'35.0', ground:'2.30'},
-  {id:'WO-SP-69093', asset:'สวิตช์เกียร์ RMU ตลาดปากน้ำ', district:'อ.เมืองสมุทรปราการ', type:'ตรวจวัดค่าความเป็นฉนวนแก๊ส', isoDate:'2026-09-22', date:'22 ก.ย. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'39.5', ground:'1.85'},
-
-  {id:'WO-SP-69101', asset:'หม้อแปลงสถานีสูบน้ำคลองด่าน', district:'อ.บางบ่อ', type:'เปลี่ยนถ่ายน้ำมันหม้อแปลง', isoDate:'2026-10-08', date:'8 ต.ค. 69', team:'ทีมหม้อแปลง 01', status:'pending', temp:'44.0', ground:'2.05'},
-  {id:'WO-SP-69102', asset:'ระบบไฟส่องสว่าง ถ.กิ่งแก้ว', district:'อ.บางพลี', type:'เปลี่ยนโคมไฟถนน LED', isoDate:'2026-10-18', date:'18 ต.ค. 69', team:'ทีมไฟสาธารณะ', status:'pending', temp:'31.0', ground:'1.90'}
+  {
+    id:'WO-SP-69083', asset:'โคมไฟถนน LED ถ.สุขสวัสดิ์-ป้อมพระจุล', district:'อ.พระสมุทรเจดีย์',
+    type:'เปลี่ยน Photo Switch & โคมไฟ', isoDate:'2026-08-27', date:'27 ส.ค. 69',
+    team:'ทีมไฟสาธารณะ', status:'done', temp:'32.0', ground:'1.95',
+    photos: ['https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&q=80']
+  },
+  {
+    id:'WO-SP-69085', asset:'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', district:'อ.บางพลี',
+    type:'แก้ไขจุดต่อร้อน (Hotspot)', isoDate:'2026-08-27', date:'27 ส.ค. 69',
+    team:'ทีมฉุกเฉิน 24ชม.', status:'high', temp:'78.4', ground:'4.80',
+    photos: ['https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&q=80']
+  },
+  {
+    id:'WO-SP-69086', asset:'สายป้อน Feeder 04 ถนนท้ายบ้าน', district:'อ.เมืองสมุทรปราการ',
+    type:'ตรวจสอบฉนวนสายส่ง', isoDate:'2026-08-27', date:'27 ส.ค. 69',
+    team:'ทีมสายส่ง 01', status:'done', temp:'35.6', ground:'2.00', photos: []
+  },
+  {
+    id:'WO-SP-69081', asset:'หม้อแปลง TR-250kVA นิคมบางปู ซ.12', district:'อ.เมืองสมุทรปราการ',
+    type:'ตรวจวัดค่าฉนวนน้ำมัน (DGA)', isoDate:'2026-08-28', date:'28 ส.ค. 69',
+    team:'ทีมหม้อแปลง 01', status:'doing', temp:'48.5', ground:'2.40', photos: []
+  },
+  {
+    id:'WO-SP-69082', asset:'เสาแรงสูง Feeder 11 เทพารักษ์ กม.8', district:'อ.บางพลี',
+    type:'ล้างลูกถ้วยฉนวนกันคราบไอเกลือ', isoDate:'2026-08-29', date:'29 ส.ค. 69',
+    team:'ทีมสายส่ง 02', status:'pending', temp:'38.2', ground:'3.10', photos: []
+  },
+  {
+    id:'WO-SP-69084', asset:'RMU สวิตช์เกียร์ ซ.วัดด่านสำโรง', district:'อ.เมืองสมุทรปราการ',
+    type:'ตรวจสอบ Ring Main Unit', isoDate:'2026-08-30', date:'30 ส.ค. 69',
+    team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'41.0', ground:'2.15', photos: []
+  }
 ];
 
 const ASSET_HEALTH_DATA = [
   {tag: 'TR-BP-0012', name: 'หม้อแปลง TR-250kVA นิคมบางปู ซ.12', area: 'อ.เมืองสมุทรปราการ · สถานีฯ ท้ายบ้าน', ahi: 92, status: 'good', statusLabel: 'สมบูรณ์ (Good)', color: '#16A34A', dgaStatus: 'Normal (H2 < 10 ppm)', tempMax: '48.5 °C', lastPM: '28 ส.ค. 2569'},
   {tag: 'FDR-TP-08', name: 'สายป้อนแรงสูง Feeder 11 เทพารักษ์ กม.8', area: 'อ.บางพลี · สถานีฯ เทพารักษ์', ahi: 64, status: 'warn', statusLabel: 'เฝ้าระวัง (Watchlist)', color: '#D97706', dgaStatus: 'คราบเกลือสะสมปานกลาง', tempMax: '58.2 °C', lastPM: '15 มิ.ย. 2569'},
-  {tag: 'TR-BK-0085', name: 'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', area: 'อ.บางพลี · บริเวณโรงงานบางโฉลง', ahi: 42, status: 'critical', statusLabel: 'เสี่ยงสูง (Critical)', color: '#DC2626', dgaStatus: 'Hotspot ขั้วต่อสายเฟส B', tempMax: '78.4 °C', lastPM: '27 ส.ค. 2569'},
-  {tag: 'RMU-PS-004', name: 'สวิตช์เกียร์ Ring Main Unit ซ.วัดด่าน', area: 'อ.เมืองสมุทรปราการ · สำโรงเหนือ', ahi: 88, status: 'good', statusLabel: 'สมบูรณ์ (Good)', color: '#16A34A', dgaStatus: 'SF6 Pressure: 0.55 MPa', tempMax: '41.0 °C', lastPM: '30 ส.ค. 2569'}
+  {tag: 'TR-BK-0085', name: 'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', area: 'อ.บางพลี · บริเวณโรงงานบางโฉลง', ahi: 42, status: 'critical', statusLabel: 'เสี่ยงสูง (Critical)', color: '#DC2626', dgaStatus: 'Hotspot ขั้วต่อสายเฟส B', tempMax: '78.4 °C', lastPM: '27 ส.ค. 2569'}
 ];
 
 let INSPECTION_HISTORY = [
-  {logId: 'LOG-SP-2026-0827-01', year: '2026', district: 'เมือง', timestamp: '27 ส.ค. 2569 08:35 น.', assetName: 'หม้อแปลงหน้า รร.นายเรือ (TR-SP-0012)', inspector: 'สายตรวจ SP-CAR 01 (ช่างสมศักดิ์)', temp: '36.4', ground: '1.85', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass', note: 'ทำความสะอาดฝุ่นและตรวจวัดระดับน้ำมันฉนวน อยู่ในเกณฑ์มาตรฐาน'},
-  {logId: 'LOG-SP-2026-0826-03', year: '2026', district: 'พระสมุทรเจดีย์', timestamp: '26 ส.ค. 2569 16:15 น.', assetName: 'โคมไฟถนน LED ป้อมพระจุล (PL-PC-042)', inspector: 'ทีมไฟสาธารณะ 02 (ช่างมานพ)', temp: '32.0', ground: '2.10', result: 'แก้ไขแล้ว (เปลี่ยนชุดไฟ)', statusClass: 'pass', note: 'เปลี่ยน Photo Switch และหลอดไฟ LED 150W จำนวน 2 ชุด'}
+  {
+    logId: 'LOG-SP-2026-0827-01', year: '2026', district: 'เมือง',
+    timestamp: '27 ส.ค. 2569 08:35 น.', assetName: 'หม้อแปลงหน้า รร.นายเรือ (TR-SP-0012)',
+    inspector: 'สายตรวจ SP-CAR 01 (ช่างสมศักดิ์)', temp: '36.4', ground: '1.85',
+    result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass',
+    note: 'ทำความสะอาดฝุ่นและตรวจวัดระดับน้ำมันฉนวน อยู่ในเกณฑ์มาตรฐาน',
+    photos: ['https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&q=80']
+  },
+  {
+    logId: 'LOG-SP-2026-0826-03', year: '2026', district: 'พระสมุทรเจดีย์',
+    timestamp: '26 ส.ค. 2569 16:15 น.', assetName: 'โคมไฟถนน LED ป้อมพระจุล (PL-PC-042)',
+    inspector: 'ทีมไฟสาธารณะ 02 (ช่างมานพ)', temp: '32.0', ground: '2.10',
+    result: 'แก้ไขแล้ว (เปลี่ยนชุดไฟ)', statusClass: 'pass',
+    note: 'เปลี่ยน Photo Switch และหลอดไฟ LED 150W จำนวน 2 ชุด',
+    photos: ['https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&q=80']
+  }
 ];
 
 const FEEDER_OUTAGE_DATA = [
-  {code: 'FDR-TP-08', name: 'สายป้อนเทพารักษ์ 08 (สถานีฯ บางพลี)', area: 'อ.บางพลี (เทพารักษ์ กม.1 - กม.12)', outageCount: 9, totalDurationMin: 345, saifi: 1.42, saidi: 48.2, mainCause: 'กิ่งไม้แตะสายช่วงลมแรง / จุดต่อสายร้อนสะสม', risk: 'critical', riskLabel: 'เสี่ยงสูง (Critical)'},
-  {code: 'FDR-BP-04', name: 'สายป้อนบางปู 04 (สถานีฯ ท้ายบ้าน)', area: 'อ.เมืองสมุทรปราการ (นิคมอุตสาหกรรมบางปู)', outageCount: 7, totalDurationMin: 220, saifi: 1.15, saidi: 32.5, mainCause: 'คราบไอเค็มทะเลสะสมบนลูกถ้วยฉนวน (Salt Contamination)', risk: 'critical', riskLabel: 'เสี่ยงสูง (Critical)'}
+  {code: 'FDR-TP-08', name: 'สายป้อนเทพารักษ์ 08 (สถานีฯ บางพลี)', area: 'อ.บางพลี (เทพารักษ์ กม.1 - กม.12)', outageCount: 9, totalDurationMin: 345, saifi: 1.42, saidi: 48.2, mainCause: 'กิ่งไม้แตะสายช่วงลมแรง / จุดต่อสายร้อนสะสม', risk: 'critical', riskLabel: 'เสี่ยงสูง (Critical)'}
 ];
 
 const PATROL_PINS = [
   {id: 1, name: 'หม้อแปลงหน้า รร.นายเรือ (ถ.สุขุมวิท)', desc: 'วัดค่าความต้านทานกราวด์ดินและระดับน้ำมัน', lat: 13.6062, lng: 100.5925, status: 'completed', assetCode: 'TR-SP-0012'},
-  {id: 2, name: 'สายป้อนนิคมฯ บางปู ซ.9 (ถ.พัฒนา 1)', desc: 'ตรวจคราบไอเกลือทะเลสะสมบนลูกถ้วยฉนวน', lat: 13.5245, lng: 100.6710, status: 'active', assetCode: 'FEEDER-BP-09'},
-  {id: 3, name: 'สวิตช์เกียร์แยกแพรกษา กม.4', desc: 'สแกน Thermo-scan ขั้วต่อสายและตู้ RMU', lat: 13.5685, lng: 100.6350, status: 'pending', assetCode: 'SWG-PS-04'},
-  {id: 4, name: 'หม้อแปลงตลาดปากน้ำ (ถ.ท้ายบ้าน)', desc: 'ตรวจบาลานซ์เฟสและโหลดการใช้ไฟช่วงค่ำ', lat: 13.5950, lng: 100.5980, status: 'pending', assetCode: 'TR-PK-0088'}
+  {id: 2, name: 'สายป้อนนิคมฯ บางปู ซ.9 (ถ.พัฒนา 1)', desc: 'ตรวจคราบไอเกลือทะเลสะสมบนลูกถ้วยฉนวน', lat: 13.5245, lng: 100.6710, status: 'active', assetCode: 'FEEDER-BP-09'}
 ];
 
 const ANOMALIES = [
-  {zone:'อ.พระสมุทรเจดีย์ (โซนชายฝั่ง)', score:'94%', title:'ความเสี่ยง Flashover จากไอเกลือทะเล', desc:'กระแสรั่วไหลบนลูกถ้วยฉนวนแตะระดับ 32mA หลังมีลมมรสุมพัดเข้าอ่าวไทย', advice:'► จัดทีมฉีดล้างลูกถ้วยแรงสูงภายใน 12 ชม.', mid:false},
-  {zone:'นิคมอุตสาหกรรมบางปู', score:'78%', title:'ฮาร์มอนิกและโหลดเกินพิกัด', desc:'โหลดความร้อนสะสมแกนเหล็กหม้อแปลง 84.5°C ในช่วงชั่วโมงการผลิตสูงสุด', advice:'► ปรับบาลานซ์เฟสและเปิดพัดลมระบายอากาศ', mid:true}
+  {zone:'อ.พระสมุทรเจดีย์ (โซนชายฝั่ง)', score:'94%', title:'ความเสี่ยง Flashover จากไอเกลือทะเล', desc:'กระแสรั่วไหลบนลูกถ้วยฉนวนแตะระดับ 32mA หลังมีลมมรสุมพัดเข้าอ่าวไทย', advice:'► จัดทีมฉีดล้างลูกถ้วยแรงสูงภายใน 12 ชม.', mid:false}
 ];
 
-/* ---------------- MONTHLY PLANNER LOGIC ---------------- */
+/* ---------------- PHOTO UPLOAD LOGIC ---------------- */
+function handlePhotoUpload(event){
+  const files = event.target.files;
+  if(!files || files.length === 0) return;
+
+  for(let i = 0; i < files.length; i++){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      uploadedPhotos.push(e.target.result);
+      renderPhotoPreviews();
+    };
+    reader.readAsDataURL(files[i]);
+  }
+}
+
+function removeUploadedPhoto(index){
+  uploadedPhotos.splice(index, 1);
+  renderPhotoPreviews();
+}
+
+function renderPhotoPreviews(){
+  const container = document.getElementById('photoPreviewContainer');
+  if(uploadedPhotos.length === 0){
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = uploadedPhotos.map((src, idx) => `
+    <div class="photo-preview-item">
+      <img src="${src}" alt="Site Photo">
+      <button type="button" class="btn-remove-photo" onclick="removeUploadedPhoto(${idx})">✕</button>
+    </div>
+  `).join('');
+}
+
+/* ---------------- MONTHLY PLANNER ---------------- */
 function renderMonthChips(){
   const container = document.getElementById('monthChipsContainer');
   container.innerHTML = THAI_MONTHS.map((mName, idx) => {
@@ -937,11 +1030,7 @@ function renderMonthChips(){
     const count = WORK_ORDERS.filter(w => w.isoDate.startsWith(targetMonthStr)).length;
     const isActive = idx === currentSelectedMonth ? 'active' : '';
 
-    return `
-      <button class="chip-month ${isActive}" onclick="selectMonth(${idx})">
-        ${mName} (${count})
-      </button>
-    `;
+    return `<button class="chip-month ${isActive}" onclick="selectMonth(${idx})">${mName} (${count})</button>`;
   }).join('');
 }
 
@@ -954,13 +1043,8 @@ function selectMonth(monthIdx){
 
 function navigateMonth(step){
   let newMonth = currentSelectedMonth + step;
-  if(newMonth < 0){
-    newMonth = 11;
-    currentPlannerYear -= 1;
-  } else if(newMonth > 11){
-    newMonth = 0;
-    currentPlannerYear += 1;
-  }
+  if(newMonth < 0){ newMonth = 11; currentPlannerYear -= 1; }
+  else if(newMonth > 11){ newMonth = 0; currentPlannerYear += 1; }
   selectMonth(newMonth);
 }
 
@@ -968,10 +1052,8 @@ function setPlannerView(mode){
   currentPlannerViewMode = mode;
   document.getElementById('btnViewTable').classList.toggle('active', mode === 'table');
   document.getElementById('btnViewCalendar').classList.toggle('active', mode === 'calendar');
-
   document.getElementById('plannerTableView').style.display = mode === 'table' ? 'block' : 'none';
   document.getElementById('plannerCalendarView').classList.toggle('show', mode === 'calendar');
-
   renderPlanner();
 }
 
@@ -1006,14 +1088,7 @@ function renderMonthlyTable(tasks){
     else if(wo.status === 'doing'){ badgeClass = 'doing'; badgeText = 'กำลังทำ'; }
     else if(wo.status === 'high'){ badgeClass = 'high'; badgeText = 'เร่งด่วน'; }
 
-    let duePill = '';
-    if(wo.isoDate === '2026-08-27'){
-      duePill = `<span class="due-pill due-urgent">⚡ วันนี้ (${wo.date})</span>`;
-    } else if(wo.isoDate === '2026-08-28'){
-      duePill = `<span class="due-pill due-near">⏳ พรุ่งนี้ (${wo.date})</span>`;
-    } else {
-      duePill = `<span class="due-pill due-normal">📅 ${wo.date}</span>`;
-    }
+    let photoTag = (wo.photos && wo.photos.length > 0) ? `<span title="มีรูปถ่ายแนบ ${wo.photos.length} รูป" style="margin-left:4px; font-size:12px; cursor:help;">📷</span>` : '';
 
     const editBtn = (currentRole === 'admin' || currentRole === 'supervisor' || currentRole === 'technician')
       ? `<button class="btn-mini" onclick="editWorkOrderById('${wo.id}')">แก้ไข</button>`
@@ -1021,11 +1096,11 @@ function renderMonthlyTable(tasks){
 
     return `
       <tr>
-        <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${wo.id}</strong></td>
+        <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${wo.id}</strong>${photoTag}</td>
         <td>${wo.asset}</td>
         <td>${wo.district}</td>
         <td>${wo.type}</td>
-        <td>${duePill}</td>
+        <td><span class="due-pill due-normal">📅 ${wo.date}</span></td>
         <td>${wo.team}</td>
         <td><span class="badge ${badgeClass}">${badgeText}</span></td>
         <td style="text-align:right;">
@@ -1043,13 +1118,10 @@ function renderMonthlyCalendar(tasks){
   const grid = document.getElementById('monthCalendarGrid');
   const dows = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
   let html = dows.map(d => `<div class="cal-head-cell">${d}</div>`).join('');
-
   const firstDay = new Date(currentPlannerYear, currentSelectedMonth, 1).getDay();
   const daysInMonth = new Date(currentPlannerYear, currentSelectedMonth + 1, 0).getDate();
 
-  for(let i = 0; i < firstDay; i++){
-    html += `<div class="cal-day-cell blank"></div>`;
-  }
+  for(let i = 0; i < firstDay; i++) html += `<div class="cal-day-cell blank"></div>`;
 
   for(let day = 1; day <= daysInMonth; day++){
     const dayStr = `${currentPlannerYear}-${String(currentSelectedMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
@@ -1058,49 +1130,32 @@ function renderMonthlyCalendar(tasks){
 
     let taskPills = dayTasks.map(t => `
       <div class="cal-task-pill" onclick="viewWorkOrderById('${t.id}')" title="${t.asset}">
-        ● ${t.asset.split(' ')[0]} (${t.id})
+        ● ${t.asset.split(' ')[0]} ${t.photos && t.photos.length > 0 ? '📷' : ''}
       </div>
     `).join('');
 
-    html += `
-      <div class="cal-day-cell ${isToday ? 'today' : ''}">
-        <div class="cal-day-num">${day}</div>
-        ${taskPills}
-      </div>
-    `;
+    html += `<div class="cal-day-cell ${isToday ? 'today' : ''}"><div class="cal-day-num">${day}</div>${taskPills}</div>`;
   }
-
   grid.innerHTML = html;
 }
 
-/* ---------------- ROLE ACCESS & ACTIONS ---------------- */
+/* ---------------- ROLE ACCESS & MODALS ---------------- */
 function handleRoleChange(){
   currentRole = document.getElementById('userRoleSelector').value;
   const labelEl = document.getElementById('activeRoleLabel');
   const btnAdd = document.getElementById('btnTopAddWork');
   const navForm = document.getElementById('navItemForm');
 
-  if(currentRole === 'admin'){
-    labelEl.textContent = 'ADMIN VIEW (สิทธิ์เต็ม)';
-    btnAdd.style.display = 'inline-flex';
-    navForm.style.display = 'flex';
-  } else if(currentRole === 'supervisor'){
-    labelEl.textContent = 'SUPERVISOR (วางแผน/อนุมัติ)';
-    btnAdd.style.display = 'inline-flex';
-    navForm.style.display = 'flex';
-  } else if(currentRole === 'technician'){
-    labelEl.textContent = 'TECHNICIAN (บันทึกภาคสนาม)';
-    btnAdd.style.display = 'none';
-    navForm.style.display = 'flex';
-  } else if(currentRole === 'executive'){
-    labelEl.textContent = 'EXECUTIVE (ดูสถิติ/อ่านอย่างเดียว)';
-    btnAdd.style.display = 'none';
-    navForm.style.display = 'none';
-  }
+  if(currentRole === 'admin') labelEl.textContent = 'ADMIN VIEW (สิทธิ์เต็ม)';
+  else if(currentRole === 'supervisor') labelEl.textContent = 'SUPERVISOR (วางแผน/อนุมัติ)';
+  else if(currentRole === 'technician') labelEl.textContent = 'TECHNICIAN (บันทึกภาคสนาม)';
+  else if(currentRole === 'executive') labelEl.textContent = 'EXECUTIVE (ดูสถิติ/อ่านอย่างเดียว)';
+
+  btnAdd.style.display = (currentRole === 'executive' || currentRole === 'technician') ? 'none' : 'inline-flex';
+  navForm.style.display = (currentRole === 'executive') ? 'none' : 'flex';
   renderPlanner();
 }
 
-/* ---------------- MODALS & WORK ORDER HANDLERS ---------------- */
 const modal = document.getElementById('dataModal');
 const modalTitle = document.getElementById('modalTitle');
 const modalContent = document.getElementById('modalContent');
@@ -1111,17 +1166,36 @@ function viewWorkOrderById(id){
   const wo = WORK_ORDERS.find(w => w.id === id);
   if(!wo) return;
 
+  let photoGalleryHtml = '';
+  if(wo.photos && wo.photos.length > 0){
+    photoGalleryHtml = `
+      <div style="margin-top:14px; padding-top:12px; border-top:1px dashed var(--border);">
+        <strong style="display:block; margin-bottom:8px; color:var(--orange-pri);">📸 รูปถ่ายสภาพอุปกรณ์หน้างาน (${wo.photos.length} ภาพ):</strong>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:10px;">
+          ${wo.photos.map(p => `
+            <a href="${p}" target="_blank" style="display:block; border-radius:8px; overflow:hidden; border:1px solid var(--border); aspect-ratio:4/3;">
+              <img src="${p}" style="width:100%; height:100%; object-fit:cover;" title="คลิกเพื่อดูรูปขนาดเต็ม">
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } else {
+    photoGalleryHtml = `<p style="margin-top:12px; font-size:12px; color:var(--text-dim); font-style:italic;">(ไม่มีรูปภาพแนบสำหรับงานนี้)</p>`;
+  }
+
   modalTitle.textContent = `รายละเอียดใบสั่งงาน : ${wo.id}`;
   modalContent.innerHTML = `
     <div style="font-size:13.5px; line-height:1.8;">
       <p><strong>จุดติดตั้ง:</strong> ${wo.asset}</p>
       <p><strong>อำเภอ:</strong> ${wo.district}</p>
       <p><strong>ประเภทงาน:</strong> ${wo.type}</p>
-      <p><strong>กำหนดแล้วเสร็จ (Due Date):</strong> <span style="color:var(--orange-pri); font-family:var(--font-num); font-weight:700;">${wo.date} (${wo.isoDate})</span></p>
+      <p><strong>กำหนดแล้วเสร็จ (Due Date):</strong> <span style="color:var(--orange-pri); font-family:var(--font-num); font-weight:700;">${wo.date}</span></p>
       <p><strong>ทีมรับผิดชอบ:</strong> ${wo.team}</p>
       <p><strong>ค่า Thermo-scan:</strong> <span style="color:var(--orange-pri); font-family:var(--font-num); font-weight:700;">${wo.temp || '-'} °C</span></p>
       <p><strong>ค่าความต้านทานดิน:</strong> <span style="color:var(--green-neon); font-family:var(--font-num); font-weight:700;">${wo.ground || '-'} Ω</span></p>
       <p><strong>สถานะ:</strong> ${wo.status.toUpperCase()}</p>
+      ${photoGalleryHtml}
     </div>
     <div style="margin-top:18px; text-align:right;">
       <button class="btn" onclick="closeModal()">ปิด</button>
@@ -1154,10 +1228,6 @@ function editWorkOrderById(id){
         <label>ทีมช่าง</label>
         <input type="text" id="e_team" value="${wo.team}" required>
       </div>
-      <div class="form-field" style="margin-bottom:12px;">
-        <label>อุณหภูมิ (°C)</label>
-        <input type="number" step="0.1" id="e_temp" value="${wo.temp}">
-      </div>
       <div style="margin-top:16px; display:flex; justify-content:flex-end; gap:8px;">
         <button type="button" class="btn" onclick="closeModal()">ยกเลิก</button>
         <button type="submit" class="btn primary">บันทึกการแก้ไข</button>
@@ -1178,7 +1248,6 @@ function saveEdit(e, id){
   const dObj = new Date(newIso);
   WORK_ORDERS[idx].date = `${dObj.getDate()} ${THAI_MONTHS[dObj.getMonth()].slice(0,3)}. ${String(dObj.getFullYear()+543).slice(-2)}`;
   WORK_ORDERS[idx].team = document.getElementById('e_team').value;
-  WORK_ORDERS[idx].temp = document.getElementById('e_temp').value;
   
   renderMonthChips();
   renderPlanner();
@@ -1199,18 +1268,23 @@ function handleFormSubmit(e){
     temp: document.getElementById('f_temp').value || '35.0',
     ground: document.getElementById('f_ground').value || '2.50',
     status: document.getElementById('f_status').value,
-    team: 'ทีมสายตรวจ SP-01'
+    team: 'ทีมสายตรวจ SP-01',
+    photos: [...uploadedPhotos] // แนบรูปถ่ายที่อัปโหลด
   };
   WORK_ORDERS.push(newWO);
   
+  // Reset Form & Photo Uploads
+  uploadedPhotos = [];
+  renderPhotoPreviews();
+  document.getElementById('woForm').reset();
+
   currentPlannerYear = dObj.getFullYear();
   currentSelectedMonth = dObj.getMonth();
   document.getElementById('currentMonthDisplay').textContent = `${THAI_MONTHS[currentSelectedMonth]} ${currentPlannerYear+543}`;
   
   renderMonthChips();
   renderPlanner();
-  document.getElementById('woForm').reset();
-  alert('บันทึกเอกสารบำรุงรักษาเรียบร้อย!');
+  alert('บันทึกใบตรวจงานและแนบรูปภาพเข้าสู่ระบบเรียบร้อย!');
   switchTab('tab-plan');
 }
 
@@ -1223,12 +1297,8 @@ function switchTab(tabId){
   const target = document.getElementById(tabId);
   if(target) target.classList.add('active');
 
-  if(tabId === 'tab-route' && mapInstance){
-    setTimeout(() => { mapInstance.invalidateSize(); }, 200);
-  }
-  if(tabId === 'tab-analytics'){
-    setTimeout(() => { initCharts(); }, 200);
-  }
+  if(tabId === 'tab-route' && mapInstance) setTimeout(() => { mapInstance.invalidateSize(); }, 200);
+  if(tabId === 'tab-analytics') setTimeout(() => { initCharts(); }, 200);
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
@@ -1236,7 +1306,7 @@ document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
-/* ---------------- EXCEL EXPORT (MONTHLY) ---------------- */
+/* ---------------- EXCEL EXPORT ---------------- */
 function exportToExcel(){
   const targetMonthStr = `${currentPlannerYear}-${String(currentSelectedMonth+1).padStart(2,'0')}`;
   const monthTasks = WORK_ORDERS.filter(w => w.isoDate.startsWith(targetMonthStr));
@@ -1244,7 +1314,8 @@ function exportToExcel(){
   const exportData = monthTasks.map(w => ({
     "รหัสใบสั่งงาน": w.id, "อุปกรณ์/จุดติดตั้ง": w.asset, "อำเภอ": w.district,
     "ประเภทงาน": w.type, "กำหนดเสร็จ (Due Date)": w.date, "ทีมรับผิดชอบ": w.team,
-    "สถานะ": w.status, "อุณหภูมิ (°C)": w.temp, "กราวด์ (Ω)": w.ground
+    "สถานะ": w.status, "อุณหภูมิ (°C)": w.temp, "กราวด์ (Ω)": w.ground,
+    "จำนวนรูปที่แนบ": (w.photos ? w.photos.length : 0)
   }));
   const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
@@ -1285,7 +1356,10 @@ function renderHistoryTable(){
 
   tbody.innerHTML = items.map((item) => `
     <tr>
-      <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${item.logId}</strong></td>
+      <td>
+        <strong style="color:var(--orange-pri); font-family:var(--font-num);">${item.logId}</strong>
+        ${item.photos && item.photos.length > 0 ? '<span title="มีรูปถ่ายหน้างาน"> 📷</span>' : ''}
+      </td>
       <td style="font-family:var(--font-num); font-size:12px;">
         <span class="badge" style="background:#F1F5F9; color:var(--text-main); margin-right:4px;">${item.year}</span>
         ${item.timestamp}
@@ -1323,7 +1397,23 @@ function viewHistoryDetail(logId){
   const item = INSPECTION_HISTORY.find(h => h.logId === logId);
   if(!item) return;
 
-  modalTitle.textContent = `บันทึกประวัติการตรวจ : ${item.logId}`;
+  let photoGalleryHtml = '';
+  if(item.photos && item.photos.length > 0){
+    photoGalleryHtml = `
+      <div style="margin-top:14px; padding-top:12px; border-top:1px dashed var(--border);">
+        <strong style="display:block; margin-bottom:8px; color:var(--orange-pri);">📸 ภาพถ่ายประกอบการตรวจหน้างาน:</strong>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:10px;">
+          ${item.photos.map(p => `
+            <a href="${p}" target="_blank" style="display:block; border-radius:8px; overflow:hidden; border:1px solid var(--border); aspect-ratio:4/3;">
+              <img src="${p}" style="width:100%; height:100%; object-fit:cover;" title="คลิกเพื่อดูรูปขนาดเต็ม">
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  modalTitle.textContent = `บันทึกประวัติตรวจ : ${item.logId}`;
   modalContent.innerHTML = `
     <div style="font-size:13.5px; line-height:1.8;">
       <p><strong>ปีงบประมาณ:</strong> <span style="font-family:var(--font-num); font-weight:700; color:var(--orange-pri);">${item.year} (พ.ศ. ${Number(item.year)+543})</span></p>
@@ -1337,6 +1427,7 @@ function viewHistoryDetail(logId){
         <strong>บันทึกรายละเอียดงาน:</strong>
         <p style="color:var(--text-muted); font-size:12.5px; margin-top:2px;">${item.note}</p>
       </div>
+      ${photoGalleryHtml}
     </div>
     <div style="margin-top:18px; text-align:right;">
       <button class="btn" onclick="closeModal()">ปิด</button>
