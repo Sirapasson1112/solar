@@ -3,32 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS ระบบบำรุงรักษาโครงข่ายไฟฟ้า — เขตสมุทรปราการ</title>
+<title>CMMS Smart Grid สมุทรปราการ (Real-Time Live Monitor)</title>
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<!-- SheetJS for Excel Export -->
+<!-- SheetJS -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 :root{
-  /* Warm & Soft Orange Palette (สบายตา คอนทราสต์นุ่มนวล) */
-  --bg-body:#0F141A;
-  --bg-surface:#171F28;
-  --bg-card:#1E2833;
-  --bg-card-alt:#232F3D;
-  --border:#2D3C4D;
-  --border-subtle:#222E3C;
+  --bg-body:#0E1318;
+  --bg-surface:#161E26;
+  --bg-card:#1C2631;
+  --bg-card-alt:#222F3E;
+  --border:#2A3A4C;
+  --border-subtle:#1E2B38;
   
   --orange-pri:#EA6C28;       /* ส้มโทนอุ่น สบายตา */
-  --orange-soft:#F38744;      /* ส้มอ่อนสำหรับจุดเน้น */
-  --orange-glow:rgba(234, 108, 40, 0.12);
+  --orange-soft:#F38744;
+  --orange-glow:rgba(234, 108, 40, 0.15);
   --orange-subtle:rgba(234, 108, 40, 0.08);
 
   --teal-soft:#2DD4BF;
-  --green-soft:#34D399;
-  --red-soft:#FB7185;
+  --green-neon:#10B981;
+  --red-neon:#F43F5E;
   --amber-soft:#FBBF24;
 
   --text-main:#F8FAFC;
@@ -50,33 +49,20 @@ html,body{
   line-height:1.5;
 }
 
-/* Layout Core */
-.app{
-  display:flex;
-  min-height:100vh;
-}
+.app{display:flex; min-height:100vh;}
 
-/* SIDEBAR (Desktop) */
+/* SIDEBAR */
 .sidebar{
-  width:260px;
-  background:var(--bg-surface);
+  width:264px; background:var(--bg-surface);
   border-right:1px solid var(--border);
-  display:flex;
-  flex-direction:column;
-  flex-shrink:0;
-  padding:20px 16px;
-  position:sticky;
-  top:0;
-  height:100vh;
-  z-index:20;
+  display:flex; flex-direction:column;
+  flex-shrink:0; padding:20px 16px;
+  position:sticky; top:0; height:100vh; z-index:20;
 }
 
 .brand-wrapper{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding-bottom:18px;
-  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:12px;
+  padding-bottom:16px; border-bottom:1px solid var(--border);
   margin-bottom:16px;
 }
 .brand-logo{
@@ -85,19 +71,19 @@ html,body{
   display:flex; align-items:center; justify-content:center;
   color:#fff; flex-shrink:0;
 }
-.brand-text h2{font-size:15px; font-weight:700; color:var(--text-main);}
+.brand-text h2{font-size:15px; font-weight:700;}
 .brand-text span{font-size:11px; color:var(--orange-soft); font-family:var(--font-num);}
 
-.area-badge{
-  background:var(--orange-subtle);
-  border:1px solid var(--border);
-  border-left:3px solid var(--orange-pri);
-  border-radius:var(--radius-sm);
-  padding:10px 12px;
-  margin-bottom:16px;
+.live-badge-status{
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--orange-subtle); border:1px solid var(--border);
+  border-left:3px solid var(--orange-pri); border-radius:var(--radius-sm);
+  padding:8px 12px; margin-bottom:16px; font-size:12px; font-weight:600;
 }
-.area-badge .title{font-size:11px; font-weight:600; color:var(--orange-soft); text-transform:uppercase;}
-.area-badge .name{font-size:13px; font-weight:600; color:var(--text-main); margin-top:2px;}
+.live-pulse-dot{
+  width:8px; height:8px; border-radius:50%; background:var(--green-neon);
+  box-shadow:0 0 8px var(--green-neon); animation:pulse 1.5s infinite;
+}
 
 .nav-group{list-style:none; display:flex; flex-direction:column; gap:6px;}
 .nav-item{
@@ -110,47 +96,37 @@ html,body{
 .nav-item svg{width:18px; height:18px; stroke-width:2; flex-shrink:0;}
 .nav-item:hover{background:var(--bg-card); color:var(--text-main);}
 .nav-item.active{
-  background:var(--orange-glow);
-  border-color:var(--orange-pri);
-  color:var(--orange-soft);
-  font-weight:600;
+  background:var(--orange-glow); border-color:var(--orange-pri);
+  color:var(--orange-soft); font-weight:600;
 }
 
-.live-widget{
-  margin-top:auto;
-  background:var(--bg-card);
-  border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  padding:12px;
-  font-size:11px;
+.live-telemetry-box{
+  margin-top:auto; background:var(--bg-card);
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:12px; font-size:11.5px;
 }
-.live-widget .dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--green-soft); margin-right:6px; animation:blink 1.8s infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
-.telemetry-val{font-family:var(--font-num); font-weight:700; color:var(--orange-soft);}
-
-/* MAIN CONTAINER */
-.main-wrapper{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  min-width:0; /* ป้องกัน overflow ใน flexbox */
+.live-telemetry-box .title{
+  color:var(--orange-soft); font-weight:700; font-family:var(--font-num);
+  margin-bottom:6px; display:flex; justify-content:space-between;
 }
+.stream-row{display:flex; justify-content:space-between; margin-bottom:3px; color:var(--text-muted);}
+.stream-val{font-family:var(--font-num); font-weight:700; color:var(--text-main);}
 
-/* TOPBAR */
+/* MAIN */
+.main-wrapper{flex:1; display:flex; flex-direction:column; min-width:0;}
+
 .topbar{
   display:flex; justify-content:space-between; align-items:center;
-  padding:16px 28px;
-  background:var(--bg-surface);
-  border-bottom:1px solid var(--border);
-  gap:12px;
+  padding:14px 28px; background:var(--bg-surface);
+  border-bottom:1px solid var(--border); gap:12px;
 }
-.topbar-info h1{font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px;}
+.topbar-info h1{font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px;}
 .topbar-info .chip{
   font-size:11px; font-family:var(--font-num); padding:2px 8px;
-  border-radius:20px; background:var(--orange-subtle); color:var(--orange-soft);
-  border:1px solid var(--orange-pri);
+  border-radius:20px; background:rgba(16,185,129,0.15); color:var(--green-neon);
+  border:1px solid rgba(16,185,129,0.3); display:flex; align-items:center; gap:5px;
 }
-.actions-group{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.actions-group{display:flex; align-items:center; gap:8px;}
 
 .btn{
   display:inline-flex; align-items:center; gap:6px;
@@ -161,31 +137,19 @@ html,body{
 }
 .btn svg{width:15px; height:15px;}
 .btn:hover{border-color:var(--orange-pri); color:var(--orange-soft);}
-.btn.primary{
-  background:var(--orange-pri); border-color:var(--orange-pri); color:#fff;
-}
-.btn.primary:hover{background:var(--orange-soft); color:#fff;}
+.btn.primary{background:var(--orange-pri); border-color:var(--orange-pri); color:#fff;}
+.btn.primary:hover{background:var(--orange-soft);}
 
-/* CONTENT AREA */
-.content{
-  padding:24px 28px;
-  flex:1;
-}
+.content{padding:22px 28px; flex:1;}
 
-/* STATS ROW */
+/* STATS */
 .stats-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-  gap:14px;
-  margin-bottom:24px;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:14px; margin-bottom:22px;
 }
 .stat-box{
-  background:var(--bg-surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:16px 18px;
-  position:relative;
-  overflow:hidden;
+  background:var(--bg-surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px 18px; position:relative; overflow:hidden;
 }
 .stat-box::after{
   content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
@@ -197,26 +161,32 @@ html,body{
 
 /* TAB PANES */
 .tab-content{display:none;}
-.tab-content.active{display:block; animation:fade .25s ease;}
+.tab-content.active{display:block; animation:fade .2s ease;}
 @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
 
 .section-head{
   display:flex; justify-content:space-between; align-items:baseline;
-  margin-bottom:14px; gap:8px;
+  margin-bottom:14px;
 }
-.section-head h3{font-size:16px; font-weight:700; color:var(--text-main);}
+.section-head h3{font-size:16px; font-weight:700;}
 .section-head .sub{font-size:12px; color:var(--text-muted);}
+
+/* REAL-TIME EVENT STREAM BANNER */
+.live-stream-bar{
+  background:rgba(234, 108, 40, 0.08); border:1px solid var(--border);
+  border-left:3px solid var(--orange-pri); border-radius:var(--radius-sm);
+  padding:9px 14px; font-size:12px; margin-bottom:16px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.live-stream-text{font-family:var(--font-num); color:var(--orange-soft);}
 
 /* RESPONSIVE TABLE */
 .table-card{
-  background:var(--bg-surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
+  background:var(--bg-surface); border:1px solid var(--border);
+  border-radius:var(--radius); overflow-x:auto;
 }
 table.data-table{
-  width:100%; border-collapse:collapse; text-align:left; font-size:13px; min-width:680px;
+  width:100%; border-collapse:collapse; text-align:left; font-size:13px; min-width:700px;
 }
 table.data-table th{
   background:var(--bg-card); padding:12px 16px; font-size:11.5px;
@@ -224,18 +194,21 @@ table.data-table th{
   border-bottom:1px solid var(--border);
 }
 table.data-table td{
-  padding:13px 16px; border-bottom:1px solid var(--border-subtle); vertical-align:middle;
+  padding:12px 16px; border-bottom:1px solid var(--border-subtle); vertical-align:middle;
+  transition:background .3s ease;
 }
-table.data-table tr:hover td{background:var(--bg-card-alt);}
+table.data-table tr.row-updated td{
+  background:rgba(234, 108, 40, 0.15) !important;
+}
 
 .badge{
   display:inline-block; font-size:11px; padding:3px 8px; border-radius:6px;
   font-family:var(--font-num); font-weight:600;
 }
-.badge.done{background:rgba(52, 211, 153, 0.12); color:var(--green-soft); border:1px solid rgba(52, 211, 153, 0.3);}
+.badge.done{background:rgba(16, 185, 129, 0.12); color:var(--green-neon); border:1px solid rgba(16, 185, 129, 0.3);}
 .badge.doing{background:rgba(45, 212, 191, 0.12); color:var(--teal-soft); border:1px solid rgba(45, 212, 191, 0.3);}
 .badge.pending{background:rgba(251, 191, 36, 0.12); color:var(--amber-soft); border:1px solid rgba(251, 191, 36, 0.3);}
-.badge.high{background:rgba(251, 113, 133, 0.12); color:var(--red-soft); border:1px solid rgba(251, 113, 133, 0.3);}
+.badge.high{background:rgba(244, 63, 94, 0.12); color:var(--red-neon); border:1px solid rgba(244, 63, 94, 0.3);}
 
 .row-actions{display:flex; gap:6px;}
 .btn-mini{
@@ -285,13 +258,25 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
   background-image:linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
   background-size:36px 36px; opacity:0.25;
 }
+.patrol-vehicle{
+  position:absolute; width:18px; height:18px; border-radius:50%;
+  background:var(--teal-soft); transform:translate(-50%, -50%);
+  transition:all 1.8s ease; z-index:10;
+  box-shadow:0 0 10px var(--teal-soft);
+}
+.patrol-vehicle::after{
+  content:''; position:absolute; inset:-6px; border-radius:50%;
+  border:2px solid var(--teal-soft); animation:pulse 1.2s infinite;
+}
+.patrol-tag{
+  position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
+  background:#000; color:var(--teal-soft); font-size:9.5px; font-family:var(--font-num);
+  padding:2px 6px; border-radius:4px; border:1px solid var(--teal-soft); white-space:nowrap;
+}
+
 .radar-pin{
   position:absolute; width:14px; height:14px; border-radius:50%;
   transform:translate(-50%, -50%); cursor:pointer;
-}
-.radar-pin::after{
-  content:''; position:absolute; inset:-4px; border-radius:50%;
-  border:2px solid inherit; animation:blink 1.8s infinite;
 }
 .radar-tooltip{
   position:absolute; top:18px; left:50%; transform:translateX(-50%);
@@ -304,12 +289,12 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
 .anomaly-cards{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px;}
 .anomaly-item{
   background:var(--bg-surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:16px; border-top:3px solid var(--red-soft);
+  border-radius:var(--radius); padding:16px; border-top:3px solid var(--red-neon);
 }
 .anomaly-item.mid{border-top-color:var(--amber-soft);}
 .anomaly-head{display:flex; justify-content:space-between; align-items:flex-start;}
 .anomaly-head .zone{font-size:11px; color:var(--text-dim); font-family:var(--font-num);}
-.anomaly-head .score{font-size:18px; font-weight:700; font-family:var(--font-num); color:var(--red-soft);}
+.anomaly-head .score{font-size:18px; font-weight:700; font-family:var(--font-num); color:var(--red-neon);}
 .anomaly-item.mid .anomaly-head .score{color:var(--amber-soft);}
 .anomaly-item h4{font-size:14px; font-weight:600; margin:6px 0 4px;}
 .anomaly-item p{font-size:12px; color:var(--text-muted); line-height:1.5;}
@@ -328,19 +313,16 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
 .modal-box{
   background:var(--bg-surface); border:1px solid var(--orange-pri);
   border-radius:var(--radius); width:100%; max-width:540px; padding:22px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.5);
 }
 .modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
 .modal-head h3{font-size:16px; font-weight:700; color:var(--orange-soft);}
 .btn-x{background:none; border:none; font-size:22px; color:var(--text-muted); cursor:pointer;}
 
-/* BOTTOM MOBILE NAVIGATION (มือถือ) */
+/* MOBILE NAV */
 .mobile-nav{
-  display:none;
-  position:fixed; bottom:0; left:0; right:0;
+  display:none; position:fixed; bottom:0; left:0; right:0;
   background:var(--bg-surface); border-top:1px solid var(--border);
-  z-index:30; padding:6px 10px;
-  justify-content:space-around;
+  z-index:30; padding:6px 10px; justify-content:space-around;
 }
 .mobile-nav-btn{
   display:flex; flex-direction:column; align-items:center; gap:3px;
@@ -351,30 +333,25 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
 .mobile-nav-btn svg{width:20px; height:20px;}
 .mobile-nav-btn.active{color:var(--orange-soft); font-weight:600;}
 
-/* RESPONSIVE BREAKPOINTS */
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
 @media(max-width:900px){
   .sidebar{display:none;}
   .mobile-nav{display:flex;}
   .content{padding:16px; padding-bottom:75px;}
   .topbar{padding:12px 16px;}
-  .topbar-info h1{font-size:16px;}
   .route-layout{grid-template-columns:1fr;}
-  .radar-screen{height:280px;}
   .form-grid{grid-template-columns:1fr;}
 }
-
 @media(max-width:600px){
-  .actions-group .btn span{display:none;} /* ซ่อนข้อความปุ่มในจอมือถือเล็ก */
+  .actions-group .btn span{display:none;}
   .actions-group .btn{padding:8px 10px;}
-  .stat-box .val{font-size:20px;}
 }
-
-/* PRINT PDF STYLES */
 @media print{
   body{background:#fff; color:#000;}
-  .sidebar, .mobile-nav, .topbar, .actions-group, .row-actions, .radar-screen{display:none !important;}
+  .sidebar, .mobile-nav, .topbar, .actions-group, .row-actions, .radar-screen, .live-stream-bar{display:none !important;}
   .content{padding:0;}
-  .table-card{border:none; box-shadow:none;}
+  .table-card{border:none;}
   table.data-table th{background:#f1f5f9; color:#000;}
   table.data-table td{border-color:#e2e8f0; color:#000;}
 }
@@ -384,7 +361,7 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
 
 <div class="app">
 
-  <!-- SIDEBAR (เดสก์ท็อป / แท็บเล็ตแนวนอน) -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="brand-wrapper">
       <div class="brand-logo">
@@ -392,13 +369,13 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>SAMUT PRAKAN GRID</span>
+        <span>LIVE TELEMETRY v3.2</span>
       </div>
     </div>
 
-    <div class="area-badge">
-      <div class="title">พื้นที่รับผิดชอบหลัก</div>
-      <div class="name">จ.สมุทรปราการ (6 อำเภอ)</div>
+    <div class="live-badge-status">
+      <span>GRID STATUS : LIVE</span>
+      <div class="live-pulse-dot"></div>
     </div>
 
     <ul class="nav-group">
@@ -428,10 +405,28 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
       </li>
     </ul>
 
-    <div class="live-widget">
-      <div><span class="dot"></span>SCADA Live Feed</div>
-      <div style="margin-top:4px;">Peak Load: <span class="telemetry-val" id="valLoad">382.4</span> MW</div>
-      <div>Feeder Temp: <span class="telemetry-val" id="valTemp">34.2</span> °C</div>
+    <!-- REAL-TIME TELEMETRY STREAM -->
+    <div class="live-telemetry-box">
+      <div class="title">
+        <span>⚡ SCADA TELEMETRY</span>
+        <span id="liveClock" style="color:var(--green-neon); font-size:11px;">00:00:00</span>
+      </div>
+      <div class="stream-row">
+        <span>Total Load:</span>
+        <span class="stream-val"><span id="rtLoad">382.4</span> MW</span>
+      </div>
+      <div class="stream-row">
+        <span>Main Bus Volt:</span>
+        <span class="stream-val"><span id="rtVolt">22.42</span> kV</span>
+      </div>
+      <div class="stream-row">
+        <span>Ambient Temp:</span>
+        <span class="stream-val"><span id="rtTemp">33.8</span> °C</span>
+      </div>
+      <div class="stream-row">
+        <span>Patrol Unit:</span>
+        <span class="stream-val" style="color:var(--teal-soft);" id="rtPatrolDist">อ.บางพลี (กม.12)</span>
+      </div>
     </div>
   </aside>
 
@@ -439,7 +434,7 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
   <div class="main-wrapper">
     <header class="topbar">
       <div class="topbar-info">
-        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip">SP-OPS</span></h1>
+        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip"><span class="live-pulse-dot"></span>REAL-TIME SYNC</span></h1>
       </div>
       <div class="actions-group">
         <button class="btn" onclick="exportToExcel()" title="ส่งออก Excel">
@@ -450,7 +445,7 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           <span>PDF</span>
         </button>
-        <button class="btn primary" onclick="goToForm()">
+        <button class="btn primary" onclick="switchTab('tab-form')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>เพิ่มงาน</span>
         </button>
@@ -464,25 +459,31 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
           <div class="lbl">แผนงานเดือนนี้</div>
           <div class="val" id="statTotal">6 <small>รายการ</small></div>
         </div>
-        <div class="stat-box" style="--accent-bar:var(--green-soft);">
-          <div class="lbl">เสร็จสมบูรณ์</div>
-          <div class="val" id="statDone" style="color:var(--green-soft);">3 <small>/ 6</small></div>
+        <div class="stat-box" style="--accent-bar:var(--green-neon);">
+          <div class="lbl">เสร็จสมบูรณ์ (Live)</div>
+          <div class="val" id="statDone" style="color:var(--green-neon);">3 <small>/ 6</small></div>
         </div>
         <div class="stat-box" style="--accent-bar:var(--teal-soft);">
-          <div class="lbl">จุดตรวจลาดตระเวน</div>
-          <div class="val" style="color:var(--teal-soft);">4 <small>พิกัด</small></div>
+          <div class="lbl">รถตรวจการ On-Duty</div>
+          <div class="val" style="color:var(--teal-soft);">1 <small>คัน (SP-CAR 01)</small></div>
         </div>
-        <div class="stat-box" style="--accent-bar:var(--red-soft);">
-          <div class="lbl">จุดเสี่ยงเฝ้าระวัง</div>
-          <div class="val" style="color:var(--red-soft);">3 <small>เคส</small></div>
+        <div class="stat-box" style="--accent-bar:var(--red-neon);">
+          <div class="lbl">แจ้งเตือนจุดเสี่ยง Real-time</div>
+          <div class="val" id="statAnomalyCount" style="color:var(--red-neon);">3 <small>เคส</small></div>
         </div>
       </section>
+
+      <!-- LIVE EVENT STREAM BAR -->
+      <div class="live-stream-bar">
+        <div><span style="color:var(--orange-pri); font-weight:700;">[LIVE EVENT LOG]:</span> <span id="eventLogText">ระบบตรวจพบอุณหภูมิปกติทุกจุดจ่ายไฟในเขต อ.เมืองสมุทรปราการ</span></div>
+        <div class="live-stream-text" id="eventLogTime">--:--:--</div>
+      </div>
 
       <!-- TAB 1: MAINTENANCE PLANNER -->
       <div id="tab-plan" class="tab-content active">
         <div class="section-head">
           <h3>ตารางวางแผนงานบำรุงรักษา (Maintenance Schedule)</h3>
-          <span class="sub">คลิกเข้าดูหรือแก้ไขสถานะได้แบบเรียลไทม์</span>
+          <span class="sub">ข้อมูลอัปเดตแบบสองทิศทาง (Real-time Live Synced)</span>
         </div>
         <div class="table-card">
           <table class="data-table">
@@ -498,9 +499,7 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
                 <th style="text-align:right;">จัดการ</th>
               </tr>
             </thead>
-            <tbody id="tableBody">
-              <!-- Rendered by JS -->
-            </tbody>
+            <tbody id="tableBody"></tbody>
           </table>
         </div>
       </div>
@@ -509,7 +508,7 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
       <div id="tab-form" class="tab-content">
         <div class="section-head">
           <h3>แบบฟอร์มเอกสารบันทึกผลการบำรุงรักษา (e-Work Order)</h3>
-          <span class="sub">กรอกผลตรวจวัดและปรับปรุงข้อมูลเข้าฐานข้อมูล</span>
+          <span class="sub">บันทึกข้อมูลและ Push เข้าสู่ระบบแบบ Real-time ทันที</span>
         </div>
         <div class="form-wrap">
           <form id="woForm" onsubmit="handleFormSubmit(event)">
@@ -566,24 +565,26 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
               </div>
             </div>
             <button type="submit" class="btn primary" style="margin-top:16px; width:100%; justify-content:center; padding:12px;">
-              บันทึกข้อมูลเข้าสู่ระบบ
+              บันทึกข้อมูลและส่งขึ้น Live Grid
             </button>
           </form>
         </div>
       </div>
 
-      <!-- TAB 3: ROUTE PATROL -->
+      <!-- TAB 3: ROUTE PATROL (LIVE TRACKING) -->
       <div id="tab-route" class="tab-content">
         <div class="section-head">
-          <h3>ระบบนำเส้นทางตรวจการ (Patrol Route & Radar)</h3>
-          <span class="sub">ลำดับพิกัดตรวจการและติดตามรถตรวจภาคสนาม</span>
+          <h3>ระบบนำเส้นทางตรวจการ (Live GPS Patrol Tracking)</h3>
+          <span class="sub">ติดตามการเคลื่อนที่ของรถตรวจการ SP-CAR 01 แบบ Real-time</span>
         </div>
         <div class="route-layout">
-          <ul class="route-list" id="routeList">
-            <!-- Rendered by JS -->
-          </ul>
+          <ul class="route-list" id="routeList"></ul>
           <div class="radar-screen">
             <div class="radar-grid"></div>
+            <!-- Live Vehicle Marker -->
+            <div class="patrol-vehicle" id="liveVehicleMarker" style="top:35%; left:38%;">
+              <div class="patrol-tag">🚗 SP-CAR 01 (Live)</div>
+            </div>
             <div id="radarPins"></div>
           </div>
         </div>
@@ -592,46 +593,16 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
       <!-- TAB 4: ANOMALY ENGINE -->
       <div id="tab-anomaly" class="tab-content">
         <div class="section-head">
-          <h3>การวิเคราะห์ความผิดปกติ (Anomaly & Risk Engine)</h3>
-          <span class="sub">ตรวจจับไอเกลือทะเลสะสมและโหลดเกินพิกัดอัตโนมัติ</span>
+          <h3>การวิเคราะห์ความผิดปกติ (Real-Time Anomaly Engine)</h3>
+          <span class="sub">ประมวลผลความเสี่ยง Flashover ไอเกลือ และ Harmonic Overload อัตโนมัติ</span>
         </div>
-        <div class="anomaly-cards">
-          <div class="anomaly-item">
-            <div class="anomaly-head">
-              <span class="zone">อ.พระสมุทรเจดีย์ (โซนชายฝั่ง)</span>
-              <span class="score">94%</span>
-            </div>
-            <h4>ความเสี่ยง Flashover จากไอเกลือทะเล</h4>
-            <p>ตรวจพบกระแสรั่วไหลบนลูกถ้วยฉนวนเกินเกณฑ์ 32mA หลังมีลมมรสุมพัดเข้าอ่าวไทยต่อเนื่อง</p>
-            <div class="advice">► สั่งการ: จัดทีมฉีดล้างลูกถ้วยแรงสูงภายใน 12 ชม.</div>
-          </div>
-
-          <div class="anomaly-item mid">
-            <div class="anomaly-head">
-              <span class="zone">นิคมอุตสาหกรรมบางปู</span>
-              <span class="score">78%</span>
-            </div>
-            <h4>ฮาร์มอนิกและโหลดเกินพิกัด</h4>
-            <p>ตรวจพบโหลดความร้อนสะสมที่แกนเหล็กหม้อแปลง 84.5°C ในช่วงชั่วโมงการผลิตสูงสุด</p>
-            <div class="advice">► สั่งการ: ปรับบาลานซ์เฟสและเปิดพัดลมระบายอากาศ</div>
-          </div>
-
-          <div class="anomaly-item">
-            <div class="anomaly-head">
-              <span class="zone">ถ.กิ่งแก้ว - บางพลี</span>
-              <span class="score">88%</span>
-            </div>
-            <h4>แรงดันตกชั่วขณะบ่อยครั้ง (Micro-Sag)</h4>
-            <p>บันทึก Voltage Sag 4 ครั้งในรอบ 48 ชม. คาดเกิดจากกิ่งไม้แตะสายช่วงลมกระโชกแรง</p>
-            <div class="advice">► สั่งการ: ส่งทีมตัดแต่งกิ่งไม้แนวสายส่งระยะ 800 เมตร</div>
-          </div>
-        </div>
+        <div class="anomaly-cards" id="anomalyContainer"></div>
       </div>
     </main>
   </div>
 </div>
 
-<!-- BOTTOM NAV (เฉพาะจอมือถือ) -->
+<!-- BOTTOM NAV FOR MOBILE -->
 <nav class="mobile-nav">
   <button class="mobile-nav-btn active" data-tab="tab-plan">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -651,7 +622,7 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
   </button>
 </nav>
 
-<!-- MODAL (ดูรายละเอียด / แก้ไข) -->
+<!-- MODAL -->
 <div class="modal" id="dataModal">
   <div class="modal-box">
     <div class="modal-head">
@@ -663,7 +634,7 @@ table.data-table tr:hover td{background:var(--bg-card-alt);}
 </div>
 
 <script>
-/* ---------------- DATA & STATE ---------------- */
+/* ---------------- STATE ---------------- */
 let WORK_ORDERS = [
   {id:'WO-SP-69081', asset:'หม้อแปลง TR-250kVA นิคมบางปู ซ.12', district:'อ.เมืองสมุทรปราการ', type:'ตรวจวัดค่าฉนวนน้ำมัน (DGA)', date:'28 ส.ค. 69', team:'ทีมหม้อแปลง 01', status:'doing', temp:'48.5', ground:'2.40'},
   {id:'WO-SP-69082', asset:'เสาแรงสูง Feeder 11 เทพารักษ์ กม.8', district:'อ.บางพลี', type:'ล้างลูกถ้วยฉนวนกันคราบไอเกลือ', date:'29 ส.ค. 69', team:'ทีมสายส่ง 02', status:'pending', temp:'38.2', ground:'3.10'},
@@ -674,10 +645,16 @@ let WORK_ORDERS = [
 ];
 
 const PATROL_PINS = [
-  {id:1, name:'รร.นายเรือ (ถ.สุขุมวิท)', desc:'วัดค่ากราวด์ดินและระดับน้ำมัน', top:35, left:38, color:'var(--green-soft)', status:'ตรวจแล้ว'},
+  {id:1, name:'รร.นายเรือ (ถ.สุขุมวิท)', desc:'วัดค่ากราวด์ดินและระดับน้ำมัน', top:35, left:38, color:'var(--green-neon)', status:'ตรวจแล้ว'},
   {id:2, name:'นิคมบางปู ซ.9 (ถ.พัฒนา 1)', desc:'ตรวจคราบไอเกลือทะเลสะสม', top:58, left:66, color:'var(--orange-pri)', status:'กำลังตรวจ'},
   {id:3, name:'สวิตช์เกียร์แพรกษา กม.4', desc:'สแกน Thermo-scan ขั้วต่อสาย', top:46, left:52, color:'var(--teal-soft)', status:'รอตรวจ'},
   {id:4, name:'ตลาดปากน้ำ (ถ.ท้ายบ้าน)', desc:'ตรวจโหลดการใช้ไฟช่วงค่ำ', top:72, left:32, color:'var(--amber-soft)', status:'รอตรวจ'}
+];
+
+const ANOMALIES = [
+  {zone:'อ.พระสมุทรเจดีย์ (โซนชายฝั่ง)', score:'94%', title:'ความเสี่ยง Flashover จากไอเกลือทะเล', desc:'กระแสรั่วไหลบนลูกถ้วยฉนวนแตะระดับ 32mA หลังมีลมมรสุมพัดเข้าอ่าวไทย', advice:'► จัดทีมฉีดล้างลูกถ้วยแรงสูงภายใน 12 ชม.', mid:false},
+  {zone:'นิคมอุตสาหกรรมบางปู', score:'78%', title:'ฮาร์มอนิกและโหลดเกินพิกัด', desc:'โหลดความร้อนสะสมแกนเหล็กหม้อแปลง 84.5°C ในช่วงชั่วโมงการผลิตสูงสุด', advice:'► ปรับบาลานซ์เฟสและเปิดพัดลมระบายอากาศ', mid:true},
+  {zone:'ถ.กิ่งแก้ว - บางพลี', score:'88%', title:'แรงดันตกชั่วขณะบ่อยครั้ง (Micro-Sag)', desc:'Voltage Sag 4 ครั้งใน 48 ชม. คาดเกิดจากกิ่งไม้แตะสายช่วงลมกระโชกแรง', advice:'► ส่งทีมตัดแต่งกิ่งไม้แนวสายส่งระยะ 800 เมตร', mid:false}
 ];
 
 /* ---------------- TAB ROUTING ---------------- */
@@ -695,12 +672,8 @@ document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
-function goToForm(){
-  switchTab('tab-form');
-}
-
 /* ---------------- RENDER TABLE ---------------- */
-function renderTable(){
+function renderTable(highlightId = null){
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = WORK_ORDERS.map((wo, i) => {
     let badgeClass = 'pending', badgeText = 'รอดำเนินการ';
@@ -708,8 +681,10 @@ function renderTable(){
     else if(wo.status === 'doing'){ badgeClass = 'doing'; badgeText = 'กำลังทำ'; }
     else if(wo.status === 'high'){ badgeClass = 'high'; badgeText = 'เร่งด่วน'; }
 
+    const isUpdated = wo.id === highlightId ? 'row-updated' : '';
+
     return `
-      <tr>
+      <tr class="${isUpdated}">
         <td><strong style="color:var(--orange-soft); font-family:var(--font-num);">${wo.id}</strong></td>
         <td>${wo.asset}</td>
         <td>${wo.district}</td>
@@ -732,7 +707,24 @@ function renderTable(){
   document.getElementById('statDone').innerHTML = `${doneCount} <small>/ ${WORK_ORDERS.length}</small>`;
 }
 
-/* ---------------- MODALS (VIEW & EDIT) ---------------- */
+/* ---------------- RENDER ANOMALIES ---------------- */
+function renderAnomalies(){
+  const container = document.getElementById('anomalyContainer');
+  container.innerHTML = ANOMALIES.map(a => `
+    <div class="anomaly-item ${a.mid ? 'mid' : ''}">
+      <div class="anomaly-head">
+        <span class="zone">${a.zone}</span>
+        <span class="score">${a.score}</span>
+      </div>
+      <h4>${a.title}</h4>
+      <p>${a.desc}</p>
+      <div class="advice">${a.advice}</div>
+    </div>
+  `).join('');
+  document.getElementById('statAnomalyCount').innerHTML = `${ANOMALIES.length} <small>เคส</small>`;
+}
+
+/* ---------------- MODALS ---------------- */
 const modal = document.getElementById('dataModal');
 const modalTitle = document.getElementById('modalTitle');
 const modalContent = document.getElementById('modalContent');
@@ -750,7 +742,7 @@ function viewWorkOrder(index){
       <p><strong>กำหนดเสร็จ:</strong> ${wo.date}</p>
       <p><strong>ทีมรับผิดชอบ:</strong> ${wo.team}</p>
       <p><strong>ค่า Thermo-scan:</strong> <span style="color:var(--orange-soft); font-family:var(--font-num); font-weight:700;">${wo.temp || '-'} °C</span></p>
-      <p><strong>ค่าความต้านทานดิน:</strong> <span style="color:var(--green-soft); font-family:var(--font-num); font-weight:700;">${wo.ground || '-'} Ω</span></p>
+      <p><strong>ค่าความต้านทานดิน:</strong> <span style="color:var(--green-neon); font-family:var(--font-num); font-weight:700;">${wo.ground || '-'} Ω</span></p>
       <p><strong>สถานะ:</strong> ${wo.status.toUpperCase()}</p>
     </div>
     <div style="margin-top:18px; text-align:right;">
@@ -796,11 +788,11 @@ function saveEdit(e, index){
   WORK_ORDERS[index].status = document.getElementById('e_status').value;
   WORK_ORDERS[index].team = document.getElementById('e_team').value;
   WORK_ORDERS[index].temp = document.getElementById('e_temp').value;
-  renderTable();
+  renderTable(WORK_ORDERS[index].id);
+  pushLiveLog(`อัปเดตสถานะงาน ${WORK_ORDERS[index].id} สำเร็จ`);
   closeModal();
 }
 
-/* ---------------- FORM SUBMIT ---------------- */
 function handleFormSubmit(e){
   e.preventDefault();
   const newWO = {
@@ -815,9 +807,9 @@ function handleFormSubmit(e){
     team: 'ทีมซ่อมบำรุงประจำเขต'
   };
   WORK_ORDERS.unshift(newWO);
-  renderTable();
+  renderTable(newWO.id);
+  pushLiveLog(`เพิ่มใบสั่งงานใหม่ ${newWO.id} เข้าระบบ Live Grid สำเร็จ`);
   document.getElementById('woForm').reset();
-  alert('บันทึกข้อมูลใบสั่งงานเรียบร้อย');
   switchTab('tab-plan');
 }
 
@@ -846,7 +838,7 @@ function renderRoute(){
   const pins = document.getElementById('radarPins');
 
   list.innerHTML = PATROL_PINS.map((p, idx) => `
-    <li class="route-item ${idx===1?'active':''}" onclick="alert('พิกัด GPS: ' + '${p.name}')">
+    <li class="route-item ${idx===1?'active':''}" onclick="highlightPin(${p.id})">
       <div class="top">
         <span>จุดตรวจที่ 0${p.id} · ${p.status}</span>
         <span style="color:${p.color}">●</span>
@@ -863,22 +855,73 @@ function renderRoute(){
   `).join('');
 }
 
-/* ---------------- REAL-TIME TELEMETRY ---------------- */
-function startLiveStream(){
+function highlightPin(id){
+  const pin = PATROL_PINS.find(p => p.id === id);
+  if(!pin) return;
+  const v = document.getElementById('liveVehicleMarker');
+  v.style.top = pin.top + '%';
+  v.style.left = pin.left + '%';
+  pushLiveLog(`รถตรวจการกำลังมุ่งหน้าสู่พิกัด: ${pin.name}`);
+}
+
+/* ---------------- REAL-TIME ENGINE ---------------- */
+function pushLiveLog(text){
+  const logEl = document.getElementById('eventLogText');
+  const timeEl = document.getElementById('eventLogTime');
+  const now = new Date();
+  const timeStr = now.toTimeString().split(' ')[0];
+  if(logEl) logEl.textContent = text;
+  if(timeEl) timeEl.textContent = timeStr;
+}
+
+function startRealTimeSimulation(){
+  // 1. Live Clock & Telemetry (ทุกวินาที)
   setInterval(() => {
-    const l = (380 + Math.random() * 6).toFixed(1);
-    const t = (34.0 + Math.random() * 1.5).toFixed(1);
-    const loadEl = document.getElementById('valLoad');
-    const tempEl = document.getElementById('valTemp');
-    if(loadEl) loadEl.textContent = l;
-    if(tempEl) tempEl.textContent = t;
-  }, 2500);
+    const now = new Date();
+    document.getElementById('liveClock').textContent = now.toTimeString().split(' ')[0];
+    
+    // Smooth random walk for load and voltage
+    const load = (380 + Math.sin(now.getTime()/5000)*6 + Math.random()*2).toFixed(1);
+    const volt = (22.38 + Math.cos(now.getTime()/7000)*0.15).toFixed(2);
+    const temp = (33.5 + Math.random()*0.4).toFixed(1);
+
+    document.getElementById('rtLoad').textContent = load;
+    document.getElementById('rtVolt').textContent = volt;
+    document.getElementById('rtTemp').textContent = temp;
+  }, 1000);
+
+  // 2. Patrol Vehicle Moving Animation (ทุก 8 วินาที ขยับไปตามจุดตรวจ)
+  let currentPinIdx = 0;
+  setInterval(() => {
+    currentPinIdx = (currentPinIdx + 1) % PATROL_PINS.length;
+    const target = PATROL_PINS[currentPinIdx];
+    const v = document.getElementById('liveVehicleMarker');
+    if(v){
+      v.style.top = target.top + '%';
+      v.style.left = target.left + '%';
+    }
+    document.getElementById('rtPatrolDist').textContent = target.name.split('(')[0];
+    pushLiveLog(`รถตรวจการ SP-CAR 01 อัปเดตพิกัด: กำลังตรวจ ${target.name}`);
+  }, 8000);
+
+  // 3. Real-time Background Anomaly / Status Event Simulator (ทุก 15 วินาที)
+  setInterval(() => {
+    const randomIdx = Math.floor(Math.random() * WORK_ORDERS.length);
+    const item = WORK_ORDERS[randomIdx];
+    if(item.status === 'doing'){
+      item.status = 'done';
+      renderTable(item.id);
+      pushLiveLog(`[แจ้งเตือนเสร็จงาน]: ${item.id} (${item.asset}) บันทึกปิดงานเรียบร้อย`);
+    }
+  }, 15000);
 }
 
 /* ---------------- INIT ---------------- */
 renderTable();
 renderRoute();
-startLiveStream();
+renderAnomalies();
+startRealTimeSimulation();
+pushLiveLog('ระบบเชื่อมต่อ Gateway และ Smart Feeder สมุทรปราการ สมบูรณ์');
 </script>
 </body>
 </html>
