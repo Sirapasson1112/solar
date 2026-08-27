@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS Smart Grid สมุทรปราการ (Monthly Planner & 3-Year Archive)</title>
+<title>CMMS Smart Grid สมุทรปราการ (Monthly Planner & History Archive)</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -303,7 +303,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
 .health-track{height:8px; background:#F1F5F9; border-radius:4px; overflow:hidden;}
 .health-fill{height:100%; border-radius:4px;}
 
-/* 3-YEAR ARCHIVE */
+/* ---------------- YEAR BUTTONS BAR ---------------- */
 .year-btn-group{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
 .btn-year{
   display:inline-flex; align-items:center; gap:6px;
@@ -427,7 +427,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
 }
 @media print{
   body{background:#fff; color:#000;}
-  .sidebar, .mobile-nav, .topbar, .actions-group, .map-card-wrapper, .nav-mission-banner, .filter-bar, .month-selector-bar{display:none !important;}
+  .sidebar, .mobile-nav, .topbar, .actions-group, .map-card-wrapper, .nav-mission-banner, .filter-bar, .month-selector-bar, .year-btn-group{display:none !important;}
   .content{padding:0;}
   .table-card{border:none; box-shadow:none;}
   table.data-table th{background:#f1f5f9; color:#000;}
@@ -447,7 +447,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>MONTHLY PLANNER v5.2</span>
+        <span>MONTHLY PLANNER v5.3</span>
       </div>
     </div>
 
@@ -483,7 +483,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
       <li>
         <button class="nav-item" data-tab="tab-history">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          ประวัติตรวจย้อนหลัง 3 ปี
+          ประวัติตรวจย้อนหลัง
         </button>
       </li>
       <li>
@@ -575,7 +575,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </section>
 
-      <!-- TAB 1: MONTHLY MAINTENANCE PLANNER (ปรับปรุงใหม่เพื่อดูรายเดือน) -->
+      <!-- TAB 1: MONTHLY MAINTENANCE PLANNER -->
       <div id="tab-plan" class="tab-content active">
         <!-- MONTH SELECTOR BAR -->
         <div class="month-selector-bar">
@@ -624,7 +624,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
       <div id="tab-analytics" class="tab-content">
         <div class="section-head">
           <div>
-            <h3>กราฟแนวโน้มดัชนีความน่าเชื่อถือ & ประสิทธิภาพ 3 ปี (2567 - 2569)</h3>
+            <h3>กราฟแนวโน้มดัชนีความน่าเชื่อถือ & ประสิทธิภาพ (2567 - 2569)</h3>
             <span class="sub">วิเคราะห์เปรียบเทียบ SAIFI, SAIDI, การเกิด Hotspot และโหลดหม้อแปลงย้อนหลัง</span>
           </div>
         </div>
@@ -657,15 +657,15 @@ table.data-table tr:hover td{background:var(--orange-light);}
         <div class="asset-grid" id="assetGridContainer"></div>
       </div>
 
-      <!-- TAB 4: 3-YEAR INSPECTION HISTORY ARCHIVE -->
+      <!-- TAB 4: INSPECTION HISTORY ARCHIVE (ประวัติตรวจย้อนหลัง) -->
       <div id="tab-history" class="tab-content">
         <div class="section-head">
           <div>
-            <h3>คลังข้อมูลประวัติการตรวจงานย้อนหลัง 3 ปี (2567 - 2569)</h3>
+            <h3>คลังข้อมูลประวัติตรวจย้อนหลัง (2567 - 2569)</h3>
             <span class="sub">กดปุ่มเลือกปีเพื่อดูประวัติการตรวจงานเฉพาะปีนั้น หรือค้นหารายอำเภอ</span>
           </div>
           <button class="btn" onclick="exportHistoryToExcel()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
             ส่งออกประวัติที่เลือก (.xlsx)
           </button>
         </div>
@@ -681,7 +681,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
             📅 ปี 2567 (2024) <span class="tag-count" id="badge2024">0</span>
           </button>
           <button class="btn-year" id="btnYearALL" onclick="selectYearFilter('ALL')">
-            📁 ดูรวมทั้งหมด 3 ปี <span class="tag-count" id="badgeALL">0</span>
+            📁 ดูรวมทั้งหมด <span class="tag-count" id="badgeALL">0</span>
           </button>
         </div>
 
@@ -723,7 +723,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
             <span class="sub">ข้อมูลสถิติเหตุขัดข้อง ความถี่ (SAIFI) และระยะเวลาดับ (SAIDI) ประจำพื้นที่สมุทรปราการ</span>
           </div>
           <button class="btn" onclick="exportOutageToExcel()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
             ส่งออกสถิติสายป้อน (.xlsx)
           </button>
         </div>
@@ -852,7 +852,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
   </button>
   <button class="mobile-nav-btn" data-tab="tab-history">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>ประวัติ</span>
+    <span>ประวัติตรวจ</span>
   </button>
   <button class="mobile-nav-btn" data-tab="tab-route">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/></svg>
@@ -875,18 +875,16 @@ table.data-table tr:hover td{background:var(--orange-light);}
 /* ---------------- DATA & STATE ---------------- */
 let currentRole = 'admin';
 let currentSelectedYear = '2026';
-let currentSelectedMonth = 7; // สิงหาคม (0-indexed: 7 คือเดือนที่ 8)
+let currentSelectedMonth = 7; // สิงหาคม (0-indexed)
 let currentPlannerYear = 2026;
-let currentPlannerViewMode = 'table'; // 'table' | 'calendar'
+let currentPlannerViewMode = 'table';
 
 const THAI_MONTHS = [
   'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
   'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
 ];
 
-// ข้อมูลแผนงานรายเดือน (ปี 2569 / 2026)
 let WORK_ORDERS = [
-  // เดือนสิงหาคม 2569 (2026-08)
   {id:'WO-SP-69083', asset:'โคมไฟถนน LED ถ.สุขสวัสดิ์-ป้อมพระจุล', district:'อ.พระสมุทรเจดีย์', type:'เปลี่ยน Photo Switch & โคมไฟ', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมไฟสาธารณะ', status:'done', temp:'32.0', ground:'1.95'},
   {id:'WO-SP-69085', asset:'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', district:'อ.บางพลี', type:'แก้ไขจุดต่อร้อน (Hotspot)', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมฉุกเฉิน 24ชม.', status:'high', temp:'78.4', ground:'4.80'},
   {id:'WO-SP-69086', asset:'สายป้อน Feeder 04 ถนนท้ายบ้าน', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบฉนวนสายส่ง', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมสายส่ง 01', status:'done', temp:'35.6', ground:'2.00'},
@@ -894,12 +892,10 @@ let WORK_ORDERS = [
   {id:'WO-SP-69082', asset:'เสาแรงสูง Feeder 11 เทพารักษ์ กม.8', district:'อ.บางพลี', type:'ล้างลูกถ้วยฉนวนกันคราบไอเกลือ', isoDate:'2026-08-29', date:'29 ส.ค. 69', team:'ทีมสายส่ง 02', status:'pending', temp:'38.2', ground:'3.10'},
   {id:'WO-SP-69084', asset:'RMU สวิตช์เกียร์ ซ.วัดด่านสำโรง', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบ Ring Main Unit', isoDate:'2026-08-30', date:'30 ส.ค. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'41.0', ground:'2.15'},
 
-  // เดือนกันยายน 2569 (2026-09)
   {id:'WO-SP-69091', asset:'หม้อแปลง TR-400kVA นิคมบางพลี ซ.4', district:'อ.บางพลี', type:'ตรวจสอบระบบระบายความร้อน', isoDate:'2026-09-04', date:'4 ก.ย. 69', team:'ทีมหม้อแปลง 02', status:'pending', temp:'42.0', ground:'2.10'},
   {id:'WO-SP-69092', asset:'เสาไฟฟ้าแรงสูง ถ.สุขสวัสดิ์ กม.12', district:'อ.พระสมุทรเจดีย์', type:'ล้างลูกถ้วยฉนวนกันคราบเกลือ', isoDate:'2026-09-12', date:'12 ก.ย. 69', team:'ทีมสายส่ง 01', status:'pending', temp:'35.0', ground:'2.30'},
   {id:'WO-SP-69093', asset:'สวิตช์เกียร์ RMU ตลาดปากน้ำ', district:'อ.เมืองสมุทรปราการ', type:'ตรวจวัดค่าความเป็นฉนวนแก๊ส', isoDate:'2026-09-22', date:'22 ก.ย. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'39.5', ground:'1.85'},
 
-  // เดือนตุลาคม 2569 (2026-10)
   {id:'WO-SP-69101', asset:'หม้อแปลงสถานีสูบน้ำคลองด่าน', district:'อ.บางบ่อ', type:'เปลี่ยนถ่ายน้ำมันหม้อแปลง', isoDate:'2026-10-08', date:'8 ต.ค. 69', team:'ทีมหม้อแปลง 01', status:'pending', temp:'44.0', ground:'2.05'},
   {id:'WO-SP-69102', asset:'ระบบไฟส่องสว่าง ถ.กิ่งแก้ว', district:'อ.บางพลี', type:'เปลี่ยนโคมไฟถนน LED', isoDate:'2026-10-18', date:'18 ต.ค. 69', team:'ทีมไฟสาธารณะ', status:'pending', temp:'31.0', ground:'1.90'}
 ];
@@ -937,7 +933,6 @@ const ANOMALIES = [
 function renderMonthChips(){
   const container = document.getElementById('monthChipsContainer');
   container.innerHTML = THAI_MONTHS.map((mName, idx) => {
-    // Count tasks for this month
     const targetMonthStr = `${currentPlannerYear}-${String(idx+1).padStart(2,'0')}`;
     const count = WORK_ORDERS.filter(w => w.isoDate.startsWith(targetMonthStr)).length;
     const isActive = idx === currentSelectedMonth ? 'active' : '';
@@ -985,7 +980,6 @@ function renderPlanner(){
   const monthTasks = WORK_ORDERS.filter(w => w.isoDate.startsWith(targetMonthStr));
   monthTasks.sort((a, b) => new Date(a.isoDate) - new Date(b.isoDate));
 
-  // Update Stats Cards
   document.getElementById('statMonthTasks').innerHTML = `${monthTasks.length} <small>รายการ</small>`;
   const doneInMonth = monthTasks.filter(x => x.status === 'done').length;
   document.getElementById('statDoneInMonth').innerHTML = `${doneInMonth} <small>/ ${monthTasks.length}</small>`;
@@ -1006,7 +1000,7 @@ function renderMonthlyTable(tasks){
     return;
   }
 
-  tbody.innerHTML = tasks.map((wo, i) => {
+  tbody.innerHTML = tasks.map((wo) => {
     let badgeClass = 'pending', badgeText = 'รอดำเนินการ';
     if(wo.status === 'done'){ badgeClass = 'done'; badgeText = 'เสร็จสมบูรณ์'; }
     else if(wo.status === 'doing'){ badgeClass = 'doing'; badgeText = 'กำลังทำ'; }
@@ -1209,7 +1203,6 @@ function handleFormSubmit(e){
   };
   WORK_ORDERS.push(newWO);
   
-  // Auto-switch to the added task's month
   currentPlannerYear = dObj.getFullYear();
   currentSelectedMonth = dObj.getMonth();
   document.getElementById('currentMonthDisplay').textContent = `${THAI_MONTHS[currentSelectedMonth]} ${currentPlannerYear+543}`;
@@ -1259,7 +1252,113 @@ function exportToExcel(){
   XLSX.writeFile(wb, `แผนบำรุงรักษา_สมุทรปราการ_เดือน_${THAI_MONTHS[currentSelectedMonth]}_${currentPlannerYear+543}.xlsx`);
 }
 
-/* ---------------- OTHER MODULES RENDERING ---------------- */
+/* ---------------- 3-YEAR INSPECTION ARCHIVE ---------------- */
+function updateYearButtonBadges(){
+  const c2026 = INSPECTION_HISTORY.filter(h => h.year === '2026').length;
+  const c2025 = INSPECTION_HISTORY.filter(h => h.year === '2025').length;
+  const c2024 = INSPECTION_HISTORY.filter(h => h.year === '2024').length;
+  const cALL = INSPECTION_HISTORY.length;
+
+  document.getElementById('badge2026').textContent = c2026;
+  document.getElementById('badge2025').textContent = c2025;
+  document.getElementById('badge2024').textContent = c2024;
+  document.getElementById('badgeALL').textContent = cALL;
+}
+
+function selectYearFilter(year){
+  currentSelectedYear = year;
+  document.querySelectorAll('.btn-year').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.getElementById('btnYear' + year);
+  if(activeBtn) activeBtn.classList.add('active');
+  renderHistoryTable();
+}
+
+function renderHistoryTable(){
+  updateYearButtonBadges();
+  const tbody = document.getElementById('historyTableBody');
+  const items = getFilteredHistoryData();
+
+  if(items.length === 0){
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">ไม่พบข้อมูลประวัติสำหรับเงื่อนไขที่เลือก</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = items.map((item) => `
+    <tr>
+      <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${item.logId}</strong></td>
+      <td style="font-family:var(--font-num); font-size:12px;">
+        <span class="badge" style="background:#F1F5F9; color:var(--text-main); margin-right:4px;">${item.year}</span>
+        ${item.timestamp}
+      </td>
+      <td>${item.assetName}</td>
+      <td>${item.inspector}</td>
+      <td style="font-family:var(--font-num); font-weight:600;">${item.temp} °C</td>
+      <td style="font-family:var(--font-num);">${item.ground} Ω</td>
+      <td><span class="badge ${item.statusClass}">${item.result}</span></td>
+      <td style="text-align:right;">
+        <button class="btn-mini" onclick="viewHistoryDetail('${item.logId}')">ดูข้อมูล</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function getFilteredHistoryData(){
+  const distVal = document.getElementById('filterDistrictSelect').value;
+  const query = document.getElementById('searchHistoryInput').value.toLowerCase();
+
+  return INSPECTION_HISTORY.filter(h => {
+    const matchYear = currentSelectedYear === 'ALL' || h.year === currentSelectedYear;
+    const matchDist = distVal === 'ALL' || (h.district && h.district.includes(distVal)) || h.assetName.includes(distVal);
+    const matchQuery = h.logId.toLowerCase().includes(query) ||
+                       h.assetName.toLowerCase().includes(query) ||
+                       h.inspector.toLowerCase().includes(query) ||
+                       h.result.toLowerCase().includes(query);
+    return matchYear && matchDist && matchQuery;
+  });
+}
+
+function filterHistoryTable(){ renderHistoryTable(); }
+
+function viewHistoryDetail(logId){
+  const item = INSPECTION_HISTORY.find(h => h.logId === logId);
+  if(!item) return;
+
+  modalTitle.textContent = `บันทึกประวัติการตรวจ : ${item.logId}`;
+  modalContent.innerHTML = `
+    <div style="font-size:13.5px; line-height:1.8;">
+      <p><strong>ปีงบประมาณ:</strong> <span style="font-family:var(--font-num); font-weight:700; color:var(--orange-pri);">${item.year} (พ.ศ. ${Number(item.year)+543})</span></p>
+      <p><strong>วันที่/เวลาเข้าตรวจ:</strong> <span style="font-family:var(--font-num);">${item.timestamp}</span></p>
+      <p><strong>อุปกรณ์/พิกัด:</strong> ${item.assetName}</p>
+      <p><strong>ผู้เข้าตรวจ:</strong> ${item.inspector}</p>
+      <p><strong>อุณหภูมิ Thermo-scan:</strong> <span style="color:var(--orange-pri); font-family:var(--font-num); font-weight:700;">${item.temp} °C</span></p>
+      <p><strong>ความต้านทานกราวด์ดิน:</strong> <span style="color:var(--green-neon); font-family:var(--font-num); font-weight:700;">${item.ground} Ω</span></p>
+      <p><strong>สรุปผลการประเมิน:</strong> <span class="badge ${item.statusClass}">${item.result}</span></p>
+      <div style="margin-top:8px; padding:10px; background:#F8FAFC; border-radius:6px; border:1px solid var(--border);">
+        <strong>บันทึกรายละเอียดงาน:</strong>
+        <p style="color:var(--text-muted); font-size:12.5px; margin-top:2px;">${item.note}</p>
+      </div>
+    </div>
+    <div style="margin-top:18px; text-align:right;">
+      <button class="btn" onclick="closeModal()">ปิด</button>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+function exportHistoryToExcel(){
+  const filteredData = getFilteredHistoryData();
+  const exportData = filteredData.map(h => ({
+    "ปี (ค.ศ.)": h.year, "ปี (พ.ศ.)": Number(h.year)+543, "รหัสบันทึก": h.logId,
+    "วันที่-เวลา": h.timestamp, "อุปกรณ์/สถานที่": h.assetName, "ผู้ตรวจ": h.inspector,
+    "อุณหภูมิ (°C)": h.temp, "กราวด์ (Ω)": h.ground, "ผลการตรวจ": h.result, "บันทึกเพิ่มเติม": h.note
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Inspection_History");
+  XLSX.writeFile(wb, `ประวัติตรวจย้อนหลัง_สมุทรปราการ_ปี_${currentSelectedYear}.xlsx`);
+}
+
+/* ---------------- OTHER MODULES ---------------- */
 function renderAssetHealth(){
   const container = document.getElementById('assetGridContainer');
   container.innerHTML = ASSET_HEALTH_DATA.map(a => `
@@ -1347,6 +1446,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderAssetHealth();
   renderFeederOutage();
   renderRouteList();
+  renderHistoryTable();
   initMap();
 });
 </script>
