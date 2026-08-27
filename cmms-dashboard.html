@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMMS โครงข่ายไฟฟ้า — บริหารบุคลากรรายเขต</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --void:#0E1419;
+  --panel:#16202B;
+  --panel-raised:#1C2733;
+  --grid-line:#26333F;
+  --grid-line-soft:#1F2A35;
+  --text-hi:#EDF2F7;
+  --text-mid:#93A2B0;
+  --text-low:#5B6B79;
+
+  --amber:#F5A623;   /* หม้อแปลง */
+  --blue:#5FA8D3;    /* ไฟฟ้าสาธารณะ */
+  --red:#FF5A4E;     /* ไฟฟ้าขัดข้อง */
+  --green:#7ED957;   /* บำรุงรักษาระบบจำหน่าย */
+
+  --amber-dim: rgba(245,166,35,.14);
+  --blue-dim: rgba(95,168,211,.14);
+  --red-dim: rgba(255,90,78,.14);
+  --green-dim: rgba(126,217,87,.14);
+
+  --radius: 10px;
+  --font-display:'IBM Plex Sans Thai', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{
+  background:var(--void);
+  color:var(--text-hi);
+  font-family:var(--font-display);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+body{
+  background-image:
+    linear-gradient(var(--grid-line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-soft) 1px, transparent 1px);
+  background-size: 34px 34px;
+  background-attachment: fixed;
+}
+a{color:inherit;}
+button{font-family:inherit; cursor:pointer;}
+:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+.app{
+  display:grid;
+  grid-template-columns: 264px 1fr;
+  min-height:100vh;
+}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{
+  background:var(--panel-raised);
+  border-right:1px solid var(--grid-line);
+  padding:22px 16px;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  padding:4px 6px 20px 6px;
+  border-bottom:1px solid var(--grid-line);
+  margin-bottom:18px;
+}
+.brand-mark{
+  width:34px; height:34px; flex:none;
+  border-radius:7px;
+  background:linear-gradient(135deg,var(--amber),#c97f12);
+  display:flex; align-items:center; justify-content:center;
+}
+.brand-title{font-weight:700; font-size:15px; line-height:1.25;}
+.brand-sub{font-size:11px; color:var(--text-mid); font-family:var(--font-mono); letter-spacing:.04em;}
+
+.side-label{
+  font-size:11px; color:var(--text-low); text-transform:uppercase;
+  letter-spacing:.12em; font-family:var(--font-mono);
+  margin:4px 6px 10px;
+}
+
+.district-list{list-style:none; display:flex; flex-direction:column; gap:8px;}
+.district-btn{
+  width:100%; text-align:left;
+  background:var(--panel);
+  border:1px solid var(--grid-line);
+  border-left:3px solid transparent;
+  border-radius:8px;
+  padding:10px 12px;
+  color:var(--text-mid);
+  transition:.15s ease;
+}
+.district-btn:hover{border-color:#334252;}
+.district-btn.active{
+  background:var(--panel-raised);
+  border-left-color:var(--amber);
+  color:var(--text-hi);
+  box-shadow: inset 0 0 0 1px rgba(245,166,35,.25);
+}
+.district-btn .d-name{font-weight:600; font-size:13.5px; display:flex; justify-content:space-between; align-items:center;}
+.district-btn .d-region{font-size:11px; color:var(--text-low); margin-top:1px;}
+.district-btn .d-led{width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green);}
+.d-stack{
+  display:flex; height:4px; border-radius:2px; overflow:hidden; margin-top:8px; background:var(--grid-line);
+}
+.d-stack span{display:block; height:100%;}
+
+.side-foot{
+  margin-top:22px; padding-top:16px; border-top:1px solid var(--grid-line);
+  font-size:11px; color:var(--text-low); font-family:var(--font-mono); line-height:1.7;
+}
+
+/* ---------- MAIN ---------- */
+.main{padding:26px 30px 60px;}
+.topbar{
+  display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px;
+  margin-bottom:22px;
+}
+.topbar h1{font-size:21px; font-weight:700;}
+.topbar .region-tag{
+  font-family:var(--font-mono); font-size:11.5px; color:var(--amber);
+  background:var(--amber-dim); border:1px solid rgba(245,166,35,.3);
+  padding:2px 8px; border-radius:5px; margin-left:10px; vertical-align:middle;
+}
+.topbar-right{text-align:right; font-family:var(--font-mono); font-size:11.5px; color:var(--text-mid);}
+.topbar-right .month{color:var(--text-hi); font-size:13px; font-weight:600; margin-bottom:2px;}
+.clock-dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--green); margin-right:6px; box-shadow:0 0 5px var(--green); animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+.stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:26px;}
+.stat-card{
+  background:var(--panel); border:1px solid var(--grid-line); border-radius:var(--radius);
+  padding:14px 16px;
+}
+.stat-card .label{font-size:11px; color:var(--text-mid); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.06em;}
+.stat-card .value{font-family:var(--font-mono); font-size:26px; font-weight:600; margin-top:6px;}
+.stat-card .value small{font-size:13px; color:var(--text-mid); font-weight:400;}
+
+.section-head{
+  display:flex; align-items:baseline; gap:10px; margin:8px 0 14px;
+}
+.section-head h2{font-size:15px; font-weight:600;}
+.section-head .hint{font-size:11.5px; color:var(--text-low); font-family:var(--font-mono);}
+
+/* ---------- DEPARTMENT GRID ---------- */
+.dept-grid{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:8px;
+}
+.dept-card{
+  background:var(--panel);
+  border:1px solid var(--grid-line);
+  border-left:5px solid var(--accent, var(--amber));
+  border-radius:var(--radius);
+  padding:16px 18px 14px;
+}
+.dept-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+.dept-id{display:flex; align-items:center; gap:10px;}
+.dept-icon{
+  width:38px; height:38px; border-radius:9px; flex:none;
+  background:var(--accent-dim, var(--amber-dim));
+  display:flex; align-items:center; justify-content:center;
+}
+.dept-icon svg{width:20px; height:20px;}
+.dept-name{font-weight:600; font-size:14.5px;}
+.dept-tag{font-size:10.5px; color:var(--text-low); font-family:var(--font-mono);}
+
+.switch{
+  width:38px; height:20px; border-radius:11px; background:var(--grid-line);
+  position:relative; border:1px solid var(--grid-line); flex:none;
+}
+.switch::after{
+  content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%;
+  background:var(--status-color,var(--green)); transition:.2s;
+  box-shadow:0 0 6px var(--status-color,var(--green));
+}
+.switch.on::after{left:20px;}
+
+.dept-metrics{display:flex; align-items:center; gap:18px; margin:14px 0 12px;}
+.ring-wrap{position:relative; width:56px; height:56px; flex:none;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-wrap .pct{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:12.5px; font-weight:600;
+}
+.metric-list{font-size:12px; color:var(--text-mid); font-family:var(--font-mono); line-height:1.9;}
+.metric-list b{color:var(--text-hi); font-weight:600;}
+
+.task-list{list-style:none; border-top:1px solid var(--grid-line-soft); padding-top:8px;}
+.task-list li{
+  display:flex; align-items:center; gap:9px; padding:6px 2px; font-size:12.5px;
+  border-bottom:1px dashed var(--grid-line-soft);
+}
+.task-list li:last-child{border-bottom:none;}
+.task-dot{width:7px; height:7px; border-radius:50%; flex:none;}
+.task-dot.done{background:var(--green); box-shadow:0 0 5px var(--green);}
+.task-dot.doing{background:var(--amber); box-shadow:0 0 5px var(--amber);}
+.task-dot.pending{background:var(--text-low);}
+.task-name{flex:1; color:var(--text-hi);}
+.task-date{font-family:var(--font-mono); color:var(--text-low); font-size:11px; flex:none;}
+
+.dept-foot{margin-top:12px; display:flex; justify-content:space-between; align-items:center;}
+.expand-btn{
+  background:none; border:1px solid var(--grid-line); color:var(--text-mid);
+  font-size:11.5px; padding:6px 10px; border-radius:6px; font-family:var(--font-mono);
+  display:flex; align-items:center; gap:6px;
+}
+.expand-btn:hover{border-color:var(--accent,var(--amber)); color:var(--text-hi);}
+.expand-btn svg{width:11px; height:11px; transition:.2s;}
+.expand-btn.open svg{transform:rotate(180deg);}
+.urgent-flag{font-size:11px; font-family:var(--font-mono); color:var(--red); display:flex; align-items:center; gap:5px;}
+.urgent-flag::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--red); box-shadow:0 0 5px var(--red);}
+
+/* ---------- CALENDAR PANEL ---------- */
+.cal-panel{
+  grid-column:1/-1;
+  background:var(--panel-raised); border:1px solid var(--grid-line); border-radius:var(--radius);
+  padding:18px 20px; margin-top:-2px; margin-bottom:16px;
+  display:none;
+}
+.cal-panel.show{display:block;}
+.cal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+.cal-head h3{font-size:13.5px; font-weight:600;}
+.cal-head span{font-size:11px; color:var(--text-low); font-family:var(--font-mono);}
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+.cal-dow{text-align:center; font-size:10px; color:var(--text-low); font-family:var(--font-mono); padding-bottom:4px;}
+.cal-cell{
+  aspect-ratio:1; border-radius:6px; background:var(--panel); border:1px solid var(--grid-line-soft);
+  padding:5px; font-family:var(--font-mono); font-size:10.5px; color:var(--text-low); position:relative;
+}
+.cal-cell.blank{background:transparent; border:none;}
+.cal-cell.has-task{border-color:var(--accent,var(--amber));}
+.cal-cell .dot{position:absolute; bottom:5px; right:5px; width:6px; height:6px; border-radius:50%;}
+.cal-cell.today{box-shadow:0 0 0 1px var(--accent,var(--amber)) inset; background:var(--accent-dim,var(--amber-dim));}
+.cal-cell .tname{
+  display:block; margin-top:10px; font-size:8.6px; line-height:1.25; color:var(--text-mid);
+  overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+}
+
+/* ---------- WORKFLOW ---------- */
+.workflow{
+  background:var(--panel); border:1px solid var(--grid-line); border-radius:var(--radius);
+  padding:26px 22px 20px; margin-top:8px;
+}
+.wf-steps{display:flex; align-items:flex-start; gap:0; position:relative; margin-top:18px;}
+.wf-step{flex:1; text-align:center; position:relative; padding:0 6px;}
+.wf-node{
+  width:44px; height:44px; border-radius:50%; margin:0 auto 10px;
+  background:var(--panel-raised); border:2px solid var(--grid-line);
+  display:flex; align-items:center; justify-content:center; position:relative; z-index:2;
+}
+.wf-node svg{width:19px; height:19px; color:var(--amber);}
+.wf-step.done .wf-node{border-color:var(--green);}
+.wf-step.active .wf-node{border-color:var(--amber); box-shadow:0 0 0 4px var(--amber-dim);}
+.wf-title{font-size:12.5px; font-weight:600;}
+.wf-desc{font-size:10.5px; color:var(--text-low); margin-top:3px; line-height:1.5;}
+.wf-wire{
+  position:absolute; top:22px; left:0; right:0; height:2px; z-index:1;
+  background-image:linear-gradient(90deg, var(--amber) 0 8px, transparent 8px 16px);
+  background-size:16px 2px; background-repeat:repeat-x;
+  animation:flow 1.1s linear infinite;
+}
+@media (prefers-reduced-motion: reduce){ .wf-wire{animation:none;} .clock-dot{animation:none;} }
+@keyframes flow{ to{ background-position:-16px 0; } }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:980px){
+  .dept-grid{grid-template-columns:1fr;}
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .wf-steps{flex-wrap:wrap; gap:18px 0;} .wf-wire{display:none;}
+}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--grid-line);}
+  .district-list{flex-direction:row; overflow-x:auto; padding-bottom:6px;}
+  .district-btn{min-width:190px;}
+  .main{padding:20px 16px 50px;}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#0E1419"/></svg>
+      </div>
+      <div>
+        <div class="brand-title">CMMS โครงข่ายไฟฟ้า</div>
+        <div class="brand-sub">PERSONNEL OPS · v1.4</div>
+      </div>
+    </div>
+
+    <div class="side-label">เลือกเขตปฏิบัติการ</div>
+    <ul class="district-list" id="districtList"></ul>
+
+    <div class="side-foot">
+      GRID STATUS — NORMAL<br>
+      อัปเดตข้อมูลล่าสุด<br>
+      <span id="clockText">--:--:--</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="districtTitle">เขต 1<span class="region-tag" id="districtTag">ภาคเหนือ</span></h1>
+      </div>
+      <div class="topbar-right">
+        <div class="month">สิงหาคม 2569</div>
+        <div><span class="clock-dot"></span>ระบบทำงานปกติ — เชื่อมต่อสด</div>
+      </div>
+    </div>
+
+    <div class="stat-row" id="statRow"></div>
+
+    <div class="section-head">
+      <h2>กลุ่มงานประจำเขต — 4 กลุ่มงาน</h2>
+      <span class="hint">คลิก “ดูปฏิทินทั้งเดือน” เพื่อดูตารางงานรายวันของกลุ่มงานนั้น</span>
+    </div>
+    <div class="dept-grid" id="deptGrid"></div>
+
+    <div class="section-head" style="margin-top:30px;">
+      <h2>เวิร์กโฟลว์การทำงานของแต่ละกลุ่มงาน</h2>
+      <span class="hint">ทุกกลุ่มงานใช้ขั้นตอนมาตรฐานเดียวกัน ตั้งแต่รับแจ้งจนถึงปิดงาน</span>
+    </div>
+    <div class="workflow">
+      <div class="wf-steps" id="wfSteps"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const DISTRICTS = [
+  {id:1, name:'เขต 1', region:'ภาคเหนือ'},
+  {id:2, name:'เขต 2', region:'ภาคกลาง'},
+  {id:3, name:'เขต 3', region:'ภาคตะวันออกเฉียงเหนือ'},
+  {id:4, name:'เขต 4', region:'ภาคใต้'},
+];
+
+const ICONS = {
+  transformer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="4.2"/><circle cx="15" cy="16" r="4.2"/><path d="M9 12v4M15 8v4"/></svg>',
+  public:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v3M6 8h12l-2 4H8l-2-4z"/><path d="M12 12v7M9 21h6"/></svg>',
+  outage:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M13 2L5 14h5l-1 8 9-12h-5l1-8z"/></svg>',
+  maintenance:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20l6-6M14 4l6 6-3 3-6-6 3-3z"/><path d="M9 11l-3 3 4 4 3-3"/></svg>',
+};
+
+const WF_ICONS = {
+  inbox:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 12L3 19h18l-2-7"/></svg>',
+  team:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.4"/><path d="M17 13.2c2.8.4 5 2.4 5 4.8"/></svg>',
+  wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.7 6.3a4 4 0 00-5.6 5l-6 6 2 2 6-6a4 4 0 005-5.6l-2.6 2.6-2-2 2.6-2.6z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 3v5c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>',
+  flag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 21V4"/><path d="M5 5h11l-2 3.5L16 12H5"/></svg>',
+};
+
+const GROUPS = [
+  {key:'transformer', name:'หม้อแปลง', accent:'--amber', dim:'--amber-dim',
+   tasks:['ตรวจสอบสภาพหม้อแปลงไฟฟ้าประจำเดือน','ตรวจวัดค่าความเป็นฉนวนน้ำมันหม้อแปลง','บันทึกค่าโหลดและอุณหภูมิหม้อแปลง',
+          'เปลี่ยนถ่ายน้ำมันหม้อแปลงที่ครบกำหนด','ตรวจสอบระบบระบายความร้อน','ทำความสะอาดลูกถ้วยและขั้วต่อ',
+          'ตรวจสอบสายดินหม้อแปลง','จัดทำรายงานสภาพหม้อแปลงประจำเดือน']},
+  {key:'public', name:'ไฟฟ้าสาธารณะ', accent:'--blue', dim:'--blue-dim',
+   tasks:['ตรวจสอบไฟฟ้าแสงสว่างสาธารณะทั้งเส้นทาง','เปลี่ยนหลอดไฟถนนที่ชำรุด','ซ่อมแซมโคมไฟที่เสียหาย',
+          'ตรวจสอบระบบตัดต่อไฟอัตโนมัติ (โฟโต้สวิตช์)','ทาสีเสาไฟฟ้าสาธารณะ','ตรวจสอบสายไฟส่องสว่างชำรุด',
+          'รับเรื่องร้องเรียนไฟถนนดับจากประชาชน','สรุปผลการซ่อมบำรุงไฟสาธารณะ']},
+  {key:'outage', name:'ไฟฟ้าขัดข้อง', accent:'--red', dim:'--red-dim',
+   tasks:['ตอบสนองเหตุไฟฟ้าดับเร่งด่วน','ตรวจสอบสาเหตุไฟฟ้าขัดข้อง','ซ่อมแซมจุดที่เกิดไฟฟ้าลัดวงจร',
+          'เปลี่ยนอุปกรณ์ป้องกันที่ชำรุด (ฟิวส์/เบรกเกอร์)','บันทึกและวิเคราะห์สาเหตุไฟฟ้าขัดข้อง','ประสานทีมกู้ภัยกรณีฉุกเฉิน',
+          'ตรวจสอบระบบหลังซ่อมแซมเสร็จสิ้น','จัดทำรายงานสรุปเหตุขัดข้องประจำเดือน']},
+  {key:'maintenance', name:'บำรุงรักษาระบบจำหน่าย', accent:'--green', dim:'--green-dim',
+   tasks:['ตัดแต่งต้นไม้ใกล้แนวสายไฟฟ้า','ตรวจสอบระยะห่างสายไฟฟ้ากับสิ่งปลูกสร้าง','บำรุงรักษาเสาไฟฟ้าและอุปกรณ์ยึดโยง',
+          'ทดสอบระบบป้องกันฟ้าผ่า','ตรวจสอบและขันแน่นจุดต่อสายไฟฟ้า','ตรวจสอบสภาพลูกถ้วยฉนวนตลอดแนว',
+          'ล้างทำความสะอาดอุปกรณ์บนเสาไฟฟ้า','จัดทำแผนบำรุงรักษาเชิงป้องกันประจำปี']},
+];
+
+const WORKFLOW = [
+  {icon:'inbox', title:'รับแจ้งงาน', desc:'บันทึกคำร้อง/แจ้งเหตุเข้าระบบ CMMS'},
+  {icon:'team', title:'มอบหมายทีม', desc:'จ่ายงานให้กลุ่มงานและพนักงานที่ว่าง'},
+  {icon:'wrench', title:'ดำเนินงาน', desc:'ทีมช่างลงพื้นที่ปฏิบัติงานจริง'},
+  {icon:'check', title:'ตรวจสอบคุณภาพ', desc:'หัวหน้างานตรวจรับและยืนยันผล'},
+  {icon:'flag', title:'ปิดงาน', desc:'บันทึกผลและปิดใบสั่งงานในระบบ'},
+];
+
+const TODAY = new Date(2026,7,27); // 27 Aug 2026
+const MONTH = 7; const YEAR = 2026; const DAYS_IN_MONTH = 31;
+
+/* seeded pseudo-random */
+function seeded(seed){ const x = Math.sin(seed)*10000; return x - Math.floor(x); }
+
+function buildDeptData(districtId, group, groupIdx){
+  const base = districtId*10 + groupIdx;
+  const staff = 4 + Math.floor(seeded(base*1.1)*6);              // 4-9
+  const completion = 38 + Math.floor(seeded(base*2.3)*58);        // 38-95
+  const tasks = group.tasks.map((name, i)=>{
+    const s = base*7 + i*3.1;
+    const day = 1 + Math.floor(seeded(s)*DAYS_IN_MONTH);
+    let status;
+    if(day < TODAY.getDate()-2) status = seeded(s*1.7) > 0.15 ? 'done' : 'pending';
+    else if(day <= TODAY.getDate()+1) status = seeded(s*1.3) > 0.5 ? 'doing' : 'pending';
+    else status = 'pending';
+    return {name, day, status};
+  }).sort((a,b)=>a.day-b.day);
+  const urgent = group.key==='outage' && tasks.filter(t=>t.status==='pending' && t.day<=TODAY.getDate()+2).length;
+  return {staff, completion, tasks, urgent};
+}
+
+const DATA = {};
+DISTRICTS.forEach(d=>{
+  DATA[d.id] = GROUPS.map((g,i)=>buildDeptData(d.id,g,i));
+});
+
+/* ---------------- RENDER: SIDEBAR ---------------- */
+const districtListEl = document.getElementById('districtList');
+let activeDistrict = 1;
+
+function renderSidebar(){
+  districtListEl.innerHTML = DISTRICTS.map(d=>{
+    const gd = DATA[d.id];
+    const totalStaff = gd.reduce((a,x)=>a+x.staff,0);
+    const totalTasks = gd.reduce((a,x)=>a+x.tasks.length,0);
+    const segs = gd.map(x=>`var(${GROUPS[gd.indexOf(x)]?.accent||'--amber'})`);
+    return `
+    <li>
+      <button class="district-btn ${d.id===activeDistrict?'active':''}" data-id="${d.id}">
+        <div class="d-name"><span>${d.name}</span><span class="d-led"></span></div>
+        <div class="d-region">${d.region}</div>
+        <div class="d-region" style="margin-top:4px;">${totalStaff} คน · ${totalTasks} งาน/เดือน</div>
+        <div class="d-stack">
+          ${gd.map((x,i)=>`<span style="width:${100/gd.length}%; background:var(${GROUPS[i].accent})"></span>`).join('')}
+        </div>
+      </button>
+    </li>`;
+  }).join('');
+  districtListEl.querySelectorAll('.district-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ activeDistrict = Number(btn.dataset.id); renderAll(); });
+  });
+}
+
+/* ---------------- RENDER: TOPBAR + STATS ---------------- */
+function renderTop(){
+  const d = DISTRICTS.find(x=>x.id===activeDistrict);
+  document.getElementById('districtTitle').innerHTML = `${d.name}<span class="region-tag">${d.region}</span>`;
+
+  const gd = DATA[activeDistrict];
+  const totalStaff = gd.reduce((a,x)=>a+x.staff,0);
+  const totalTasks = gd.reduce((a,x)=>a+x.tasks.length,0);
+  const doneTasks = gd.reduce((a,x)=>a+x.tasks.filter(t=>t.status==='done').length,0);
+  const urgent = gd.reduce((a,x)=>a+(x.urgent||0),0);
+
+  document.getElementById('statRow').innerHTML = `
+    <div class="stat-card"><div class="label">พนักงานทั้งหมด</div><div class="value">${totalStaff}<small> คน</small></div></div>
+    <div class="stat-card"><div class="label">งานเดือนนี้</div><div class="value">${totalTasks}<small> งาน</small></div></div>
+    <div class="stat-card"><div class="label">งานเสร็จแล้ว</div><div class="value">${doneTasks}<small> / ${totalTasks}</small></div></div>
+    <div class="stat-card"><div class="label">งานเร่งด่วน (ขัดข้อง)</div><div class="value" style="color:${urgent>0?'var(--red)':'var(--text-hi)'}">${urgent}<small> รายการ</small></div></div>
+  `;
+}
+
+/* ---------------- RENDER: DEPT CARDS ---------------- */
+const DOW = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+
+function ring(pct, colorVar){
+  const r = 22, c = 2*Math.PI*r;
+  const off = c - (pct/100)*c;
+  return `<svg width="56" height="56" viewBox="0 0 56 56">
+    <circle cx="28" cy="28" r="${r}" fill="none" stroke="var(--grid-line)" stroke-width="5"/>
+    <circle cx="28" cy="28" r="${r}" fill="none" stroke="var(${colorVar})" stroke-width="5"
+      stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"/>
+  </svg>`;
+}
+
+function calendarHTML(group, dept, accentVar){
+  let cells = `<div class="cal-grid">` + DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  const firstDow = new Date(YEAR, MONTH, 1).getDay();
+  for(let i=0;i<firstDow;i++) cells += `<div class="cal-cell blank"></div>`;
+  for(let day=1; day<=DAYS_IN_MONTH; day++){
+    const t = dept.tasks.find(x=>x.day===day);
+    const isToday = day===TODAY.getDate();
+    let cls = 'cal-cell' + (t?' has-task':'') + (isToday?' today':'');
+    let dotColor = t ? (t.status==='done'?'var(--green)':t.status==='doing'?'var(--amber)':'var(--text-low)') : 'transparent';
+    cells += `<div class="${cls}" style="--accent:var(${accentVar})">
+      ${day}
+      ${t?`<span class="tname">${t.name}</span><span class="dot" style="background:${dotColor}"></span>`:''}
+    </div>`;
+  }
+  cells += `</div>`;
+  return cells;
+}
+
+function renderDepts(){
+  const gd = DATA[activeDistrict];
+  const grid = document.getElementById('deptGrid');
+  grid.innerHTML = GROUPS.map((g,i)=>{
+    const dept = gd[i];
+    const statusColor = dept.completion>=70?'var(--green)':dept.completion>=40?'var(--amber)':'var(--red)';
+    const doneCount = dept.tasks.filter(t=>t.status==='done').length;
+    const doingCount = dept.tasks.filter(t=>t.status==='doing').length;
+    const shown = dept.tasks.slice(0,5);
+    return `
+    <div class="dept-card" style="--accent:var(${g.accent}); --accent-dim:var(${g.dim})">
+      <div class="dept-head">
+        <div class="dept-id">
+          <div class="dept-icon">${ICONS[g.key]}</div>
+          <div>
+            <div class="dept-name">${g.name}</div>
+            <div class="dept-tag">GROUP-0${i+1} · เขต ${activeDistrict}</div>
+          </div>
+        </div>
+        <div class="switch on" style="--status-color:${statusColor}" title="สถานะกลุ่มงาน"></div>
+      </div>
+
+      <div class="dept-metrics">
+        <div class="ring-wrap">${ring(dept.completion, g.accent)}<div class="pct">${dept.completion}%</div></div>
+        <div class="metric-list">
+          พนักงานประจำกลุ่ม &nbsp;<b>${dept.staff} คน</b><br>
+          เสร็จแล้ว <b>${doneCount}</b> · กำลังทำ <b>${doingCount}</b> · รอดำเนินการ <b>${dept.tasks.length-doneCount-doingCount}</b>
+        </div>
+      </div>
+
+      <ul class="task-list">
+        ${shown.map(t=>`
+          <li>
+            <span class="task-dot ${t.status}"></span>
+            <span class="task-name">${t.name}</span>
+            <span class="task-date">${String(t.day).padStart(2,'0')} ส.ค.</span>
+          </li>`).join('')}
+      </ul>
+
+      <div class="dept-foot">
+        ${dept.urgent ? `<span class="urgent-flag">${dept.urgent} งานเร่งด่วนรอทีม</span>` : `<span></span>`}
+        <button class="expand-btn" data-key="${g.key}">
+          ดูปฏิทินทั้งเดือน
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="cal-panel" id="cal-${g.key}">
+      <div class="cal-head">
+        <h3>ปฏิทินงาน — ${g.name} (สิงหาคม 2569)</h3>
+        <span>เขต ${activeDistrict} · ${dept.tasks.length} งานในเดือนนี้</span>
+      </div>
+      ${calendarHTML(g, dept, g.accent)}
+    </div>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('.expand-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.dataset.key;
+      const panel = document.getElementById('cal-'+key);
+      const isOpen = panel.classList.contains('show');
+      grid.querySelectorAll('.cal-panel').forEach(p=>p.classList.remove('show'));
+      grid.querySelectorAll('.expand-btn').forEach(b=>b.classList.remove('open'));
+      if(!isOpen){ panel.classList.add('show'); btn.classList.add('open'); }
+    });
+  });
+}
+
+/* ---------------- RENDER: WORKFLOW ---------------- */
+function renderWorkflow(){
+  const el = document.getElementById('wfSteps');
+  el.innerHTML = `<div class="wf-wire"></div>` + WORKFLOW.map((s,i)=>`
+    <div class="wf-step ${i<2?'done':i===2?'active':''}">
+      <div class="wf-node">${WF_ICONS[s.icon]}</div>
+      <div class="wf-title">${s.title}</div>
+      <div class="wf-desc">${s.desc}</div>
+    </div>
+  `).join('');
+}
+
+/* ---------------- CLOCK ---------------- */
+function tickClock(){
+  const now = new Date();
+  document.getElementById('clockText').textContent = now.toLocaleTimeString('th-TH');
+}
+setInterval(tickClock, 1000); tickClock();
+
+/* ---------------- INIT ---------------- */
+function renderAll(){
+  renderSidebar();
+  renderTop();
+  renderDepts();
+}
+renderAll();
+renderWorkflow();
+</script>
+</body>
+</html>
