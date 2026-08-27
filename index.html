@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS Smart Grid สมุทรปราการ (Inspection Logs & GPS Route)</title>
+<title>CMMS Smart Grid สมุทรปราการ (Feeder Outage Analytics & Due Date Sort)</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -244,7 +244,7 @@ html,body{
   border-radius:var(--radius); overflow-x:auto;
 }
 table.data-table{
-  width:100%; border-collapse:collapse; text-align:left; font-size:13px; min-width:700px;
+  width:100%; border-collapse:collapse; text-align:left; font-size:13px; min-width:720px;
 }
 table.data-table th{
   background:var(--bg-card); padding:12px 16px; font-size:11.5px;
@@ -254,6 +254,15 @@ table.data-table th{
 table.data-table td{
   padding:12px 16px; border-bottom:1px solid var(--border-subtle); vertical-align:middle;
 }
+
+.due-pill{
+  font-size:11px; padding:2px 8px; border-radius:4px; font-family:var(--font-num); font-weight:700;
+  display:inline-flex; align-items:center; gap:4px;
+}
+.due-urgent{background:rgba(244, 63, 94, 0.15); color:var(--red-neon); border:1px solid rgba(244, 63, 94, 0.3);}
+.due-near{background:rgba(251, 191, 36, 0.15); color:var(--amber-soft); border:1px solid rgba(251, 191, 36, 0.3);}
+.due-normal{background:rgba(148, 163, 184, 0.12); color:var(--text-muted); border:1px solid var(--border-subtle);}
+
 .badge{
   display:inline-block; font-size:11px; padding:3px 8px; border-radius:6px;
   font-family:var(--font-num); font-weight:600;
@@ -271,6 +280,35 @@ table.data-table td{
   cursor:pointer; transition:.15s;
 }
 .btn-mini:hover{border-color:var(--orange-pri); color:var(--orange-soft);}
+
+/* FEEDER OUTAGE ANALYTICS STYLES */
+.feeder-grid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; margin-bottom:20px;
+}
+.feeder-card{
+  background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:18px; position:relative; overflow:hidden;
+}
+.feeder-card.critical{border-top:3px solid var(--red-neon);}
+.feeder-card.warning{border-top:3px solid var(--amber-soft);}
+.feeder-card.good{border-top:3px solid var(--green-neon);}
+.feeder-head{display:flex; justify-content:space-between; align-items:flex-start;}
+.feeder-code{font-family:var(--font-num); font-size:12px; color:var(--orange-soft); font-weight:700;}
+.feeder-title{font-size:14.5px; font-weight:700; margin:4px 0 2px;}
+.feeder-area{font-size:11.5px; color:var(--text-muted);}
+
+.feeder-metrics{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;
+  background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-sm);
+  padding:10px; margin:12px 0 10px; text-align:center;
+}
+.fm-label{font-size:10px; color:var(--text-dim); text-transform:uppercase; font-family:var(--font-num);}
+.fm-val{font-family:var(--font-num); font-size:16px; font-weight:700; margin-top:2px;}
+
+.feeder-cause{
+  font-size:11.5px; color:var(--text-muted); line-height:1.5;
+}
+.feeder-cause strong{color:var(--text-main);}
 
 /* FILTER BAR */
 .filter-bar{
@@ -343,8 +381,8 @@ table.data-table td{
 .mobile-nav-btn{
   display:flex; flex-direction:column; align-items:center; gap:3px;
   background:none; border:none; color:var(--text-dim);
-  font-size:10px; font-family:var(--font-main); font-weight:500;
-  padding:4px 6px; cursor:pointer;
+  font-size:9.5px; font-family:var(--font-main); font-weight:500;
+  padding:4px 4px; cursor:pointer;
 }
 .mobile-nav-btn svg{width:18px; height:18px;}
 .mobile-nav-btn.active{color:var(--orange-soft); font-weight:600;}
@@ -359,6 +397,7 @@ table.data-table td{
   .route-layout{grid-template-columns:1fr;}
   .map-card-wrapper{height:380px;}
   .form-grid{grid-template-columns:1fr;}
+  .feeder-grid{grid-template-columns:1fr;}
 }
 @media print{
   body{background:#fff; color:#000;}
@@ -382,7 +421,7 @@ table.data-table td{
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>INSPECTION OPS v3.6</span>
+        <span>OUTAGE ANALYTICS v3.8</span>
       </div>
     </div>
 
@@ -393,13 +432,19 @@ table.data-table td{
 
     <ul class="nav-group">
       <li>
-        <button class="nav-item" data-tab="tab-plan">
+        <button class="nav-item active" data-tab="tab-plan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          ตารางวางแผนงาน
+          ตารางวางแผนงาน (เรียงวัน)
         </button>
       </li>
       <li>
-        <button class="nav-item active" data-tab="tab-route">
+        <button class="nav-item" data-tab="tab-outage">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/><path d="M18 10h4M16 6h4"/></svg>
+          สถิติไฟฟ้าดับรายสายป้อน
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-tab="tab-route">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/><path d="M6 10V6"/></svg>
           นำเส้นทางตรวจการ (GPS)
         </button>
@@ -434,12 +479,12 @@ table.data-table td{
         <span class="stream-val"><span id="rtLoad">382.4</span> MW</span>
       </div>
       <div class="stream-row">
-        <span>Main Bus Volt:</span>
-        <span class="stream-val"><span id="rtVolt">22.42</span> kV</span>
+        <span>SAIFI (สะสมปี 69):</span>
+        <span class="stream-val" style="color:var(--amber-soft);">0.84 ครั้ง/ราย</span>
       </div>
       <div class="stream-row">
-        <span>Ambient Temp:</span>
-        <span class="stream-val"><span id="rtTemp">33.8</span> °C</span>
+        <span>SAIDI (สะสมปี 69):</span>
+        <span class="stream-val" style="color:var(--teal-soft);">28.5 นาที/ราย</span>
       </div>
       <div class="stream-row">
         <span>Patrol Unit:</span>
@@ -452,7 +497,7 @@ table.data-table td{
   <div class="main-wrapper">
     <header class="topbar">
       <div class="topbar-info">
-        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip"><span class="live-pulse-dot"></span>HISTORY LOG READY</span></h1>
+        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip"><span class="live-pulse-dot"></span>SORT BY DUE DATE</span></h1>
       </div>
       <div class="actions-group">
         <button class="btn" onclick="exportToExcel()" title="ส่งออก Excel">
@@ -473,26 +518,96 @@ table.data-table td{
     <main class="content">
       <!-- STATS -->
       <section class="stats-grid">
+        <div class="stat-box" style="--accent-bar:var(--red-neon);">
+          <div class="lbl">งานครบกำหนดด่วนวันนี้ / พรุ่งนี้</div>
+          <div class="val" id="statDueToday" style="color:var(--red-neon);">3 <small>รายการ</small></div>
+        </div>
         <div class="stat-box" style="--accent-bar:var(--orange-pri);">
-          <div class="lbl">แผนงานเดือนนี้</div>
+          <div class="lbl">แผนงานบำรุงรักษาทั้งหมด</div>
           <div class="val" id="statTotal">6 <small>รายการ</small></div>
+        </div>
+        <div class="stat-box" style="--accent-bar:var(--amber-soft);">
+          <div class="lbl">สายป้อนดับสูงสุดเดือนนี้</div>
+          <div class="val" style="color:var(--amber-soft); font-size:20px;">FEEDER-08 <small>(เทพารักษ์)</small></div>
         </div>
         <div class="stat-box" style="--accent-bar:var(--green-neon);">
           <div class="lbl">ความคืบหน้าสายตรวจ</div>
           <div class="val" id="statPatrolProgress" style="color:var(--green-neon);">1 <small>/ 4 จุด</small></div>
         </div>
-        <div class="stat-box" style="--accent-bar:var(--teal-soft);">
-          <div class="lbl">ประวัติตรวจสะสม</div>
-          <div class="val" id="statHistoryTotal" style="color:var(--teal-soft);">5 <small>ครั้ง</small></div>
-        </div>
-        <div class="stat-box" style="--accent-bar:var(--red-neon);">
-          <div class="lbl">จุดเสี่ยงเฝ้าระวัง</div>
-          <div class="val" style="color:var(--red-neon);">3 <small>เคส</small></div>
-        </div>
       </section>
 
-      <!-- TAB: ROUTE PATROL (DEFAULT ACTIVE) -->
-      <div id="tab-route" class="tab-content active">
+      <!-- TAB 1: MAINTENANCE PLANNER (SORT BY DUE DATE) -->
+      <div id="tab-plan" class="tab-content active">
+        <div class="section-head">
+          <div>
+            <h3>ตารางวางแผนงานบำรุงรักษา (เรียงลำดับงานครบกำหนดใกล้สุดก่อน)</h3>
+            <span class="sub">ระบบจัดเรียงจากวันที่ใกล้ครบกำหนด (Earliest Due Date) เพื่อป้องกันงานค้างส่ง</span>
+          </div>
+          <button class="btn" onclick="resortWorkOrders()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            เรียงลำดับใหม่
+          </button>
+        </div>
+        <div class="table-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>รหัส WO</th>
+                <th>อุปกรณ์ / จุดติดตั้ง</th>
+                <th>อำเภอ</th>
+                <th>ประเภทงาน</th>
+                <th>กำหนดเสร็จ (Due Date)</th>
+                <th>ทีมช่าง</th>
+                <th>สถานะ</th>
+                <th style="text-align:right;">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: FEEDER OUTAGE ANALYTICS (NEW FEATURE) -->
+      <div id="tab-outage" class="tab-content">
+        <div class="section-head">
+          <div>
+            <h3>สถิติไฟฟ้าขัดข้องรายสายป้อน (Feeder Outage & Reliability Statistics)</h3>
+            <span class="sub">ข้อมูลสถิติเหตุขัดข้อง ความถี่ (SAIFI) และระยะเวลาดับ (SAIDI) ประจำพื้นที่สมุทรปราการ</span>
+          </div>
+          <button class="btn" onclick="exportOutageToExcel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+            ส่งออกสถิติสายป้อน (.xlsx)
+          </button>
+        </div>
+
+        <!-- FEEDER CARDS GRID -->
+        <div class="feeder-grid" id="feederCardsGrid"></div>
+
+        <div class="section-head" style="margin-top:24px;">
+          <h3>ตารางเปรียบเทียบสถิติสายป้อนหลัก (Feeder Reliability Ranking)</h3>
+          <span class="sub">จัดอันดับสายป้อนที่มีความเสี่ยงสูงเพื่อวางแผน PM ล่วงหน้า</span>
+        </div>
+        <div class="table-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>รหัสสายป้อน</th>
+                <th>ชื่อสายป้อน / สถานีต้นทาง</th>
+                <th>พื้นที่บริการ</th>
+                <th>จำนวนครั้งที่ดับ (ปี 69)</th>
+                <th>รวมเวลาดับ (นาที)</th>
+                <th>ดัชนี SAIFI</th>
+                <th>สาเหตุหลักที่ตรวจพบ</th>
+                <th>ระดับความเสี่ยง</th>
+              </tr>
+            </thead>
+            <tbody id="feederTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: ROUTE PATROL -->
+      <div id="tab-route" class="tab-content">
         <div class="nav-mission-banner">
           <div class="mission-info">
             <h4 id="currentMissionTitle">📍 กำลังตรวจจุดที่ 2: นิคมบางปู ซ.9 (ถ.พัฒนา 1)</h4>
@@ -517,7 +632,7 @@ table.data-table td{
         </div>
       </div>
 
-      <!-- TAB: INSPECTION HISTORY (NEW FEATURE) -->
+      <!-- TAB 4: INSPECTION HISTORY -->
       <div id="tab-history" class="tab-content">
         <div class="section-head">
           <div>
@@ -553,32 +668,7 @@ table.data-table td{
         </div>
       </div>
 
-      <!-- TAB: MAINTENANCE PLANNER -->
-      <div id="tab-plan" class="tab-content">
-        <div class="section-head">
-          <h3>ตารางวางแผนงานบำรุงรักษา (Maintenance Schedule)</h3>
-          <span class="sub">ข้อมูลอัปเดตแบบสองทิศทาง (Real-time Live Synced)</span>
-        </div>
-        <div class="table-card">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>รหัส WO</th>
-                <th>อุปกรณ์ / จุดติดตั้ง</th>
-                <th>อำเภอ</th>
-                <th>ประเภทงาน</th>
-                <th>กำหนดเสร็จ</th>
-                <th>ทีมช่าง</th>
-                <th>สถานะ</th>
-                <th style="text-align:right;">จัดการ</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- TAB: FORM -->
+      <!-- TAB 5: FORM -->
       <div id="tab-form" class="tab-content">
         <div class="section-head">
           <h3>แบบฟอร์มเอกสารบันทึกผลการบำรุงรักษา (e-Work Order)</h3>
@@ -605,6 +695,10 @@ table.data-table td{
               <div class="form-field">
                 <label>ชื่ออุปกรณ์ / พิกัดหม้อแปลง</label>
                 <input type="text" id="f_asset" placeholder="เช่น TR-250kVA นิคมบางปู ซ.12" required>
+              </div>
+              <div class="form-field">
+                <label>กำหนดแล้วเสร็จ (Due Date)</label>
+                <input type="date" id="f_dueDate" value="2026-08-28" required>
               </div>
               <div class="form-field">
                 <label>ประเภทงาน</label>
@@ -645,7 +739,7 @@ table.data-table td{
         </div>
       </div>
 
-      <!-- TAB: ANOMALY ENGINE -->
+      <!-- TAB 6: ANOMALY ENGINE -->
       <div id="tab-anomaly" class="tab-content">
         <div class="section-head">
           <h3>การวิเคราะห์ความผิดปกติ (Real-Time Anomaly Engine)</h3>
@@ -659,20 +753,24 @@ table.data-table td{
 
 <!-- BOTTOM NAV FOR MOBILE -->
 <nav class="mobile-nav">
-  <button class="mobile-nav-btn active" data-tab="tab-route">
+  <button class="mobile-nav-btn active" data-tab="tab-plan">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    <span>แผนงาน</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab="tab-outage">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <span>สถิติไฟดับ</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab="tab-route">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/></svg>
-    <span>นำทาง GPS</span>
+    <span>GPS นำทาง</span>
   </button>
   <button class="mobile-nav-btn" data-tab="tab-history">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     <span>ประวัติ</span>
   </button>
-  <button class="mobile-nav-btn" data-tab="tab-plan">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-    <span>แผนงาน</span>
-  </button>
   <button class="mobile-nav-btn" data-tab="tab-form">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
     <span>ฟอร์ม</span>
   </button>
   <button class="mobile-nav-btn" data-tab="tab-anomaly">
@@ -693,14 +791,78 @@ table.data-table td{
 </div>
 
 <script>
-/* ---------------- DATA STORE ---------------- */
+/* ---------------- DATA STORE (เรียงลำดับวัน ISO Date) ---------------- */
 let WORK_ORDERS = [
-  {id:'WO-SP-69081', asset:'หม้อแปลง TR-250kVA นิคมบางปู ซ.12', district:'อ.เมืองสมุทรปราการ', type:'ตรวจวัดค่าฉนวนน้ำมัน (DGA)', date:'28 ส.ค. 69', team:'ทีมหม้อแปลง 01', status:'doing', temp:'48.5', ground:'2.40'},
-  {id:'WO-SP-69082', asset:'เสาแรงสูง Feeder 11 เทพารักษ์ กม.8', district:'อ.บางพลี', type:'ล้างลูกถ้วยฉนวนกันคราบไอเกลือ', date:'29 ส.ค. 69', team:'ทีมสายส่ง 02', status:'pending', temp:'38.2', ground:'3.10'},
-  {id:'WO-SP-69083', asset:'โคมไฟถนน LED ถ.สุขสวัสดิ์-ป้อมพระจุล', district:'อ.พระสมุทรเจดีย์', type:'เปลี่ยน Photo Switch & โคมไฟ', date:'27 ส.ค. 69', team:'ทีมไฟสาธารณะ', status:'done', temp:'32.0', ground:'1.95'},
-  {id:'WO-SP-69084', asset:'RMU สวิตช์เกียร์ ซ.วัดด่านสำโรง', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบ Ring Main Unit', date:'30 ส.ค. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'41.0', ground:'2.15'},
-  {id:'WO-SP-69085', asset:'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', district:'อ.บางพลี', type:'แก้ไขจุดต่อร้อน (Hotspot)', date:'27 ส.ค. 69', team:'ทีมฉุกเฉิน 24ชม.', status:'high', temp:'78.4', ground:'4.80'},
-  {id:'WO-SP-69086', asset:'สายป้อน Feeder 04 ถนนท้ายบ้าน', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบฉนวนสายส่ง', date:'27 ส.ค. 69', team:'ทีมสายส่ง 01', status:'done', temp:'35.6', ground:'2.00'}
+  {id:'WO-SP-69083', asset:'โคมไฟถนน LED ถ.สุขสวัสดิ์-ป้อมพระจุล', district:'อ.พระสมุทรเจดีย์', type:'เปลี่ยน Photo Switch & โคมไฟ', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมไฟสาธารณะ', status:'done', temp:'32.0', ground:'1.95'},
+  {id:'WO-SP-69085', asset:'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', district:'อ.บางพลี', type:'แก้ไขจุดต่อร้อน (Hotspot)', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมฉุกเฉิน 24ชม.', status:'high', temp:'78.4', ground:'4.80'},
+  {id:'WO-SP-69086', asset:'สายป้อน Feeder 04 ถนนท้ายบ้าน', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบฉนวนสายส่ง', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมสายส่ง 01', status:'done', temp:'35.6', ground:'2.00'},
+  {id:'WO-SP-69081', asset:'หม้อแปลง TR-250kVA นิคมบางปู ซ.12', district:'อ.เมืองสมุทรปราการ', type:'ตรวจวัดค่าฉนวนน้ำมัน (DGA)', isoDate:'2026-08-28', date:'28 ส.ค. 69', team:'ทีมหม้อแปลง 01', status:'doing', temp:'48.5', ground:'2.40'},
+  {id:'WO-SP-69082', asset:'เสาแรงสูง Feeder 11 เทพารักษ์ กม.8', district:'อ.บางพลี', type:'ล้างลูกถ้วยฉนวนกันคราบไอเกลือ', isoDate:'2026-08-29', date:'29 ส.ค. 69', team:'ทีมสายส่ง 02', status:'pending', temp:'38.2', ground:'3.10'},
+  {id:'WO-SP-69084', asset:'RMU สวิตช์เกียร์ ซ.วัดด่านสำโรง', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบ Ring Main Unit', isoDate:'2026-08-30', date:'30 ส.ค. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'41.0', ground:'2.15'}
+];
+
+// ข้อมูลสถิติไฟฟ้าดับรายสายป้อน (Feeder Outage Stats)
+const FEEDER_OUTAGE_DATA = [
+  {
+    code: 'FDR-TP-08',
+    name: 'สายป้อนเทพารักษ์ 08 (สถานีฯ บางพลี)',
+    area: 'อ.บางพลี (เทพารักษ์ กม.1 - กม.12)',
+    outageCount: 9,
+    totalDurationMin: 345,
+    saifi: 1.42,
+    saidi: 48.2,
+    mainCause: 'กิ่งไม้แตะสายช่วงลมแรง / จุดต่อสายร้อนสะสม',
+    risk: 'critical',
+    riskLabel: 'เสี่ยงสูง (Critical)'
+  },
+  {
+    code: 'FDR-BP-04',
+    name: 'สายป้อนบางปู 04 (สถานีฯ ท้ายบ้าน)',
+    area: 'อ.เมืองสมุทรปราการ (นิคมอุตสาหกรรมบางปู)',
+    outageCount: 7,
+    totalDurationMin: 220,
+    saifi: 1.15,
+    saidi: 32.5,
+    mainCause: 'คราบไอเค็มทะเลสะสมบนลูกถ้วยฉนวน (Salt Contamination)',
+    risk: 'critical',
+    riskLabel: 'เสี่ยงสูง (Critical)'
+  },
+  {
+    code: 'FDR-SS-02',
+    name: 'สายป้อนสุขสวัสดิ์ 02 (สถานีฯ พระสมุทรเจดีย์)',
+    area: 'อ.พระสมุทรเจดีย์ (สามแยกพระประแดง - ป้อมพระจุล)',
+    outageCount: 5,
+    totalDurationMin: 140,
+    saifi: 0.82,
+    saidi: 21.0,
+    mainCause: 'สัตว์เลื้อยคลาน / ลมพายุชายฝั่งพัดสายแกว่งชน',
+    risk: 'warning',
+    riskLabel: 'ปานกลาง (Watchlist)'
+  },
+  {
+    code: 'FDR-KK-11',
+    name: 'สายป้อนกิ่งแก้ว 11 (สถานีฯ ราชาเทวะ)',
+    area: 'อ.บางพลี / อ.บางเสาธง (ถ.กิ่งแก้ว)',
+    outageCount: 4,
+    totalDurationMin: 95,
+    saifi: 0.65,
+    saidi: 15.4,
+    mainCause: 'อุบัติเหตุรถเฉี่ยวชนเสาไฟฟ้า / งานก่อสร้างขยายถนน',
+    risk: 'warning',
+    riskLabel: 'ปานกลาง (Watchlist)'
+  },
+  {
+    code: 'FDR-BB-01',
+    name: 'สายป้อนบางบ่อ 01 (สถานีฯ บางบ่อ)',
+    area: 'อ.บางบ่อ (ถ.รัตนราช - คลองด่าน)',
+    outageCount: 2,
+    totalDurationMin: 45,
+    saifi: 0.28,
+    saidi: 7.2,
+    mainCause: 'อุปกรณ์ป้องกันเบรกเกอร์ทริปจากฟ้าผ่า',
+    risk: 'good',
+    riskLabel: 'ต่ำ / ปกติ (Normal)'
+  }
 ];
 
 const PATROL_PINS = [
@@ -738,7 +900,6 @@ const PATROL_PINS = [
   }
 ];
 
-// ประวัติการเข้าตรวจงานย้อนหลัง (Inspection Logs)
 let INSPECTION_HISTORY = [
   {
     logId: 'LOG-SP-2026-0827-01',
@@ -772,28 +933,6 @@ let INSPECTION_HISTORY = [
     result: 'เฝ้าระวัง (Hotspot)',
     statusClass: 'warn',
     note: 'พบจุดต่อสายเฟส B ร้อนกว่าปกติ ได้ขันแน่นและนัดตรวจซ้ำใน 7 วัน'
-  },
-  {
-    logId: 'LOG-SP-2026-0825-04',
-    timestamp: '25 ส.ค. 2569 11:20 น.',
-    assetName: 'สวิตช์เกียร์ RMU ซ.วัดด่านสำโรง',
-    inspector: 'ทีมอุปกรณ์พิเศษ (ช่างเอกชัย)',
-    temp: '40.5',
-    ground: '1.95',
-    result: 'ปกติ (ผ่านเกณฑ์)',
-    statusClass: 'pass',
-    note: 'ตรวจสอบแรงดันแก๊ส SF6 และกลไกตัดต่อวงจร ทำงานสมบูรณ์'
-  },
-  {
-    logId: 'LOG-SP-2026-0825-01',
-    timestamp: '25 ส.ค. 2569 09:10 น.',
-    assetName: 'เสาไฟฟ้าแรงสูง เทพารักษ์ กม.14',
-    inspector: 'ทีมสายส่ง 02 (ช่างดำรงค์)',
-    temp: '34.8',
-    ground: '2.80',
-    result: 'ปกติ (ฉีดล้างคราบเกลือ)',
-    statusClass: 'pass',
-    note: 'ฉีดล้างทำความสะอาดลูกถ้วยฉนวนกันมลภาวะไอเค็มทะเล'
   }
 ];
 
@@ -802,6 +941,136 @@ const ANOMALIES = [
   {zone:'นิคมอุตสาหกรรมบางปู', score:'78%', title:'ฮาร์มอนิกและโหลดเกินพิกัด', desc:'โหลดความร้อนสะสมแกนเหล็กหม้อแปลง 84.5°C ในช่วงชั่วโมงการผลิตสูงสุด', advice:'► ปรับบาลานซ์เฟสและเปิดพัดลมระบายอากาศ', mid:true},
   {zone:'ถ.กิ่งแก้ว - บางพลี', score:'88%', title:'แรงดันตกชั่วขณะบ่อยครั้ง (Micro-Sag)', desc:'Voltage Sag 4 ครั้งใน 48 ชม. คาดเกิดจากกิ่งไม้แตะสายช่วงลมกระโชกแรง', advice:'► ส่งทีมตัดแต่งกิ่งไม้แนวสายส่งระยะ 800 เมตร', mid:false}
 ];
+
+/* ---------------- SORT BY DUE DATE ---------------- */
+function sortWorkOrdersByDue(){
+  // เรียงลำดับจากวันที่ครบกำหนดใกล้สุดขึ้นก่อน
+  WORK_ORDERS.sort((a, b) => new Date(a.isoDate) - new Date(b.isoDate));
+}
+
+function resortWorkOrders(){
+  sortWorkOrdersByDue();
+  renderTable();
+  alert('จัดเรียงลำดับตามกำหนดเสร็จใกล้สุดเรียบร้อย');
+}
+
+/* ---------------- RENDER TABLE ---------------- */
+function renderTable(){
+  sortWorkOrdersByDue();
+  const tbody = document.getElementById('tableBody');
+  const todayStr = '2026-08-27'; // จำลองวันปัจจุบัน
+
+  tbody.innerHTML = WORK_ORDERS.map((wo, i) => {
+    let badgeClass = 'pending', badgeText = 'รอดำเนินการ';
+    if(wo.status === 'done'){ badgeClass = 'done'; badgeText = 'เสร็จสมบูรณ์'; }
+    else if(wo.status === 'doing'){ badgeClass = 'doing'; badgeText = 'กำลังทำ'; }
+    else if(wo.status === 'high'){ badgeClass = 'high'; badgeText = 'เร่งด่วน'; }
+
+    // ป้ายเตือนความเร่งด่วนของ Due Date
+    let duePill = '';
+    if(wo.isoDate === todayStr){
+      duePill = `<span class="due-pill due-urgent">⚡ วันนี้ (${wo.date})</span>`;
+    } else if(wo.isoDate === '2026-08-28'){
+      duePill = `<span class="due-pill due-near">⏳ พรุ่งนี้ (${wo.date})</span>`;
+    } else {
+      duePill = `<span class="due-pill due-normal">📅 ${wo.date}</span>`;
+    }
+
+    return `
+      <tr>
+        <td><strong style="color:var(--orange-soft); font-family:var(--font-num);">${wo.id}</strong></td>
+        <td>${wo.asset}</td>
+        <td>${wo.district}</td>
+        <td>${wo.type}</td>
+        <td>${duePill}</td>
+        <td>${wo.team}</td>
+        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+        <td style="text-align:right;">
+          <div class="row-actions" style="justify-content:flex-end;">
+            <button class="btn-mini" onclick="viewWorkOrder(${i})">ดู</button>
+            <button class="btn-mini" onclick="editWorkOrder(${i})">แก้ไข</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('statTotal').innerHTML = `${WORK_ORDERS.length} <small>รายการ</small>`;
+  const dueTodayCount = WORK_ORDERS.filter(x => x.isoDate <= '2026-08-28' && x.status !== 'done').length;
+  document.getElementById('statDueToday').innerHTML = `${dueTodayCount} <small>รายการ</small>`;
+}
+
+/* ---------------- FEEDER OUTAGE MODULE ---------------- */
+function renderFeederOutage(){
+  const grid = document.getElementById('feederCardsGrid');
+  const tbody = document.getElementById('feederTableBody');
+
+  // 1. Render Cards
+  grid.innerHTML = FEEDER_OUTAGE_DATA.map(f => {
+    let cardClass = f.risk;
+    return `
+      <div class="feeder-card ${cardClass}">
+        <div class="feeder-head">
+          <div>
+            <span class="feeder-code">${f.code}</span>
+            <div class="feeder-title">${f.name}</div>
+            <div class="feeder-area">${f.area}</div>
+          </div>
+          <span class="badge ${f.risk === 'critical' ? 'high' : f.risk === 'warning' ? 'pending' : 'pass'}">${f.riskLabel}</span>
+        </div>
+        <div class="feeder-metrics">
+          <div>
+            <div class="fm-label">ดับสะสม</div>
+            <div class="fm-val" style="color:${f.risk==='critical'?'var(--red-neon)':'var(--text-main)'}">${f.outageCount} <small style="font-size:11px;">ครั้ง</small></div>
+          </div>
+          <div>
+            <div class="fm-label">เวลารวม</div>
+            <div class="fm-val">${f.totalDurationMin} <small style="font-size:11px;">นาที</small></div>
+          </div>
+          <div>
+            <div class="fm-label">SAIFI</div>
+            <div class="fm-val" style="color:var(--orange-soft)">${f.saifi}</div>
+          </div>
+        </div>
+        <div class="feeder-cause">
+          <strong>สาเหตุหลัก:</strong> ${f.mainCause}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // 2. Render Table
+  tbody.innerHTML = FEEDER_OUTAGE_DATA.map(f => `
+    <tr>
+      <td><strong style="color:var(--orange-soft); font-family:var(--font-num);">${f.code}</strong></td>
+      <td><strong>${f.name}</strong></td>
+      <td>${f.area}</td>
+      <td style="font-family:var(--font-num); font-weight:700; color:${f.outageCount>=7?'var(--red-neon)':'var(--text-main)'}">${f.outageCount} ครั้ง</td>
+      <td style="font-family:var(--font-num);">${f.totalDurationMin} นาที</td>
+      <td style="font-family:var(--font-num); font-weight:700; color:var(--orange-soft);">${f.saifi}</td>
+      <td>${f.mainCause}</td>
+      <td><span class="badge ${f.risk==='critical'?'high':f.risk==='warning'?'pending':'pass'}">${f.riskLabel}</span></td>
+    </tr>
+  `).join('');
+}
+
+function exportOutageToExcel(){
+  const exportData = FEEDER_OUTAGE_DATA.map(f => ({
+    "รหัสสายป้อน": f.code,
+    "ชื่อสายป้อน": f.name,
+    "พื้นที่บริการ": f.area,
+    "จำนวนครั้งที่ดับ (ครั้ง)": f.outageCount,
+    "เวลารวมที่ดับ (นาที)": f.totalDurationMin,
+    "SAIFI (ครั้ง/ราย/ปี)": f.saifi,
+    "SAIDI (นาที/ราย/ปี)": f.saidi,
+    "สาเหตุหลัก": f.mainCause,
+    "ระดับความเสี่ยง": f.riskLabel
+  }));
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Feeder_Outage_Stats");
+  XLSX.writeFile(wb, "สถิติไฟฟ้าดับรายสายป้อน_สมุทรปราการ.xlsx");
+}
 
 /* ---------------- LEAFLET MAP ENGINE ---------------- */
 let mapInstance = null;
@@ -879,7 +1148,6 @@ function focusCheckpoint(id){
   if(marker) marker.openPopup();
 }
 
-/* ---------------- STEP-BY-STEP PATROL SEQUENCE ---------------- */
 function renderRouteList(){
   const listEl = document.getElementById('routeList');
   listEl.innerHTML = PATROL_PINS.map((p) => {
@@ -935,7 +1203,6 @@ function completeCurrentAndNext(){
     const completedPin = PATROL_PINS[activeIdx];
     completedPin.status = 'completed';
 
-    // Auto-insert into Inspection History
     const now = new Date();
     const newHistory = {
       logId: `LOG-SP-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(10 + Math.random()*90)}`,
@@ -968,7 +1235,7 @@ function quickCheckin(id){
   switchTab('tab-form');
 }
 
-/* ---------------- INSPECTION HISTORY MODULE ---------------- */
+/* ---------------- INSPECTION HISTORY ---------------- */
 function renderHistoryTable(data = INSPECTION_HISTORY){
   const tbody = document.getElementById('historyTableBody');
   tbody.innerHTML = data.map((item, idx) => `
@@ -985,8 +1252,6 @@ function renderHistoryTable(data = INSPECTION_HISTORY){
       </td>
     </tr>
   `).join('');
-
-  document.getElementById('statHistoryTotal').innerHTML = `${INSPECTION_HISTORY.length} <small>ครั้ง</small>`;
 }
 
 function filterHistoryTable(){
@@ -1059,37 +1324,6 @@ document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
-/* ---------------- RENDER TABLE ---------------- */
-function renderTable(){
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = WORK_ORDERS.map((wo, i) => {
-    let badgeClass = 'pending', badgeText = 'รอดำเนินการ';
-    if(wo.status === 'done'){ badgeClass = 'done'; badgeText = 'เสร็จสมบูรณ์'; }
-    else if(wo.status === 'doing'){ badgeClass = 'doing'; badgeText = 'กำลังทำ'; }
-    else if(wo.status === 'high'){ badgeClass = 'high'; badgeText = 'เร่งด่วน'; }
-
-    return `
-      <tr>
-        <td><strong style="color:var(--orange-soft); font-family:var(--font-num);">${wo.id}</strong></td>
-        <td>${wo.asset}</td>
-        <td>${wo.district}</td>
-        <td>${wo.type}</td>
-        <td style="font-family:var(--font-num);">${wo.date}</td>
-        <td>${wo.team}</td>
-        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
-        <td style="text-align:right;">
-          <div class="row-actions" style="justify-content:flex-end;">
-            <button class="btn-mini" onclick="viewWorkOrder(${i})">ดู</button>
-            <button class="btn-mini" onclick="editWorkOrder(${i})">แก้ไข</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  document.getElementById('statTotal').innerHTML = `${WORK_ORDERS.length} <small>รายการ</small>`;
-}
-
 /* ---------------- RENDER ANOMALIES ---------------- */
 function renderAnomalies(){
   const container = document.getElementById('anomalyContainer');
@@ -1121,7 +1355,7 @@ function viewWorkOrder(index){
       <p><strong>จุดติดตั้ง:</strong> ${wo.asset}</p>
       <p><strong>อำเภอ:</strong> ${wo.district}</p>
       <p><strong>ประเภทงาน:</strong> ${wo.type}</p>
-      <p><strong>กำหนดเสร็จ:</strong> ${wo.date}</p>
+      <p><strong>กำหนดแล้วเสร็จ (Due Date):</strong> <span style="color:var(--orange-soft); font-family:var(--font-num); font-weight:700;">${wo.date}</span></p>
       <p><strong>ทีมรับผิดชอบ:</strong> ${wo.team}</p>
       <p><strong>ค่า Thermo-scan:</strong> <span style="color:var(--orange-soft); font-family:var(--font-num); font-weight:700;">${wo.temp || '-'} °C</span></p>
       <p><strong>ค่าความต้านทานดิน:</strong> <span style="color:var(--green-neon); font-family:var(--font-num); font-weight:700;">${wo.ground || '-'} Ω</span></p>
@@ -1149,6 +1383,10 @@ function editWorkOrder(index){
         </select>
       </div>
       <div class="form-field" style="margin-bottom:12px;">
+        <label>กำหนดแล้วเสร็จ</label>
+        <input type="date" id="e_isoDate" value="${wo.isoDate}" required>
+      </div>
+      <div class="form-field" style="margin-bottom:12px;">
         <label>ทีมช่าง</label>
         <input type="text" id="e_team" value="${wo.team}" required>
       </div>
@@ -1168,6 +1406,10 @@ function editWorkOrder(index){
 function saveEdit(e, index){
   e.preventDefault();
   WORK_ORDERS[index].status = document.getElementById('e_status').value;
+  const newIso = document.getElementById('e_isoDate').value;
+  WORK_ORDERS[index].isoDate = newIso;
+  const dObj = new Date(newIso);
+  WORK_ORDERS[index].date = `${dObj.getDate()} ส.ค. 69`;
   WORK_ORDERS[index].team = document.getElementById('e_team').value;
   WORK_ORDERS[index].temp = document.getElementById('e_temp').value;
   renderTable();
@@ -1176,18 +1418,21 @@ function saveEdit(e, index){
 
 function handleFormSubmit(e){
   e.preventDefault();
+  const rawDate = document.getElementById('f_dueDate').value;
+  const dObj = new Date(rawDate);
   const newWO = {
     id: document.getElementById('f_id').value,
     district: document.getElementById('f_district').value,
     asset: document.getElementById('f_asset').value,
     type: document.getElementById('f_type').value,
+    isoDate: rawDate,
+    date: `${dObj.getDate()} ส.ค. 69`,
     temp: document.getElementById('f_temp').value || '35.0',
     ground: document.getElementById('f_ground').value || '2.50',
     status: document.getElementById('f_status').value,
-    date: '27 ส.ค. 69',
     team: 'ทีมสายตรวจ SP-01'
   };
-  WORK_ORDERS.unshift(newWO);
+  WORK_ORDERS.push(newWO);
   renderTable();
   document.getElementById('woForm').reset();
   alert('บันทึกเอกสารบำรุงรักษาเรียบร้อย!');
@@ -1201,7 +1446,7 @@ function exportToExcel(){
     "อุปกรณ์/จุดติดตั้ง": w.asset,
     "อำเภอ": w.district,
     "ประเภทงาน": w.type,
-    "กำหนดเสร็จ": w.date,
+    "กำหนดเสร็จ (Due Date)": w.date,
     "ทีมรับผิดชอบ": w.team,
     "สถานะ": w.status,
     "อุณหภูมิ (°C)": w.temp,
@@ -1220,12 +1465,7 @@ function startLiveTelemetry(){
     document.getElementById('liveClock').textContent = now.toTimeString().split(' ')[0];
     
     const load = (380 + Math.sin(now.getTime()/5000)*6 + Math.random()*2).toFixed(1);
-    const volt = (22.38 + Math.cos(now.getTime()/7000)*0.15).toFixed(2);
-    const temp = (33.5 + Math.random()*0.4).toFixed(1);
-
     document.getElementById('rtLoad').textContent = load;
-    document.getElementById('rtVolt').textContent = volt;
-    document.getElementById('rtTemp').textContent = temp;
   }, 1000);
 }
 
@@ -1235,6 +1475,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderRouteList();
   renderHistoryTable();
   renderTable();
+  renderFeederOutage();
   renderAnomalies();
   startLiveTelemetry();
 });
