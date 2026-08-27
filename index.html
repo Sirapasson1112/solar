@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS Smart Grid สมุทรปราการ (3-Year Historical Archive Edition)</title>
+<title>CMMS Smart Grid สมุทรปราการ (Quick Year Buttons Edition)</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -187,18 +187,31 @@ html,body{
 .section-head h3{font-size:16px; font-weight:700;}
 .section-head .sub{font-size:12px; color:var(--text-muted);}
 
-/* 3-YEAR ARCHIVE DASHBOARD BAR */
-.archive-kpi-bar{
-  display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:18px;
+/* ---------------- YEAR BUTTONS BAR (ปรับแต่งใหม่) ---------------- */
+.year-btn-group{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;
 }
-.archive-kpi-card{
-  background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:14px 16px; box-shadow:var(--shadow-sm);
+.btn-year{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 16px; border-radius:30px; font-size:13px; font-weight:600;
+  background:var(--bg-surface); border:1px solid var(--border);
+  color:var(--text-muted); cursor:pointer; transition:.2s ease;
+  box-shadow:var(--shadow-sm); font-family:var(--font-main);
 }
-.archive-kpi-card.active{border-color:var(--orange-pri); background:var(--bg-card-alt);}
-.archive-year-tag{font-size:11px; font-family:var(--font-num); font-weight:700; color:var(--orange-pri);}
-.archive-count{font-size:22px; font-weight:700; font-family:var(--font-num); margin:4px 0 2px;}
-.archive-sub{font-size:11.5px; color:var(--text-muted);}
+.btn-year:hover{
+  border-color:var(--orange-pri); color:var(--orange-pri); background:var(--orange-light);
+}
+.btn-year.active{
+  background:var(--orange-pri); color:#FFFFFF; border-color:var(--orange-pri);
+  box-shadow:0 3px 8px rgba(234, 88, 12, 0.3);
+}
+.btn-year .tag-count{
+  font-size:11px; font-family:var(--font-num); padding:1px 6px; border-radius:10px;
+  background:rgba(0,0,0,0.08); font-weight:700;
+}
+.btn-year.active .tag-count{
+  background:rgba(255,255,255,0.25); color:#FFFFFF;
+}
 
 /* ROUTE PATROL MODULE */
 .nav-mission-banner{
@@ -424,11 +437,10 @@ table.data-table tr:hover td{background:var(--orange-light);}
   .map-card-wrapper{height:380px;}
   .form-grid{grid-template-columns:1fr;}
   .feeder-grid{grid-template-columns:1fr;}
-  .archive-kpi-bar{grid-template-columns:1fr;}
 }
 @media print{
   body{background:#fff; color:#000;}
-  .sidebar, .mobile-nav, .topbar, .actions-group, .map-card-wrapper, .nav-mission-banner, .filter-bar{display:none !important;}
+  .sidebar, .mobile-nav, .topbar, .actions-group, .map-card-wrapper, .nav-mission-banner, .filter-bar, .year-btn-group{display:none !important;}
   .content{padding:0;}
   .table-card{border:none; box-shadow:none;}
   table.data-table th{background:#f1f5f9; color:#000;}
@@ -448,7 +460,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>3-YEAR ARCHIVE v4.2</span>
+        <span>YEAR BUTTONS v4.4</span>
       </div>
     </div>
 
@@ -524,7 +536,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
   <div class="main-wrapper">
     <header class="topbar">
       <div class="topbar-info">
-        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip"><span class="live-pulse-dot"></span>3-YEAR ARCHIVE ACTIVE</span></h1>
+        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip"><span class="live-pulse-dot"></span>SORT BY DUE DATE</span></h1>
       </div>
       <div class="actions-group">
         <button class="btn" onclick="exportToExcel()" title="ส่งออก Excel">
@@ -594,12 +606,12 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </div>
 
-      <!-- TAB 2: 3-YEAR INSPECTION HISTORY ARCHIVE (UPGRADED) -->
+      <!-- TAB 2: 3-YEAR INSPECTION HISTORY ARCHIVE (WITH YEAR BUTTONS) -->
       <div id="tab-history" class="tab-content">
         <div class="section-head">
           <div>
             <h3>คลังข้อมูลประวัติการตรวจงานย้อนหลัง 3 ปี (2567 - 2569)</h3>
-            <span class="sub">ค้นหา เรียกดูข้อมูลเชิงลึกรายปี และส่งออกรายงานย้อนหลังได้ทันที</span>
+            <span class="sub">กดปุ่มเลือกปีเพื่อดูประวัติการตรวจงานเฉพาะปีนั้น หรือค้นหารายอำเภอ</span>
           </div>
           <button class="btn" onclick="exportHistoryToExcel()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
@@ -607,33 +619,24 @@ table.data-table tr:hover td{background:var(--orange-light);}
           </button>
         </div>
 
-        <!-- 3-YEAR SUMMARY KPI CARDS -->
-        <div class="archive-kpi-bar">
-          <div class="archive-kpi-card" id="cardYear2026" onclick="setYearFilter('2026')">
-            <div class="archive-year-tag">📊 ปีปัจจุบัน (2569 / 2026)</div>
-            <div class="archive-count" id="countYear2026">0 <small style="font-size:12px;">รายการ</small></div>
-            <div class="archive-sub">อัตราผ่านเกณฑ์เฉลี่ย 92.4%</div>
-          </div>
-          <div class="archive-kpi-card" id="cardYear2025" onclick="setYearFilter('2025')">
-            <div class="archive-year-tag">📁 ย้อนหลัง 1 ปี (2568 / 2025)</div>
-            <div class="archive-count" id="countYear2025">0 <small style="font-size:12px;">รายการ</small></div>
-            <div class="archive-sub">อัตราผ่านเกณฑ์เฉลี่ย 89.8%</div>
-          </div>
-          <div class="archive-kpi-card" id="cardYear2024" onclick="setYearFilter('2024')">
-            <div class="archive-year-tag">📁 ย้อนหลัง 2 ปี (2567 / 2024)</div>
-            <div class="archive-count" id="countYear2024">0 <small style="font-size:12px;">รายการ</small></div>
-            <div class="archive-sub">อัตราผ่านเกณฑ์เฉลี่ย 86.5%</div>
-          </div>
+        <!-- ชุดปุ่มกดเลือกปี (Year Filter Buttons) -->
+        <div class="year-btn-group">
+          <button class="btn-year active" id="btnYear2026" onclick="selectYearFilter('2026')">
+            📅 ปี 2569 (2026) <span class="tag-count" id="badge2026">0</span>
+          </button>
+          <button class="btn-year" id="btnYear2025" onclick="selectYearFilter('2025')">
+            📅 ปี 2568 (2025) <span class="tag-count" id="badge2025">0</span>
+          </button>
+          <button class="btn-year" id="btnYear2024" onclick="selectYearFilter('2024')">
+            📅 ปี 2567 (2024) <span class="tag-count" id="badge2024">0</span>
+          </button>
+          <button class="btn-year" id="btnYearALL" onclick="selectYearFilter('ALL')">
+            📁 ดูรวมทั้งหมด 3 ปี <span class="tag-count" id="badgeALL">0</span>
+          </button>
         </div>
 
-        <!-- ADVANCED FILTER BAR -->
+        <!-- ตัวกรองอำเภอและค้นหา -->
         <div class="filter-bar">
-          <select id="filterYearSelect" class="select-filter" onchange="filterHistoryTable()">
-            <option value="ALL">📅 ข้อมูลย้อนหลังทั้งหมด (3 ปี)</option>
-            <option value="2026" selected>ปี 2569 (2026) - ปัจจุบัน</option>
-            <option value="2025">ปี 2568 (2025)</option>
-            <option value="2024">ปี 2567 (2024)</option>
-          </select>
           <select id="filterDistrictSelect" class="select-filter" onchange="filterHistoryTable()">
             <option value="ALL">📍 ทุกอำเภอในสมุทรปราการ</option>
             <option value="เมือง">อ.เมืองสมุทรปราการ</option>
@@ -851,6 +854,8 @@ table.data-table tr:hover td{background:var(--orange-light);}
 
 <script>
 /* ---------------- DATA STORE ---------------- */
+let currentSelectedYear = '2026'; // ค่าเริ่มต้นปี 2569
+
 let WORK_ORDERS = [
   {id:'WO-SP-69083', asset:'โคมไฟถนน LED ถ.สุขสวัสดิ์-ป้อมพระจุล', district:'อ.พระสมุทรเจดีย์', type:'เปลี่ยน Photo Switch & โคมไฟ', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมไฟสาธารณะ', status:'done', temp:'32.0', ground:'1.95'},
   {id:'WO-SP-69085', asset:'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', district:'อ.บางพลี', type:'แก้ไขจุดต่อร้อน (Hotspot)', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมฉุกเฉิน 24ชม.', status:'high', temp:'78.4', ground:'4.80'},
@@ -860,7 +865,7 @@ let WORK_ORDERS = [
   {id:'WO-SP-69084', asset:'RMU สวิตช์เกียร์ ซ.วัดด่านสำโรง', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบ Ring Main Unit', isoDate:'2026-08-30', date:'30 ส.ค. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'41.0', ground:'2.15'}
 ];
 
-// ฐานข้อมูลประวัติย้อนหลัง 3 ปี (ปี 2567, 2568, 2569)
+// ฐานข้อมูลประวัติย้อนหลัง 3 ปี (2567, 2568, 2569)
 let INSPECTION_HISTORY = [
   // ปี 2569 (2026)
   {
@@ -1125,24 +1130,39 @@ function renderTable(){
   document.getElementById('statDueToday').innerHTML = `${dueTodayCount} <small>รายการ</small>`;
 }
 
-/* ---------------- 3-YEAR INSPECTION ARCHIVE ---------------- */
-function updateArchiveSummaryCards(){
+/* ---------------- 3-YEAR INSPECTION ARCHIVE (YEAR BUTTONS) ---------------- */
+function updateYearButtonBadges(){
   const c2026 = INSPECTION_HISTORY.filter(h => h.year === '2026').length;
   const c2025 = INSPECTION_HISTORY.filter(h => h.year === '2025').length;
   const c2024 = INSPECTION_HISTORY.filter(h => h.year === '2024').length;
+  const cALL = INSPECTION_HISTORY.length;
 
-  document.getElementById('countYear2026').innerHTML = `${c2026} <small style="font-size:12px;">รายการ</small>`;
-  document.getElementById('countYear2025').innerHTML = `${c2025} <small style="font-size:12px;">รายการ</small>`;
-  document.getElementById('countYear2024').innerHTML = `${c2024} <small style="font-size:12px;">รายการ</small>`;
-  document.getElementById('statHistoryTotal').innerHTML = `${INSPECTION_HISTORY.length} <small>บันทึก</small>`;
+  document.getElementById('badge2026').textContent = c2026;
+  document.getElementById('badge2025').textContent = c2025;
+  document.getElementById('badge2024').textContent = c2024;
+  document.getElementById('badgeALL').textContent = cALL;
+  document.getElementById('statHistoryTotal').innerHTML = `${cALL} <small>บันทึก</small>`;
 }
 
-function renderHistoryTable(data = null){
-  updateArchiveSummaryCards();
-  const tbody = document.getElementById('historyTableBody');
-  const items = data || getFilteredHistoryData();
+function selectYearFilter(year){
+  currentSelectedYear = year;
+  document.querySelectorAll('.btn-year').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.getElementById('btnYear' + year);
+  if(activeBtn) activeBtn.classList.add('active');
+  renderHistoryTable();
+}
 
-  tbody.innerHTML = items.map((item, idx) => `
+function renderHistoryTable(){
+  updateYearButtonBadges();
+  const tbody = document.getElementById('historyTableBody');
+  const items = getFilteredHistoryData();
+
+  if(items.length === 0){
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">ไม่พบข้อมูลประวัติสำหรับเงื่อนไขที่เลือก</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = items.map((item) => `
     <tr>
       <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${item.logId}</strong></td>
       <td style="font-family:var(--font-num); font-size:12px;">
@@ -1162,12 +1182,11 @@ function renderHistoryTable(data = null){
 }
 
 function getFilteredHistoryData(){
-  const yearVal = document.getElementById('filterYearSelect').value;
   const distVal = document.getElementById('filterDistrictSelect').value;
   const query = document.getElementById('searchHistoryInput').value.toLowerCase();
 
   return INSPECTION_HISTORY.filter(h => {
-    const matchYear = yearVal === 'ALL' || h.year === yearVal;
+    const matchYear = currentSelectedYear === 'ALL' || h.year === currentSelectedYear;
     const matchDist = distVal === 'ALL' || (h.district && h.district.includes(distVal)) || h.assetName.includes(distVal);
     const matchQuery = h.logId.toLowerCase().includes(query) ||
                        h.assetName.toLowerCase().includes(query) ||
@@ -1178,14 +1197,6 @@ function getFilteredHistoryData(){
 }
 
 function filterHistoryTable(){
-  renderHistoryTable();
-}
-
-function setYearFilter(year){
-  document.getElementById('filterYearSelect').value = year;
-  document.querySelectorAll('.archive-kpi-card').forEach(c => c.classList.remove('active'));
-  const targetCard = document.getElementById('cardYear' + year);
-  if(targetCard) targetCard.classList.add('active');
   renderHistoryTable();
 }
 
@@ -1231,8 +1242,8 @@ function exportHistoryToExcel(){
   }));
   const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "3Year_Inspection_History");
-  XLSX.writeFile(wb, "ประวัติการตรวจงานย้อนหลัง_สมุทรปราการ.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, "Inspection_History");
+  XLSX.writeFile(wb, `ประวัติการตรวจงาน_สมุทรปราการ_ปี_${currentSelectedYear}.xlsx`);
 }
 
 /* ---------------- FEEDER OUTAGE MODULE ---------------- */
