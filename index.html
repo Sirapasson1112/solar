@@ -3,12 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS Smart Grid สมุทรปราการ (Real-Time Live Monitor)</title>
-<!-- Google Fonts -->
+<title>CMMS Smart Grid สมุทรปราการ (Real-Time GPS Route Navigation)</title>
+
+<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<!-- SheetJS -->
+
+<!-- Leaflet Map CSS & JS (แผนที่ Interactive จริงบนมือถือ/PC) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<!-- SheetJS สำหรับ Export Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -20,7 +26,7 @@
   --border:#2A3A4C;
   --border-subtle:#1E2B38;
   
-  --orange-pri:#EA6C28;       /* ส้มโทนอุ่น สบายตา */
+  --orange-pri:#EA6C28;       /* สีส้มอบอุ่น สบายตา */
   --orange-soft:#F38744;
   --orange-glow:rgba(234, 108, 40, 0.15);
   --orange-subtle:rgba(234, 108, 40, 0.08);
@@ -29,6 +35,7 @@
   --green-neon:#10B981;
   --red-neon:#F43F5E;
   --amber-soft:#FBBF24;
+  --blue-gmap:#4285F4;
 
   --text-main:#F8FAFC;
   --text-muted:#94A3B8;
@@ -139,6 +146,10 @@ html,body{
 .btn:hover{border-color:var(--orange-pri); color:var(--orange-soft);}
 .btn.primary{background:var(--orange-pri); border-color:var(--orange-pri); color:#fff;}
 .btn.primary:hover{background:var(--orange-soft);}
+.btn.gmap{
+  background:#1A73E8; border-color:#1A73E8; color:#fff;
+}
+.btn.gmap:hover{background:#1557b0;}
 
 .content{padding:22px 28px; flex:1;}
 
@@ -171,16 +182,77 @@ html,body{
 .section-head h3{font-size:16px; font-weight:700;}
 .section-head .sub{font-size:12px; color:var(--text-muted);}
 
-/* REAL-TIME EVENT STREAM BANNER */
-.live-stream-bar{
-  background:rgba(234, 108, 40, 0.08); border:1px solid var(--border);
-  border-left:3px solid var(--orange-pri); border-radius:var(--radius-sm);
-  padding:9px 14px; font-size:12px; margin-bottom:16px;
-  display:flex; align-items:center; justify-content:space-between;
+/* ---------------- ROUTE & NAVIGATION MODULE ---------------- */
+.nav-mission-banner{
+  background:linear-gradient(135deg, var(--bg-card), var(--bg-card-alt));
+  border:1px solid var(--orange-pri); border-radius:var(--radius);
+  padding:16px 20px; margin-bottom:16px;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
 }
-.live-stream-text{font-family:var(--font-num); color:var(--orange-soft);}
+.mission-info h4{font-size:16px; font-weight:700; color:var(--orange-soft); display:flex; align-items:center; gap:8px;}
+.mission-info p{font-size:12.5px; color:var(--text-muted); margin-top:4px;}
+.mission-progress{
+  display:flex; align-items:center; gap:12px;
+}
+.progress-bar-wrap{
+  width:140px; height:8px; background:var(--bg-body); border-radius:4px; overflow:hidden; border:1px solid var(--border);
+}
+.progress-bar-fill{
+  height:100%; background:var(--orange-pri); width:25%; transition:width .4s ease;
+}
 
-/* RESPONSIVE TABLE */
+.route-layout{display:grid; grid-template-columns:360px 1fr; gap:18px;}
+.route-list{list-style:none; display:flex; flex-direction:column; gap:10px;}
+.route-item{
+  background:var(--bg-surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px; cursor:pointer; transition:.2s;
+  position:relative;
+}
+.route-item.active{
+  border-color:var(--orange-pri); background:var(--bg-card);
+  box-shadow:inset 3px 0 0 var(--orange-pri);
+}
+.route-item.completed{opacity:0.65; border-color:var(--border-subtle);}
+.route-item .top{display:flex; justify-content:space-between; font-size:11px; color:var(--orange-soft); font-family:var(--font-num);}
+.route-item .name{font-size:13.5px; font-weight:600; margin:4px 0 2px;}
+.route-item .desc{font-size:11.5px; color:var(--text-muted);}
+.route-item .actions-row{
+  display:flex; gap:8px; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);
+}
+
+/* REAL MAP CONTAINER */
+.map-card-wrapper{
+  background:var(--bg-surface); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column;
+  height:540px;
+}
+#inspectionMap{
+  width:100%; flex:1; background:#11171f; z-index:5;
+}
+
+/* Custom Marker CSS */
+.custom-map-marker{
+  width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-num); font-size:11px; font-weight:700;
+  color:#fff; border:2px solid #fff; box-shadow:0 0 10px rgba(0,0,0,0.6);
+}
+.custom-map-marker.active{
+  background:var(--orange-pri); animation:pulse 1.5s infinite;
+}
+.custom-map-marker.completed{background:var(--green-neon);}
+.custom-map-marker.pending{background:var(--text-dim);}
+
+/* Leaflet Dark Theme Overrides */
+.leaflet-container{background:#0E1318 !important;}
+.leaflet-popup-content-wrapper{
+  background:var(--bg-surface) !important; color:var(--text-main) !important;
+  border:1px solid var(--orange-pri); border-radius:8px !important;
+  font-family:var(--font-main) !important; font-size:12px;
+}
+.leaflet-popup-tip{background:var(--bg-surface) !important;}
+
+/* TABLE STYLING */
 .table-card{
   background:var(--bg-surface); border:1px solid var(--border);
   border-radius:var(--radius); overflow-x:auto;
@@ -195,12 +267,7 @@ table.data-table th{
 }
 table.data-table td{
   padding:12px 16px; border-bottom:1px solid var(--border-subtle); vertical-align:middle;
-  transition:background .3s ease;
 }
-table.data-table tr.row-updated td{
-  background:rgba(234, 108, 40, 0.15) !important;
-}
-
 .badge{
   display:inline-block; font-size:11px; padding:3px 8px; border-radius:6px;
   font-family:var(--font-num); font-weight:600;
@@ -209,8 +276,6 @@ table.data-table tr.row-updated td{
 .badge.doing{background:rgba(45, 212, 191, 0.12); color:var(--teal-soft); border:1px solid rgba(45, 212, 191, 0.3);}
 .badge.pending{background:rgba(251, 191, 36, 0.12); color:var(--amber-soft); border:1px solid rgba(251, 191, 36, 0.3);}
 .badge.high{background:rgba(244, 63, 94, 0.12); color:var(--red-neon); border:1px solid rgba(244, 63, 94, 0.3);}
-
-.row-actions{display:flex; gap:6px;}
 .btn-mini{
   padding:4px 8px; font-size:11.5px; border-radius:4px;
   background:var(--bg-card); border:1px solid var(--border); color:var(--text-muted);
@@ -236,56 +301,7 @@ table.data-table tr.row-updated td{
   border-color:var(--orange-pri); outline:none; box-shadow:0 0 0 2px var(--orange-glow);
 }
 
-/* ROUTE PATROL & RADAR */
-.route-layout{display:grid; grid-template-columns:320px 1fr; gap:16px;}
-.route-list{list-style:none; display:flex; flex-direction:column; gap:10px;}
-.route-item{
-  background:var(--bg-surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:14px; cursor:pointer; transition:.2s;
-}
-.route-item:hover, .route-item.active{border-color:var(--orange-pri); background:var(--bg-card);}
-.route-item .top{display:flex; justify-content:space-between; font-size:11px; color:var(--orange-soft); font-family:var(--font-num);}
-.route-item .name{font-size:13.5px; font-weight:600; margin:4px 0 2px;}
-.route-item .desc{font-size:11.5px; color:var(--text-muted);}
-
-.radar-screen{
-  background:radial-gradient(circle at center, #1b2530 0%, #11171f 75%);
-  border:1px solid var(--border); border-radius:var(--radius);
-  height:360px; position:relative; overflow:hidden;
-}
-.radar-grid{
-  position:absolute; inset:0;
-  background-image:linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size:36px 36px; opacity:0.25;
-}
-.patrol-vehicle{
-  position:absolute; width:18px; height:18px; border-radius:50%;
-  background:var(--teal-soft); transform:translate(-50%, -50%);
-  transition:all 1.8s ease; z-index:10;
-  box-shadow:0 0 10px var(--teal-soft);
-}
-.patrol-vehicle::after{
-  content:''; position:absolute; inset:-6px; border-radius:50%;
-  border:2px solid var(--teal-soft); animation:pulse 1.2s infinite;
-}
-.patrol-tag{
-  position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
-  background:#000; color:var(--teal-soft); font-size:9.5px; font-family:var(--font-num);
-  padding:2px 6px; border-radius:4px; border:1px solid var(--teal-soft); white-space:nowrap;
-}
-
-.radar-pin{
-  position:absolute; width:14px; height:14px; border-radius:50%;
-  transform:translate(-50%, -50%); cursor:pointer;
-}
-.radar-tooltip{
-  position:absolute; top:18px; left:50%; transform:translateX(-50%);
-  background:var(--bg-surface); border:1px solid var(--orange-pri);
-  padding:3px 8px; border-radius:4px; font-size:10.5px; font-family:var(--font-num);
-  white-space:nowrap; pointer-events:none;
-}
-
-/* ANOMALY GRID */
+/* ANOMALY */
 .anomaly-cards{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px;}
 .anomaly-item{
   background:var(--bg-surface); border:1px solid var(--border);
@@ -335,21 +351,18 @@ table.data-table tr.row-updated td{
 
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
-@media(max-width:900px){
+@media(max-width:960px){
   .sidebar{display:none;}
   .mobile-nav{display:flex;}
   .content{padding:16px; padding-bottom:75px;}
   .topbar{padding:12px 16px;}
   .route-layout{grid-template-columns:1fr;}
+  .map-card-wrapper{height:380px;}
   .form-grid{grid-template-columns:1fr;}
-}
-@media(max-width:600px){
-  .actions-group .btn span{display:none;}
-  .actions-group .btn{padding:8px 10px;}
 }
 @media print{
   body{background:#fff; color:#000;}
-  .sidebar, .mobile-nav, .topbar, .actions-group, .row-actions, .radar-screen, .live-stream-bar{display:none !important;}
+  .sidebar, .mobile-nav, .topbar, .actions-group, .map-card-wrapper, .nav-mission-banner{display:none !important;}
   .content{padding:0;}
   .table-card{border:none;}
   table.data-table th{background:#f1f5f9; color:#000;}
@@ -369,7 +382,7 @@ table.data-table tr.row-updated td{
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>LIVE TELEMETRY v3.2</span>
+        <span>GPS ROUTE NAV v3.4</span>
       </div>
     </div>
 
@@ -380,21 +393,21 @@ table.data-table tr.row-updated td{
 
     <ul class="nav-group">
       <li>
-        <button class="nav-item active" data-tab="tab-plan">
+        <button class="nav-item" data-tab="tab-plan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           ตารางวางแผนงาน
+        </button>
+      </li>
+      <li>
+        <button class="nav-item active" data-tab="tab-route">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/><path d="M6 10V6"/></svg>
+          นำเส้นทางตรวจการ (GPS)
         </button>
       </li>
       <li>
         <button class="nav-item" data-tab="tab-form">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
           ฟอร์มบำรุงรักษา
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-tab="tab-route">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/><path d="M6 10V6"/></svg>
-          นำเส้นทางตรวจการ
         </button>
       </li>
       <li>
@@ -405,7 +418,6 @@ table.data-table tr.row-updated td{
       </li>
     </ul>
 
-    <!-- REAL-TIME TELEMETRY STREAM -->
     <div class="live-telemetry-box">
       <div class="title">
         <span>⚡ SCADA TELEMETRY</span>
@@ -425,7 +437,7 @@ table.data-table tr.row-updated td{
       </div>
       <div class="stream-row">
         <span>Patrol Unit:</span>
-        <span class="stream-val" style="color:var(--teal-soft);" id="rtPatrolDist">อ.บางพลี (กม.12)</span>
+        <span class="stream-val" style="color:var(--teal-soft);" id="rtPatrolDist">อ.บางพลี</span>
       </div>
     </div>
   </aside>
@@ -434,7 +446,7 @@ table.data-table tr.row-updated td{
   <div class="main-wrapper">
     <header class="topbar">
       <div class="topbar-info">
-        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip"><span class="live-pulse-dot"></span>REAL-TIME SYNC</span></h1>
+        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip"><span class="live-pulse-dot"></span>GPS CONNECTED</span></h1>
       </div>
       <div class="actions-group">
         <button class="btn" onclick="exportToExcel()" title="ส่งออก Excel">
@@ -460,27 +472,51 @@ table.data-table tr.row-updated td{
           <div class="val" id="statTotal">6 <small>รายการ</small></div>
         </div>
         <div class="stat-box" style="--accent-bar:var(--green-neon);">
-          <div class="lbl">เสร็จสมบูรณ์ (Live)</div>
-          <div class="val" id="statDone" style="color:var(--green-neon);">3 <small>/ 6</small></div>
+          <div class="lbl">ความคืบหน้าสายตรวจ</div>
+          <div class="val" id="statPatrolProgress" style="color:var(--green-neon);">1 <small>/ 4 จุด</small></div>
         </div>
         <div class="stat-box" style="--accent-bar:var(--teal-soft);">
           <div class="lbl">รถตรวจการ On-Duty</div>
-          <div class="val" style="color:var(--teal-soft);">1 <small>คัน (SP-CAR 01)</small></div>
+          <div class="val" style="color:var(--teal-soft);">SP-CAR 01</div>
         </div>
         <div class="stat-box" style="--accent-bar:var(--red-neon);">
-          <div class="lbl">แจ้งเตือนจุดเสี่ยง Real-time</div>
-          <div class="val" id="statAnomalyCount" style="color:var(--red-neon);">3 <small>เคส</small></div>
+          <div class="lbl">จุดเสี่ยงเฝ้าระวัง</div>
+          <div class="val" style="color:var(--red-neon);">3 <small>เคส</small></div>
         </div>
       </section>
 
-      <!-- LIVE EVENT STREAM BAR -->
-      <div class="live-stream-bar">
-        <div><span style="color:var(--orange-pri); font-weight:700;">[LIVE EVENT LOG]:</span> <span id="eventLogText">ระบบตรวจพบอุณหภูมิปกติทุกจุดจ่ายไฟในเขต อ.เมืองสมุทรปราการ</span></div>
-        <div class="live-stream-text" id="eventLogTime">--:--:--</div>
+      <!-- TAB: ROUTE PATROL & GOOGLE MAP NAVIGATION (DEFAULT ACTIVE) -->
+      <div id="tab-route" class="tab-content active">
+        <!-- MISSION SUMMARY HEADER -->
+        <div class="nav-mission-banner">
+          <div class="mission-info">
+            <h4 id="currentMissionTitle">📍 กำลังตรวจจุดที่ 2: นิคมบางปู ซ.9 (ถ.พัฒนา 1)</h4>
+            <p id="currentMissionDesc">ตรวจคราบไอเกลือทะเลสะสมบนลูกถ้วยและวัดอุณหภูมิขั้วต่อสาย</p>
+          </div>
+          <div class="mission-progress">
+            <span style="font-size:12px; font-family:var(--font-num); color:var(--text-muted);" id="progressText">ความคืบหน้า 25%</span>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progressBarFill" style="width:25%;"></div>
+            </div>
+            <button class="btn primary" onclick="completeCurrentAndNext()" style="padding:9px 14px;">
+              ✓ ตรวจเสร็จแล้ว ไปจุดถัดไป
+            </button>
+          </div>
+        </div>
+
+        <div class="route-layout">
+          <!-- SEQUENTIAL CHECKPOINT LIST -->
+          <ul class="route-list" id="routeList"></ul>
+
+          <!-- REAL LEAFLET MAP VIEW -->
+          <div class="map-card-wrapper">
+            <div id="inspectionMap"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- TAB 1: MAINTENANCE PLANNER -->
-      <div id="tab-plan" class="tab-content active">
+      <!-- TAB: MAINTENANCE PLANNER -->
+      <div id="tab-plan" class="tab-content">
         <div class="section-head">
           <h3>ตารางวางแผนงานบำรุงรักษา (Maintenance Schedule)</h3>
           <span class="sub">ข้อมูลอัปเดตแบบสองทิศทาง (Real-time Live Synced)</span>
@@ -504,7 +540,7 @@ table.data-table tr.row-updated td{
         </div>
       </div>
 
-      <!-- TAB 2: FORM -->
+      <!-- TAB: FORM -->
       <div id="tab-form" class="tab-content">
         <div class="section-head">
           <h3>แบบฟอร์มเอกสารบันทึกผลการบำรุงรักษา (e-Work Order)</h3>
@@ -571,26 +607,7 @@ table.data-table tr.row-updated td{
         </div>
       </div>
 
-      <!-- TAB 3: ROUTE PATROL (LIVE TRACKING) -->
-      <div id="tab-route" class="tab-content">
-        <div class="section-head">
-          <h3>ระบบนำเส้นทางตรวจการ (Live GPS Patrol Tracking)</h3>
-          <span class="sub">ติดตามการเคลื่อนที่ของรถตรวจการ SP-CAR 01 แบบ Real-time</span>
-        </div>
-        <div class="route-layout">
-          <ul class="route-list" id="routeList"></ul>
-          <div class="radar-screen">
-            <div class="radar-grid"></div>
-            <!-- Live Vehicle Marker -->
-            <div class="patrol-vehicle" id="liveVehicleMarker" style="top:35%; left:38%;">
-              <div class="patrol-tag">🚗 SP-CAR 01 (Live)</div>
-            </div>
-            <div id="radarPins"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 4: ANOMALY ENGINE -->
+      <!-- TAB: ANOMALY ENGINE -->
       <div id="tab-anomaly" class="tab-content">
         <div class="section-head">
           <h3>การวิเคราะห์ความผิดปกติ (Real-Time Anomaly Engine)</h3>
@@ -604,17 +621,17 @@ table.data-table tr.row-updated td{
 
 <!-- BOTTOM NAV FOR MOBILE -->
 <nav class="mobile-nav">
-  <button class="mobile-nav-btn active" data-tab="tab-plan">
+  <button class="mobile-nav-btn active" data-tab="tab-route">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/></svg>
+    <span>นำทาง GPS</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab="tab-plan">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     <span>แผนงาน</span>
   </button>
   <button class="mobile-nav-btn" data-tab="tab-form">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
     <span>ฟอร์ม</span>
-  </button>
-  <button class="mobile-nav-btn" data-tab="tab-route">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/></svg>
-    <span>เส้นทาง</span>
   </button>
   <button class="mobile-nav-btn" data-tab="tab-anomaly">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
@@ -634,7 +651,7 @@ table.data-table tr.row-updated td{
 </div>
 
 <script>
-/* ---------------- STATE ---------------- */
+/* ---------------- STATE & DATA (สมุทรปราการ พิกัดจริง) ---------------- */
 let WORK_ORDERS = [
   {id:'WO-SP-69081', asset:'หม้อแปลง TR-250kVA นิคมบางปู ซ.12', district:'อ.เมืองสมุทรปราการ', type:'ตรวจวัดค่าฉนวนน้ำมัน (DGA)', date:'28 ส.ค. 69', team:'ทีมหม้อแปลง 01', status:'doing', temp:'48.5', ground:'2.40'},
   {id:'WO-SP-69082', asset:'เสาแรงสูง Feeder 11 เทพารักษ์ กม.8', district:'อ.บางพลี', type:'ล้างลูกถ้วยฉนวนกันคราบไอเกลือ', date:'29 ส.ค. 69', team:'ทีมสายส่ง 02', status:'pending', temp:'38.2', ground:'3.10'},
@@ -644,11 +661,40 @@ let WORK_ORDERS = [
   {id:'WO-SP-69086', asset:'สายป้อน Feeder 04 ถนนท้ายบ้าน', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบฉนวนสายส่ง', date:'27 ส.ค. 69', team:'ทีมสายส่ง 01', status:'done', temp:'35.6', ground:'2.00'}
 ];
 
+// พิกัดจริงใน จ.สมุทรปราการ สำหรับเรียงลำดับเส้นทางตรวจ
 const PATROL_PINS = [
-  {id:1, name:'รร.นายเรือ (ถ.สุขุมวิท)', desc:'วัดค่ากราวด์ดินและระดับน้ำมัน', top:35, left:38, color:'var(--green-neon)', status:'ตรวจแล้ว'},
-  {id:2, name:'นิคมบางปู ซ.9 (ถ.พัฒนา 1)', desc:'ตรวจคราบไอเกลือทะเลสะสม', top:58, left:66, color:'var(--orange-pri)', status:'กำลังตรวจ'},
-  {id:3, name:'สวิตช์เกียร์แพรกษา กม.4', desc:'สแกน Thermo-scan ขั้วต่อสาย', top:46, left:52, color:'var(--teal-soft)', status:'รอตรวจ'},
-  {id:4, name:'ตลาดปากน้ำ (ถ.ท้ายบ้าน)', desc:'ตรวจโหลดการใช้ไฟช่วงค่ำ', top:72, left:32, color:'var(--amber-soft)', status:'รอตรวจ'}
+  {
+    id: 1,
+    name: 'หม้อแปลงหน้า รร.นายเรือ (ถ.สุขุมวิท)',
+    desc: 'วัดค่าความต้านทานกราวด์ดินและระดับน้ำมัน',
+    lat: 13.6062, lng: 100.5925,
+    status: 'completed', // completed | active | pending
+    assetCode: 'TR-SP-0012'
+  },
+  {
+    id: 2,
+    name: 'สายป้อนนิคมฯ บางปู ซ.9 (ถ.พัฒนา 1)',
+    desc: 'ตรวจคราบไอเกลือทะเลสะสมบนลูกถ้วยฉนวน',
+    lat: 13.5245, lng: 100.6710,
+    status: 'active',
+    assetCode: 'FEEDER-BP-09'
+  },
+  {
+    id: 3,
+    name: 'สวิตช์เกียร์แยกแพรกษา กม.4',
+    desc: 'สแกน Thermo-scan ขั้วต่อสายและตู้ RMU',
+    lat: 13.5685, lng: 100.6350,
+    status: 'pending',
+    assetCode: 'SWG-PS-04'
+  },
+  {
+    id: 4,
+    name: 'หม้อแปลงตลาดปากน้ำ (ถ.ท้ายบ้าน)',
+    desc: 'ตรวจบาลานซ์เฟสและโหลดการใช้ไฟช่วงค่ำ',
+    lat: 13.5950, lng: 100.5980,
+    status: 'pending',
+    assetCode: 'TR-PK-0088'
+  }
 ];
 
 const ANOMALIES = [
@@ -656,6 +702,164 @@ const ANOMALIES = [
   {zone:'นิคมอุตสาหกรรมบางปู', score:'78%', title:'ฮาร์มอนิกและโหลดเกินพิกัด', desc:'โหลดความร้อนสะสมแกนเหล็กหม้อแปลง 84.5°C ในช่วงชั่วโมงการผลิตสูงสุด', advice:'► ปรับบาลานซ์เฟสและเปิดพัดลมระบายอากาศ', mid:true},
   {zone:'ถ.กิ่งแก้ว - บางพลี', score:'88%', title:'แรงดันตกชั่วขณะบ่อยครั้ง (Micro-Sag)', desc:'Voltage Sag 4 ครั้งใน 48 ชม. คาดเกิดจากกิ่งไม้แตะสายช่วงลมกระโชกแรง', advice:'► ส่งทีมตัดแต่งกิ่งไม้แนวสายส่งระยะ 800 เมตร', mid:false}
 ];
+
+/* ---------------- LEAFLET MAP ENGINE ---------------- */
+let mapInstance = null;
+let markerLayers = [];
+let routePolyline = null;
+
+function initMap(){
+  if(mapInstance) return;
+
+  // ศูนย์กลางที่ สมุทรปราการ
+  mapInstance = L.map('inspectionMap').setView([13.5750, 100.6250], 12);
+
+  // ใช้ CartoDB Dark Matter Base Map เพื่อความสบายตา
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom: 19
+  }).addTo(mapInstance);
+
+  renderMapMarkers();
+}
+
+function renderMapMarkers(){
+  if(!mapInstance) return;
+
+  // Clear existing
+  markerLayers.forEach(m => mapInstance.removeLayer(m));
+  markerLayers = [];
+  if(routePolyline) mapInstance.removeLayer(routePolyline);
+
+  const latlngs = [];
+
+  PATROL_PINS.forEach((p, idx) => {
+    latlngs.push([p.lat, p.lng]);
+
+    // Custom Numbered Marker Icon
+    const markerHtml = `
+      <div class="custom-map-marker ${p.status}">
+        ${p.id}
+      </div>
+    `;
+    const customIcon = L.divIcon({
+      html: markerHtml,
+      className: '',
+      iconSize: [26, 26],
+      iconAnchor: [13, 13]
+    });
+
+    const marker = L.marker([p.lat, p.lng], {icon: customIcon}).addTo(mapInstance);
+    
+    // Popup with Google Maps URL
+    const gmapUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
+    marker.bindPopup(`
+      <strong style="color:var(--orange-pri); font-size:13px;">จุดที่ ${p.id}: ${p.name}</strong><br>
+      <span style="color:#64748B;">รหัสอุปกรณ์: ${p.assetCode}</span><br>
+      <span style="display:block; margin:6px 0;">${p.desc}</span>
+      <a href="${gmapUrl}" target="_blank" class="btn gmap" style="color:#fff; text-decoration:none; padding:4px 8px; font-size:11px; display:inline-block; border-radius:4px;">
+        🗺️ เปิดนำทาง Google Maps
+      </a>
+    `);
+
+    markerLayers.push(marker);
+  });
+
+  // วาดเส้นเชื่อมลำดับจุดตรวจ (Inspection Route Line)
+  routePolyline = L.polyline(latlngs, {
+    color: '#EA6C28',
+    weight: 4,
+    opacity: 0.8,
+    dashArray: '8, 8'
+  }).addTo(mapInstance);
+
+  mapInstance.fitBounds(routePolyline.getBounds(), {padding: [40, 40]});
+}
+
+function openGoogleMapsNavigation(lat, lng){
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  window.open(url, '_blank');
+}
+
+function focusCheckpoint(id){
+  const pin = PATROL_PINS.find(p => p.id === id);
+  if(!pin || !mapInstance) return;
+
+  mapInstance.flyTo([pin.lat, pin.lng], 15, {duration: 1.2});
+  const marker = markerLayers[id - 1];
+  if(marker) marker.openPopup();
+}
+
+/* ---------------- STEP-BY-STEP PATROL SEQUENCE ---------------- */
+function renderRouteList(){
+  const listEl = document.getElementById('routeList');
+  listEl.innerHTML = PATROL_PINS.map((p) => {
+    let statusBadge = '<span class="badge pending">รอดำเนินการ</span>';
+    if(p.status === 'completed') statusBadge = '<span class="badge done">✓ ตรวจเสร็จแล้ว</span>';
+    else if(p.status === 'active') statusBadge = '<span class="badge doing">📍 กำลังตรวจจุดนี้</span>';
+
+    return `
+      <li class="route-item ${p.status === 'active' ? 'active' : ''} ${p.status === 'completed' ? 'completed' : ''}" onclick="focusCheckpoint(${p.id})">
+        <div class="top">
+          <span>ลำดับที่ ${p.id} · ${p.assetCode}</span>
+          ${statusBadge}
+        </div>
+        <div class="name">${p.name}</div>
+        <div class="desc">${p.desc}</div>
+        <div class="actions-row" onclick="event.stopPropagation();">
+          <button class="btn gmap" style="padding:4px 10px; font-size:11px;" onclick="openGoogleMapsNavigation(${p.lat}, ${p.lng})">
+            🗺️ นำทาง Google Maps
+          </button>
+          <button class="btn" style="padding:4px 10px; font-size:11px;" onclick="quickCheckin(${p.id})">
+            บันทึกผลจุดนี้
+          </button>
+        </div>
+      </li>
+    `;
+  }).join('');
+
+  updateMissionBanner();
+}
+
+function updateMissionBanner(){
+  const activePin = PATROL_PINS.find(p => p.status === 'active');
+  const completedCount = PATROL_PINS.filter(p => p.status === 'completed').length;
+  const total = PATROL_PINS.length;
+  const pct = Math.round((completedCount / total) * 100);
+
+  document.getElementById('statPatrolProgress').innerHTML = `${completedCount} <small>/ ${total} จุด</small>`;
+  document.getElementById('progressText').textContent = `ความคืบหน้า ${pct}% (${completedCount}/${total})`;
+  document.getElementById('progressBarFill').style.width = `${pct}%`;
+
+  if(activePin){
+    document.getElementById('currentMissionTitle').textContent = `📍 จุดที่ ${activePin.id}: ${activePin.name}`;
+    document.getElementById('currentMissionDesc').textContent = `${activePin.desc} (${activePin.assetCode})`;
+  } else {
+    document.getElementById('currentMissionTitle').textContent = `🎉 ตรวจครบทุกจุดในแผนงานแล้ว`;
+    document.getElementById('currentMissionDesc').textContent = `สายตรวจ SP-CAR 01 ปฏิบัติภารกิจเสร็จสมบูรณ์ 100%`;
+  }
+}
+
+function completeCurrentAndNext(){
+  const activeIdx = PATROL_PINS.findIndex(p => p.status === 'active');
+  if(activeIdx !== -1){
+    PATROL_PINS[activeIdx].status = 'completed';
+    if(activeIdx + 1 < PATROL_PINS.length){
+      PATROL_PINS[activeIdx + 1].status = 'active';
+      focusCheckpoint(PATROL_PINS[activeIdx + 1].id);
+    }
+    renderRouteList();
+    renderMapMarkers();
+  }
+}
+
+function quickCheckin(id){
+  const pin = PATROL_PINS.find(p => p.id === id);
+  if(!pin) return;
+  document.getElementById('f_asset').value = `${pin.name} (${pin.assetCode})`;
+  document.getElementById('f_id').value = `WO-SP-${Math.floor(10000 + Math.random()*90000)}`;
+  switchTab('tab-form');
+}
 
 /* ---------------- TAB ROUTING ---------------- */
 function switchTab(tabId){
@@ -665,6 +869,11 @@ function switchTab(tabId){
   });
   const target = document.getElementById(tabId);
   if(target) target.classList.add('active');
+
+  // Invalidate map size when tab becomes visible
+  if(tabId === 'tab-route' && mapInstance){
+    setTimeout(() => { mapInstance.invalidateSize(); }, 200);
+  }
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
@@ -673,7 +882,7 @@ document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
 });
 
 /* ---------------- RENDER TABLE ---------------- */
-function renderTable(highlightId = null){
+function renderTable(){
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = WORK_ORDERS.map((wo, i) => {
     let badgeClass = 'pending', badgeText = 'รอดำเนินการ';
@@ -681,10 +890,8 @@ function renderTable(highlightId = null){
     else if(wo.status === 'doing'){ badgeClass = 'doing'; badgeText = 'กำลังทำ'; }
     else if(wo.status === 'high'){ badgeClass = 'high'; badgeText = 'เร่งด่วน'; }
 
-    const isUpdated = wo.id === highlightId ? 'row-updated' : '';
-
     return `
-      <tr class="${isUpdated}">
+      <tr>
         <td><strong style="color:var(--orange-soft); font-family:var(--font-num);">${wo.id}</strong></td>
         <td>${wo.asset}</td>
         <td>${wo.district}</td>
@@ -703,8 +910,6 @@ function renderTable(highlightId = null){
   }).join('');
 
   document.getElementById('statTotal').innerHTML = `${WORK_ORDERS.length} <small>รายการ</small>`;
-  const doneCount = WORK_ORDERS.filter(x => x.status === 'done').length;
-  document.getElementById('statDone').innerHTML = `${doneCount} <small>/ ${WORK_ORDERS.length}</small>`;
 }
 
 /* ---------------- RENDER ANOMALIES ---------------- */
@@ -721,7 +926,6 @@ function renderAnomalies(){
       <div class="advice">${a.advice}</div>
     </div>
   `).join('');
-  document.getElementById('statAnomalyCount').innerHTML = `${ANOMALIES.length} <small>เคส</small>`;
 }
 
 /* ---------------- MODALS ---------------- */
@@ -788,8 +992,7 @@ function saveEdit(e, index){
   WORK_ORDERS[index].status = document.getElementById('e_status').value;
   WORK_ORDERS[index].team = document.getElementById('e_team').value;
   WORK_ORDERS[index].temp = document.getElementById('e_temp').value;
-  renderTable(WORK_ORDERS[index].id);
-  pushLiveLog(`อัปเดตสถานะงาน ${WORK_ORDERS[index].id} สำเร็จ`);
+  renderTable();
   closeModal();
 }
 
@@ -804,12 +1007,12 @@ function handleFormSubmit(e){
     ground: document.getElementById('f_ground').value || '2.50',
     status: document.getElementById('f_status').value,
     date: '27 ส.ค. 69',
-    team: 'ทีมซ่อมบำรุงประจำเขต'
+    team: 'ทีมสายตรวจ SP-01'
   };
   WORK_ORDERS.unshift(newWO);
-  renderTable(newWO.id);
-  pushLiveLog(`เพิ่มใบสั่งงานใหม่ ${newWO.id} เข้าระบบ Live Grid สำเร็จ`);
+  renderTable();
   document.getElementById('woForm').reset();
+  alert('บันทึกเอกสารบำรุงรักษาเรียบร้อย!');
   switchTab('tab-plan');
 }
 
@@ -832,55 +1035,12 @@ function exportToExcel(){
   XLSX.writeFile(wb, "รายงานแผนบำรุงรักษา_สมุทรปราการ.xlsx");
 }
 
-/* ---------------- ROUTE & RADAR ---------------- */
-function renderRoute(){
-  const list = document.getElementById('routeList');
-  const pins = document.getElementById('radarPins');
-
-  list.innerHTML = PATROL_PINS.map((p, idx) => `
-    <li class="route-item ${idx===1?'active':''}" onclick="highlightPin(${p.id})">
-      <div class="top">
-        <span>จุดตรวจที่ 0${p.id} · ${p.status}</span>
-        <span style="color:${p.color}">●</span>
-      </div>
-      <div class="name">${p.name}</div>
-      <div class="desc">${p.desc}</div>
-    </li>
-  `).join('');
-
-  pins.innerHTML = PATROL_PINS.map(p => `
-    <div class="radar-pin" style="top:${p.top}%; left:${p.left}%; background:${p.color}; border-color:${p.color};">
-      <div class="radar-tooltip">${p.name}</div>
-    </div>
-  `).join('');
-}
-
-function highlightPin(id){
-  const pin = PATROL_PINS.find(p => p.id === id);
-  if(!pin) return;
-  const v = document.getElementById('liveVehicleMarker');
-  v.style.top = pin.top + '%';
-  v.style.left = pin.left + '%';
-  pushLiveLog(`รถตรวจการกำลังมุ่งหน้าสู่พิกัด: ${pin.name}`);
-}
-
-/* ---------------- REAL-TIME ENGINE ---------------- */
-function pushLiveLog(text){
-  const logEl = document.getElementById('eventLogText');
-  const timeEl = document.getElementById('eventLogTime');
-  const now = new Date();
-  const timeStr = now.toTimeString().split(' ')[0];
-  if(logEl) logEl.textContent = text;
-  if(timeEl) timeEl.textContent = timeStr;
-}
-
-function startRealTimeSimulation(){
-  // 1. Live Clock & Telemetry (ทุกวินาที)
+/* ---------------- REAL-TIME TELEMETRY ---------------- */
+function startLiveTelemetry(){
   setInterval(() => {
     const now = new Date();
     document.getElementById('liveClock').textContent = now.toTimeString().split(' ')[0];
     
-    // Smooth random walk for load and voltage
     const load = (380 + Math.sin(now.getTime()/5000)*6 + Math.random()*2).toFixed(1);
     const volt = (22.38 + Math.cos(now.getTime()/7000)*0.15).toFixed(2);
     const temp = (33.5 + Math.random()*0.4).toFixed(1);
@@ -889,39 +1049,16 @@ function startRealTimeSimulation(){
     document.getElementById('rtVolt').textContent = volt;
     document.getElementById('rtTemp').textContent = temp;
   }, 1000);
-
-  // 2. Patrol Vehicle Moving Animation (ทุก 8 วินาที ขยับไปตามจุดตรวจ)
-  let currentPinIdx = 0;
-  setInterval(() => {
-    currentPinIdx = (currentPinIdx + 1) % PATROL_PINS.length;
-    const target = PATROL_PINS[currentPinIdx];
-    const v = document.getElementById('liveVehicleMarker');
-    if(v){
-      v.style.top = target.top + '%';
-      v.style.left = target.left + '%';
-    }
-    document.getElementById('rtPatrolDist').textContent = target.name.split('(')[0];
-    pushLiveLog(`รถตรวจการ SP-CAR 01 อัปเดตพิกัด: กำลังตรวจ ${target.name}`);
-  }, 8000);
-
-  // 3. Real-time Background Anomaly / Status Event Simulator (ทุก 15 วินาที)
-  setInterval(() => {
-    const randomIdx = Math.floor(Math.random() * WORK_ORDERS.length);
-    const item = WORK_ORDERS[randomIdx];
-    if(item.status === 'doing'){
-      item.status = 'done';
-      renderTable(item.id);
-      pushLiveLog(`[แจ้งเตือนเสร็จงาน]: ${item.id} (${item.asset}) บันทึกปิดงานเรียบร้อย`);
-    }
-  }, 15000);
 }
 
 /* ---------------- INIT ---------------- */
-renderTable();
-renderRoute();
-renderAnomalies();
-startRealTimeSimulation();
-pushLiveLog('ระบบเชื่อมต่อ Gateway และ Smart Feeder สมุทรปราการ สมบูรณ์');
+window.addEventListener('DOMContentLoaded', () => {
+  initMap();
+  renderRouteList();
+  renderTable();
+  renderAnomalies();
+  startLiveTelemetry();
+});
 </script>
 </body>
 </html>
