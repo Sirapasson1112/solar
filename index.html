@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS Smart Grid สมุทรปราการ (Fixed Dual Charts Edition)</title>
+<title>CMMS Smart Grid สมุทรปราการ (Form Reordered Edition v5.6)</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -189,17 +189,6 @@ html,body{
 .section-head h3{font-size:16px; font-weight:700;}
 .section-head .sub{font-size:12px; color:var(--text-muted);}
 
-/* ---------------- CHARTS SECTION ---------------- */
-.chart-grid{
-  display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:20px;
-}
-.chart-card{
-  background:var(--bg-surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);
-}
-.chart-card h4{font-size:14px; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;}
-.chart-card .chart-container{position:relative; height:260px; width:100%;}
-
 /* ---------------- MONTHLY PLANNER CONTROLS ---------------- */
 .month-selector-bar{
   background:var(--bg-surface); border:1px solid var(--border);
@@ -297,7 +286,12 @@ table.data-table tr:hover td{background:var(--orange-light);}
 }
 .btn-mini:hover{border-color:var(--orange-pri); color:var(--orange-pri); background:var(--orange-light);}
 
-/* ASSETS */
+/* CHARTS & ASSETS */
+.chart-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:20px;}
+.chart-card{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);}
+.chart-card h4{font-size:14px; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;}
+.chart-card .chart-container{position:relative; height:260px; width:100%;}
+
 .asset-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:16px; margin-bottom:20px;}
 .asset-card{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm);}
 .asset-head{display:flex; justify-content:space-between; align-items:flex-start;}
@@ -465,7 +459,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
 
 <div class="app">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR (ฟอร์มบำรุงรักษาอยู่ลำดับที่ 2) -->
   <aside class="sidebar">
     <div class="brand-wrapper">
       <div class="brand-logo">
@@ -473,7 +467,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>MONTHLY PLANNER v5.5</span>
+        <span>MONTHLY PLANNER v5.6</span>
       </div>
     </div>
 
@@ -488,48 +482,56 @@ table.data-table tr:hover td{background:var(--orange-light);}
     </div>
 
     <ul class="nav-group">
+      <!-- 1. ตารางวางแผนงานรายเดือน -->
       <li>
         <button class="nav-item active" data-tab="tab-plan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           ตารางวางแผนงานรายเดือน
         </button>
       </li>
-      <li>
-        <button class="nav-item" data-tab="tab-analytics">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18"/><path d="M18 17l-5-5-4 4-6-6"/></svg>
-          กราฟแนวโน้ม & สถิติ 3 ปี
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-tab="tab-assets">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          สถานะอุปกรณ์ (Asset Health)
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-tab="tab-history">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          ประวัติตรวจย้อนหลัง
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-tab="tab-outage">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/><path d="M18 10h4M16 6h4"/></svg>
-          สถิติไฟฟ้าดับรายสายป้อน
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-tab="tab-route">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/><path d="M6 10V6"/></svg>
-          นำเส้นทางตรวจการ (GPS)
-        </button>
-      </li>
+      <!-- 2. ฟอร์มบำรุงรักษา (ย้ายมาลำดับที่ 2 ใต้ตารางวางแผนงาน) -->
       <li>
         <button class="nav-item" data-tab="tab-form" id="navItemForm">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
           ฟอร์มบำรุงรักษา
         </button>
       </li>
+      <!-- 3. กราฟแนวโน้ม & สถิติ 3 ปี -->
+      <li>
+        <button class="nav-item" data-tab="tab-analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18"/><path d="M18 17l-5-5-4 4-6-6"/></svg>
+          กราฟแนวโน้ม & สถิติ 3 ปี
+        </button>
+      </li>
+      <!-- 4. สถานะอุปกรณ์ (Asset Health) -->
+      <li>
+        <button class="nav-item" data-tab="tab-assets">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          สถานะอุปกรณ์ (Asset Health)
+        </button>
+      </li>
+      <!-- 5. ประวัติตรวจย้อนหลัง -->
+      <li>
+        <button class="nav-item" data-tab="tab-history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ประวัติตรวจย้อนหลัง
+        </button>
+      </li>
+      <!-- 6. สถิติไฟฟ้าดับรายสายป้อน -->
+      <li>
+        <button class="nav-item" data-tab="tab-outage">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/><path d="M18 10h4M16 6h4"/></svg>
+          สถิติไฟฟ้าดับรายสายป้อน
+        </button>
+      </li>
+      <!-- 7. นำเส้นทางตรวจการ (GPS) -->
+      <li>
+        <button class="nav-item" data-tab="tab-route">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/><path d="M6 10V6"/></svg>
+          นำเส้นทางตรวจการ (GPS)
+        </button>
+      </li>
+      <!-- 8. วิเคราะห์ความผิดปกติ -->
       <li>
         <button class="nav-item" data-tab="tab-anomaly">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
@@ -601,7 +603,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </section>
 
-      <!-- TAB 1: MONTHLY MAINTENANCE PLANNER -->
+      <!-- 1. TAB: MONTHLY MAINTENANCE PLANNER -->
       <div id="tab-plan" class="tab-content active">
         <div class="month-selector-bar">
           <div class="month-nav-controls">
@@ -641,144 +643,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </div>
 
-      <!-- TAB 2: ANALYTICS & TREND CHARTS (FIXED BOTH CHARTS) -->
-      <div id="tab-analytics" class="tab-content">
-        <div class="section-head">
-          <div>
-            <h3>กราฟแนวโน้มดัชนีความน่าเชื่อถือ & ประสิทธิภาพ (2567 - 2569)</h3>
-            <span class="sub">วิเคราะห์เปรียบเทียบ SAIFI, SAIDI, การเกิด Hotspot และโหลดหม้อแปลงย้อนหลัง</span>
-          </div>
-        </div>
-        <div class="chart-grid">
-          <div class="chart-card">
-            <h4>
-              <span>📊 แนวโน้มดัชนี SAIFI / SAIDI รายปี</span>
-              <small style="color:var(--green-neon); font-size:11.5px;">✓ ปรับปรุงดีขึ้น 18.2%</small>
-            </h4>
-            <div class="chart-container"><canvas id="chartSaifiSaidi"></canvas></div>
-          </div>
-          <div class="chart-card">
-            <h4>
-              <span>🌡️ แนวโน้มอุณหภูมิ Thermo-scan เฉลี่ยรายเดือน</span>
-              <small style="color:var(--orange-pri); font-size:11.5px;">Zone สมุทรปราการ</small>
-            </h4>
-            <div class="chart-container"><canvas id="chartTempTrend"></canvas></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 3: ASSET HEALTH & MAINTENANCE STATUS -->
-      <div id="tab-assets" class="tab-content">
-        <div class="section-head">
-          <div>
-            <h3>สถานะสุขภาพอุปกรณ์หลักและดัชนี AHI (Asset Health Index)</h3>
-            <span class="sub">ประเมินความเสี่ยงและอายุการใช้งานหม้อแปลง สวิตช์เกียร์ และสายส่ง</span>
-          </div>
-        </div>
-        <div class="asset-grid" id="assetGridContainer"></div>
-      </div>
-
-      <!-- TAB 4: INSPECTION HISTORY ARCHIVE -->
-      <div id="tab-history" class="tab-content">
-        <div class="section-head">
-          <div>
-            <h3>คลังข้อมูลประวัติตรวจย้อนหลัง (2567 - 2569)</h3>
-            <span class="sub">กดปุ่มเลือกปีเพื่อดูประวัติการตรวจงานเฉพาะปีนั้น หรือค้นหารายอำเภอ</span>
-          </div>
-          <button class="btn" onclick="exportHistoryToExcel()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
-            ส่งออกประวัติที่เลือก (.xlsx)
-          </button>
-        </div>
-
-        <div class="year-btn-group">
-          <button class="btn-year active" id="btnYear2026" onclick="selectYearFilter('2026')">
-            📅 ปี 2569 (2026) <span class="tag-count" id="badge2026">0</span>
-          </button>
-          <button class="btn-year" id="btnYear2025" onclick="selectYearFilter('2025')">
-            📅 ปี 2568 (2025) <span class="tag-count" id="badge2025">0</span>
-          </button>
-          <button class="btn-year" id="btnYear2024" onclick="selectYearFilter('2024')">
-            📅 ปี 2567 (2024) <span class="tag-count" id="badge2024">0</span>
-          </button>
-          <button class="btn-year" id="btnYearALL" onclick="selectYearFilter('ALL')">
-            📁 ดูรวมทั้งหมด <span class="tag-count" id="badgeALL">0</span>
-          </button>
-        </div>
-
-        <div class="filter-bar">
-          <select id="filterDistrictSelect" class="select-filter" onchange="filterHistoryTable()">
-            <option value="ALL">📍 ทุกอำเภอในสมุทรปราการ</option>
-            <option value="เมือง">อ.เมืองสมุทรปราการ</option>
-            <option value="บางพลี">อ.บางพลี</option>
-            <option value="บางบ่อ">อ.บางบ่อ</option>
-            <option value="พระสมุทรเจดีย์">อ.พระสมุทรเจดีย์</option>
-          </select>
-          <input type="text" id="searchHistoryInput" class="search-input" placeholder="🔍 ค้นหารหัส / อุปกรณ์ / ผู้ตรวจ..." oninput="filterHistoryTable()">
-        </div>
-
-        <div class="table-card">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>รหัสบันทึก</th>
-                <th>ปี / วันที่เข้าตรวจ</th>
-                <th>อุปกรณ์ / สถานที่ตรวจ</th>
-                <th>สายตรวจ / ช่างผู้ตรวจ</th>
-                <th>Thermo (°C)</th>
-                <th>กราวด์ (Ω)</th>
-                <th>ผลการตรวจ</th>
-                <th style="text-align:right;">ดูข้อมูล</th>
-              </tr>
-            </thead>
-            <tbody id="historyTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- TAB 5: FEEDER OUTAGE ANALYTICS -->
-      <div id="tab-outage" class="tab-content">
-        <div class="section-head">
-          <div>
-            <h3>สถิติไฟฟ้าขัดข้องรายสายป้อน (Feeder Outage & Reliability Statistics)</h3>
-            <span class="sub">ข้อมูลสถิติเหตุขัดข้อง ความถี่ (SAIFI) และระยะเวลาดับ (SAIDI) ประจำพื้นที่สมุทรปราการ</span>
-          </div>
-          <button class="btn" onclick="exportOutageToExcel()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
-            ส่งออกสถิติสายป้อน (.xlsx)
-          </button>
-        </div>
-
-        <div class="feeder-grid" id="feederCardsGrid"></div>
-      </div>
-
-      <!-- TAB 6: ROUTE PATROL -->
-      <div id="tab-route" class="tab-content">
-        <div class="nav-mission-banner">
-          <div class="mission-info">
-            <h4 id="currentMissionTitle">📍 กำลังตรวจจุดที่ 2: นิคมบางปู ซ.9 (ถ.พัฒนา 1)</h4>
-            <p id="currentMissionDesc">ตรวจคราบไอเกลือทะเลสะสมบนลูกถ้วยและวัดอุณหภูมิขั้วต่อสาย</p>
-          </div>
-          <div class="mission-progress">
-            <span style="font-size:12px; font-family:var(--font-num); color:var(--text-muted);" id="progressText">ความคืบหน้า 25%</span>
-            <div class="progress-bar-wrap">
-              <div class="progress-bar-fill" id="progressBarFill" style="width:25%;"></div>
-            </div>
-            <button class="btn primary" onclick="completeCurrentAndNext()" style="padding:9px 14px;">
-              ✓ ตรวจเสร็จแล้ว ไปจุดถัดไป
-            </button>
-          </div>
-        </div>
-
-        <div class="route-layout">
-          <ul class="route-list" id="routeList"></ul>
-          <div class="map-card-wrapper">
-            <div id="inspectionMap"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 7: FORM WITH PHOTO UPLOAD -->
+      <!-- 2. TAB: FORM WITH PHOTO UPLOAD (ลำดับที่ 2 ใต้ตารางวางแผนงาน) -->
       <div id="tab-form" class="tab-content">
         <div class="section-head">
           <h3>แบบฟอร์มเอกสารบันทึกผลการบำรุงรักษา (e-Work Order)</h3>
@@ -862,7 +727,144 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </div>
 
-      <!-- TAB 8: ANOMALY ENGINE -->
+      <!-- 3. TAB: ANALYTICS & TREND CHARTS -->
+      <div id="tab-analytics" class="tab-content">
+        <div class="section-head">
+          <div>
+            <h3>กราฟแนวโน้มดัชนีความน่าเชื่อถือ & ประสิทธิภาพ (2567 - 2569)</h3>
+            <span class="sub">วิเคราะห์เปรียบเทียบ SAIFI, SAIDI, การเกิด Hotspot และโหลดหม้อแปลงย้อนหลัง</span>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h4>
+              <span>📊 แนวโน้มดัชนี SAIFI / SAIDI รายปี</span>
+              <small style="color:var(--green-neon); font-size:11.5px;">✓ ปรับปรุงดีขึ้น 18.2%</small>
+            </h4>
+            <div class="chart-container"><canvas id="chartSaifiSaidi"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>
+              <span>🌡️ แนวโน้มอุณหภูมิ Thermo-scan เฉลี่ยรายเดือน</span>
+              <small style="color:var(--orange-pri); font-size:11.5px;">Zone สมุทรปราการ</small>
+            </h4>
+            <div class="chart-container"><canvas id="chartTempTrend"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. TAB: ASSET HEALTH & MAINTENANCE STATUS -->
+      <div id="tab-assets" class="tab-content">
+        <div class="section-head">
+          <div>
+            <h3>สถานะสุขภาพอุปกรณ์หลักและดัชนี AHI (Asset Health Index)</h3>
+            <span class="sub">ประเมินความเสี่ยงและอายุการใช้งานหม้อแปลง สวิตช์เกียร์ และสายส่ง</span>
+          </div>
+        </div>
+        <div class="asset-grid" id="assetGridContainer"></div>
+      </div>
+
+      <!-- 5. TAB: INSPECTION HISTORY ARCHIVE -->
+      <div id="tab-history" class="tab-content">
+        <div class="section-head">
+          <div>
+            <h3>คลังข้อมูลประวัติตรวจย้อนหลัง (2567 - 2569)</h3>
+            <span class="sub">กดปุ่มเลือกปีเพื่อดูประวัติการตรวจงานเฉพาะปีนั้น หรือค้นหารายอำเภอ</span>
+          </div>
+          <button class="btn" onclick="exportHistoryToExcel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
+            ส่งออกประวัติที่เลือก (.xlsx)
+          </button>
+        </div>
+
+        <div class="year-btn-group">
+          <button class="btn-year active" id="btnYear2026" onclick="selectYearFilter('2026')">
+            📅 ปี 2569 (2026) <span class="tag-count" id="badge2026">0</span>
+          </button>
+          <button class="btn-year" id="btnYear2025" onclick="selectYearFilter('2025')">
+            📅 ปี 2568 (2025) <span class="tag-count" id="badge2025">0</span>
+          </button>
+          <button class="btn-year" id="btnYear2024" onclick="selectYearFilter('2024')">
+            📅 ปี 2567 (2024) <span class="tag-count" id="badge2024">0</span>
+          </button>
+          <button class="btn-year" id="btnYearALL" onclick="selectYearFilter('ALL')">
+            📁 ดูรวมทั้งหมด <span class="tag-count" id="badgeALL">0</span>
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <select id="filterDistrictSelect" class="select-filter" onchange="filterHistoryTable()">
+            <option value="ALL">📍 ทุกอำเภอในสมุทรปราการ</option>
+            <option value="เมือง">อ.เมืองสมุทรปราการ</option>
+            <option value="บางพลี">อ.บางพลี</option>
+            <option value="บางบ่อ">อ.บางบ่อ</option>
+            <option value="พระสมุทรเจดีย์">อ.พระสมุทรเจดีย์</option>
+          </select>
+          <input type="text" id="searchHistoryInput" class="search-input" placeholder="🔍 ค้นหารหัส / อุปกรณ์ / ผู้ตรวจ..." oninput="filterHistoryTable()">
+        </div>
+
+        <div class="table-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>รหัสบันทึก</th>
+                <th>ปี / วันที่เข้าตรวจ</th>
+                <th>อุปกรณ์ / สถานที่ตรวจ</th>
+                <th>สายตรวจ / ช่างผู้ตรวจ</th>
+                <th>Thermo (°C)</th>
+                <th>กราวด์ (Ω)</th>
+                <th>ผลการตรวจ</th>
+                <th style="text-align:right;">ดูข้อมูล</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 6. TAB: FEEDER OUTAGE ANALYTICS -->
+      <div id="tab-outage" class="tab-content">
+        <div class="section-head">
+          <div>
+            <h3>สถิติไฟฟ้าขัดข้องรายสายป้อน (Feeder Outage & Reliability Statistics)</h3>
+            <span class="sub">ข้อมูลสถิติเหตุขัดข้อง ความถี่ (SAIFI) และระยะเวลาดับ (SAIDI) ประจำพื้นที่สมุทรปราการ</span>
+          </div>
+          <button class="btn" onclick="exportOutageToExcel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
+            ส่งออกสถิติสายป้อน (.xlsx)
+          </button>
+        </div>
+
+        <div class="feeder-grid" id="feederCardsGrid"></div>
+      </div>
+
+      <!-- 7. TAB: ROUTE PATROL -->
+      <div id="tab-route" class="tab-content">
+        <div class="nav-mission-banner">
+          <div class="mission-info">
+            <h4 id="currentMissionTitle">📍 กำลังตรวจจุดที่ 2: นิคมบางปู ซ.9 (ถ.พัฒนา 1)</h4>
+            <p id="currentMissionDesc">ตรวจคราบไอเกลือทะเลสะสมบนลูกถ้วยและวัดอุณหภูมิขั้วต่อสาย</p>
+          </div>
+          <div class="mission-progress">
+            <span style="font-size:12px; font-family:var(--font-num); color:var(--text-muted);" id="progressText">ความคืบหน้า 25%</span>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progressBarFill" style="width:25%;"></div>
+            </div>
+            <button class="btn primary" onclick="completeCurrentAndNext()" style="padding:9px 14px;">
+              ✓ ตรวจเสร็จแล้ว ไปจุดถัดไป
+            </button>
+          </div>
+        </div>
+
+        <div class="route-layout">
+          <ul class="route-list" id="routeList"></ul>
+          <div class="map-card-wrapper">
+            <div id="inspectionMap"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. TAB: ANOMALY ENGINE -->
       <div id="tab-anomaly" class="tab-content">
         <div class="section-head">
           <h3>การวิเคราะห์ความผิดปกติ (Real-Time Anomaly Engine)</h3>
@@ -874,11 +876,15 @@ table.data-table tr:hover td{background:var(--orange-light);}
   </div>
 </div>
 
-<!-- BOTTOM NAV FOR MOBILE -->
+<!-- BOTTOM NAV FOR MOBILE (ปรับฟอร์มขึ้นลำดับที่ 2) -->
 <nav class="mobile-nav">
   <button class="mobile-nav-btn active" data-tab="tab-plan">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     <span>แผนงาน</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab="tab-form">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+    <span>ฟอร์ม</span>
   </button>
   <button class="mobile-nav-btn" data-tab="tab-analytics">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17l-5-5-4 4-6-6"/></svg>
@@ -1519,12 +1525,11 @@ function renderRouteList(){
   `).join('');
 }
 
-/* ---------------- CHARTS ENGINE (แก้ไขให้โหลดพร้อมกันทั้ง 2 กราฟ) ---------------- */
+/* ---------------- CHARTS ENGINE ---------------- */
 let chartSaifiInstance = null;
 let chartTempInstance = null;
 
 function initCharts(){
-  // กราฟที่ 1: SAIFI / SAIDI (Bar Chart)
   const ctxSaifi = document.getElementById('chartSaifiSaidi');
   if(ctxSaifi) {
     if(chartSaifiInstance) chartSaifiInstance.destroy();
@@ -1541,7 +1546,6 @@ function initCharts(){
     });
   }
 
-  // กราฟที่ 2: Thermo-scan Temperature Trend (Line Chart)
   const ctxTemp = document.getElementById('chartTempTrend');
   if(ctxTemp) {
     if(chartTempInstance) chartTempInstance.destroy();
