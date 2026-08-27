@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS Smart Grid สมุทรปราการ (Quick Year Buttons Edition)</title>
+<title>CMMS Smart Grid สมุทรปราการ (Enterprise Edition v5.0)</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
-<!-- SheetJS for Export Excel -->
+<!-- Chart.js สำหรับกราฟแนวโน้ม -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- SheetJS สำหรับ Export Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -35,6 +38,7 @@
   --green-neon:#16A34A;
   --red-neon:#DC2626;
   --amber-soft:#D97706;
+  --purple-soft:#7C3AED;
 
   --text-main:#0F172A;
   --text-muted:#64748B;
@@ -61,7 +65,7 @@ html,body{
 
 /* SIDEBAR */
 .sidebar{
-  width:264px; background:var(--bg-surface);
+  width:270px; background:var(--bg-surface);
   border-right:1px solid var(--border);
   display:flex; flex-direction:column;
   flex-shrink:0; padding:20px 16px;
@@ -71,10 +75,10 @@ html,body{
 .brand-wrapper{
   display:flex; align-items:center; gap:12px;
   padding-bottom:16px; border-bottom:1px solid var(--border);
-  margin-bottom:16px;
+  margin-bottom:14px;
 }
 .brand-logo{
-  width:40px; height:40px; border-radius:10px;
+  width:42px; height:42px; border-radius:10px;
   background:linear-gradient(135deg, var(--orange-soft), var(--orange-pri));
   display:flex; align-items:center; justify-content:center;
   color:#fff; flex-shrink:0;
@@ -83,23 +87,24 @@ html,body{
 .brand-text h2{font-size:15px; font-weight:700; color:var(--text-main);}
 .brand-text span{font-size:11px; color:var(--orange-pri); font-family:var(--font-num); font-weight:600;}
 
-.live-badge-status{
-  display:flex; align-items:center; justify-content:space-between;
-  background:var(--orange-light); border:1px solid #FED7AA;
-  border-left:3px solid var(--orange-pri); border-radius:var(--radius-sm);
-  padding:8px 12px; margin-bottom:16px; font-size:12px; font-weight:600; color:var(--orange-pri);
+/* USER ROLE BADGE */
+.role-switch-card{
+  background:var(--bg-card-alt); border:1px solid #FED7AA;
+  border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:14px;
 }
-.live-pulse-dot{
-  width:8px; height:8px; border-radius:50%; background:var(--green-neon);
-  box-shadow:0 0 6px var(--green-neon); animation:pulse 1.5s infinite;
+.role-switch-card .lbl{font-size:10.5px; font-weight:700; color:var(--orange-pri); text-transform:uppercase;}
+.role-select{
+  width:100%; margin-top:4px; padding:6px 8px; border-radius:6px;
+  border:1px solid #FDBA74; background:#fff; font-size:12px; font-weight:600;
+  color:var(--text-main); font-family:var(--font-main); outline:none;
 }
 
-.nav-group{list-style:none; display:flex; flex-direction:column; gap:6px;}
+.nav-group{list-style:none; display:flex; flex-direction:column; gap:5px;}
 .nav-item{
   width:100%; display:flex; align-items:center; gap:12px;
-  padding:11px 14px; border-radius:var(--radius-sm);
+  padding:10px 12px; border-radius:var(--radius-sm);
   background:transparent; border:1px solid transparent;
-  color:var(--text-muted); font-size:13.5px; font-weight:500;
+  color:var(--text-muted); font-size:13px; font-weight:500;
   cursor:pointer; transition:.2s ease; text-align:left;
 }
 .nav-item svg{width:18px; height:18px; stroke-width:2; flex-shrink:0;}
@@ -159,7 +164,7 @@ html,body{
 
 /* STATS */
 .stats-grid{
-  display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
   gap:14px; margin-bottom:22px;
 }
 .stat-box{
@@ -187,7 +192,42 @@ html,body{
 .section-head h3{font-size:16px; font-weight:700;}
 .section-head .sub{font-size:12px; color:var(--text-muted);}
 
-/* ---------------- YEAR BUTTONS BAR (ปรับแต่งใหม่) ---------------- */
+/* ---------------- CHARTS SECTION ---------------- */
+.chart-grid{
+  display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:20px;
+}
+.chart-card{
+  background:var(--bg-surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);
+}
+.chart-card h4{font-size:14px; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;}
+.chart-card .chart-container{position:relative; height:240px; width:100%;}
+
+/* ---------------- ASSET HEALTH INDEX (AHI) ---------------- */
+.asset-grid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:16px; margin-bottom:20px;
+}
+.asset-card{
+  background:var(--bg-surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm);
+  position:relative;
+}
+.asset-head{display:flex; justify-content:space-between; align-items:flex-start;}
+.asset-tag{font-family:var(--font-num); font-size:12px; color:var(--orange-pri); font-weight:700;}
+.asset-name{font-size:14px; font-weight:700; margin:3px 0 1px;}
+.asset-sub{font-size:11.5px; color:var(--text-muted);}
+
+.health-bar-wrap{margin:12px 0 10px;}
+.health-label{display:flex; justify-content:space-between; font-size:11.5px; font-weight:600; margin-bottom:4px;}
+.health-track{height:8px; background:#F1F5F9; border-radius:4px; overflow:hidden;}
+.health-fill{height:100%; border-radius:4px;}
+
+.asset-metrics-pill{
+  display:flex; gap:8px; flex-wrap:wrap; font-size:11px; font-family:var(--font-num);
+}
+.mpill{background:#F8FAFC; border:1px solid var(--border); padding:3px 8px; border-radius:4px;}
+
+/* ---------------- YEAR BUTTONS ---------------- */
 .year-btn-group{
   display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;
 }
@@ -215,11 +255,9 @@ html,body{
 
 /* ROUTE PATROL MODULE */
 .nav-mission-banner{
-  background:var(--bg-card-alt);
-  border:1px solid #FED7AA; border-radius:var(--radius);
-  padding:16px 20px; margin-bottom:16px;
-  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
-  box-shadow:var(--shadow-sm);
+  background:var(--bg-card-alt); border:1px solid #FED7AA; border-radius:var(--radius);
+  padding:16px 20px; margin-bottom:16px; display:flex; justify-content:space-between;
+  align-items:center; flex-wrap:wrap; gap:14px; box-shadow:var(--shadow-sm);
 }
 .mission-info h4{font-size:16px; font-weight:700; color:var(--orange-pri); display:flex; align-items:center; gap:8px;}
 .mission-info p{font-size:12.5px; color:var(--text-muted); margin-top:4px;}
@@ -433,6 +471,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
   .mobile-nav{display:flex;}
   .content{padding:16px; padding-bottom:75px;}
   .topbar{padding:12px 16px;}
+  .chart-grid{grid-template-columns:1fr;}
   .route-layout{grid-template-columns:1fr;}
   .map-card-wrapper{height:380px;}
   .form-grid{grid-template-columns:1fr;}
@@ -460,13 +499,19 @@ table.data-table tr:hover td{background:var(--orange-light);}
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>YEAR BUTTONS v4.4</span>
+        <span>RBAC & CHARTS v5.0</span>
       </div>
     </div>
 
-    <div class="live-badge-status">
-      <span>GRID STATUS : LIVE</span>
-      <div class="live-pulse-dot"></div>
+    <!-- ROLE-BASED ACCESS CONTROL (RBAC) SELECTOR -->
+    <div class="role-switch-card">
+      <div class="lbl">👤 สิทธิ์ผู้ใช้งาน (User Role)</div>
+      <select id="userRoleSelector" class="role-select" onchange="handleRoleChange()">
+        <option value="admin">1. วิศวกร / ผู้ดูแลระบบ (Admin)</option>
+        <option value="supervisor">2. หัวหน้างาน (Supervisor)</option>
+        <option value="technician">3. ช่างเทคนิคตรวจการ (Tech)</option>
+        <option value="executive">4. ผู้บริหาร (Executive - View)</option>
+      </select>
     </div>
 
     <ul class="nav-group">
@@ -474,6 +519,18 @@ table.data-table tr:hover td{background:var(--orange-light);}
         <button class="nav-item active" data-tab="tab-plan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           ตารางวางแผนงาน (เรียงวัน)
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-tab="tab-analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18"/><path d="M18 17l-5-5-4 4-6-6"/></svg>
+          กราฟแนวโน้ม & สถิติ 3 ปี
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-tab="tab-assets">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          สถานะอุปกรณ์ (Asset Health)
         </button>
       </li>
       <li>
@@ -495,7 +552,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </button>
       </li>
       <li>
-        <button class="nav-item" data-tab="tab-form">
+        <button class="nav-item" data-tab="tab-form" id="navItemForm">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
           ฟอร์มบำรุงรักษา
         </button>
@@ -536,7 +593,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
   <div class="main-wrapper">
     <header class="topbar">
       <div class="topbar-info">
-        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip"><span class="live-pulse-dot"></span>SORT BY DUE DATE</span></h1>
+        <h1>ระบบบริหารงานบำรุงรักษา <span class="chip"><span class="live-pulse-dot"></span><span id="activeRoleLabel">ADMIN VIEW</span></span></h1>
       </div>
       <div class="actions-group">
         <button class="btn" onclick="exportToExcel()" title="ส่งออก Excel">
@@ -547,7 +604,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           <span>PDF</span>
         </button>
-        <button class="btn primary" onclick="switchTab('tab-form')">
+        <button class="btn primary" id="btnTopAddWork" onclick="switchTab('tab-form')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>เพิ่มงาน</span>
         </button>
@@ -566,8 +623,8 @@ table.data-table tr:hover td{background:var(--orange-light);}
           <div class="val" id="statTotal">6 <small>รายการ</small></div>
         </div>
         <div class="stat-box" style="--accent-bar:var(--teal-soft);">
-          <div class="lbl">ประวัติตรวจสะสม (3 ปี)</div>
-          <div class="val" id="statHistoryTotal" style="color:var(--teal-soft);">14 <small>บันทึก</small></div>
+          <div class="lbl">ดัชนีสุขภาพอุปกรณ์ (AHI Avg)</div>
+          <div class="val" style="color:var(--teal-soft);">88.2 <small>%</small></div>
         </div>
         <div class="stat-box" style="--accent-bar:var(--green-neon);">
           <div class="lbl">ความคืบหน้าสายตรวจ</div>
@@ -606,7 +663,50 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </div>
 
-      <!-- TAB 2: 3-YEAR INSPECTION HISTORY ARCHIVE (WITH YEAR BUTTONS) -->
+      <!-- TAB 2: ANALYTICS & TREND CHARTS (NEW FEATURE) -->
+      <div id="tab-analytics" class="tab-content">
+        <div class="section-head">
+          <div>
+            <h3>กราฟแนวโน้มดัชนีความน่าเชื่อถือ & ประสิทธิภาพ 3 ปี (2567 - 2569)</h3>
+            <span class="sub">วิเคราะห์เปรียบเทียบ SAIFI, SAIDI, การเกิด Hotspot และโหลดหม้อแปลงย้อนหลัง</span>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h4>
+              <span>📊 แนวโน้มดัชนี SAIFI / SAIDI รายปี</span>
+              <small style="color:var(--green-neon); font-size:11.5px;">✓ ปรับปรุงดีขึ้น 18.2%</small>
+            </h4>
+            <div class="chart-container">
+              <canvas id="chartSaifiSaidi"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h4>
+              <span>🌡️ แนวโน้มอุณหภูมิ Thermo-scan เฉลี่ยรายเดือน</span>
+              <small style="color:var(--orange-pri); font-size:11.5px;">Zone สมุทรปราการ</small>
+            </h4>
+            <div class="chart-container">
+              <canvas id="chartTempTrend"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: ASSET HEALTH & MAINTENANCE STATUS (NEW FEATURE) -->
+      <div id="tab-assets" class="tab-content">
+        <div class="section-head">
+          <div>
+            <h3>สถานะสุขภาพอุปกรณ์หลักและดัชนี AHI (Asset Health Index)</h3>
+            <span class="sub">ประเมินความเสี่ยงและอายุการใช้งานหม้อแปลง สวิตช์เกียร์ และสายส่ง</span>
+          </div>
+        </div>
+        <div class="asset-grid" id="assetGridContainer"></div>
+      </div>
+
+      <!-- TAB 4: 3-YEAR INSPECTION HISTORY ARCHIVE (WITH YEAR BUTTONS) -->
       <div id="tab-history" class="tab-content">
         <div class="section-head">
           <div>
@@ -619,7 +719,6 @@ table.data-table tr:hover td{background:var(--orange-light);}
           </button>
         </div>
 
-        <!-- ชุดปุ่มกดเลือกปี (Year Filter Buttons) -->
         <div class="year-btn-group">
           <button class="btn-year active" id="btnYear2026" onclick="selectYearFilter('2026')">
             📅 ปี 2569 (2026) <span class="tag-count" id="badge2026">0</span>
@@ -635,7 +734,6 @@ table.data-table tr:hover td{background:var(--orange-light);}
           </button>
         </div>
 
-        <!-- ตัวกรองอำเภอและค้นหา -->
         <div class="filter-bar">
           <select id="filterDistrictSelect" class="select-filter" onchange="filterHistoryTable()">
             <option value="ALL">📍 ทุกอำเภอในสมุทรปราการ</option>
@@ -666,7 +764,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </div>
 
-      <!-- TAB 3: FEEDER OUTAGE ANALYTICS -->
+      <!-- TAB 5: FEEDER OUTAGE ANALYTICS -->
       <div id="tab-outage" class="tab-content">
         <div class="section-head">
           <div>
@@ -704,7 +802,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </div>
 
-      <!-- TAB 4: ROUTE PATROL -->
+      <!-- TAB 6: ROUTE PATROL -->
       <div id="tab-route" class="tab-content">
         <div class="nav-mission-banner">
           <div class="mission-info">
@@ -730,7 +828,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </div>
 
-      <!-- TAB 5: FORM -->
+      <!-- TAB 7: FORM -->
       <div id="tab-form" class="tab-content">
         <div class="section-head">
           <h3>แบบฟอร์มเอกสารบันทึกผลการบำรุงรักษา (e-Work Order)</h3>
@@ -794,14 +892,14 @@ table.data-table tr:hover td{background:var(--orange-light);}
                 </select>
               </div>
             </div>
-            <button type="submit" class="btn primary" style="margin-top:16px; width:100%; justify-content:center; padding:12px;">
+            <button type="submit" class="btn primary" id="btnSubmitForm" style="margin-top:16px; width:100%; justify-content:center; padding:12px;">
               บันทึกข้อมูลและส่งขึ้น Live Grid
             </button>
           </form>
         </div>
       </div>
 
-      <!-- TAB 6: ANOMALY ENGINE -->
+      <!-- TAB 8: ANOMALY ENGINE -->
       <div id="tab-anomaly" class="tab-content">
         <div class="section-head">
           <h3>การวิเคราะห์ความผิดปกติ (Real-Time Anomaly Engine)</h3>
@@ -819,25 +917,21 @@ table.data-table tr:hover td{background:var(--orange-light);}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     <span>แผนงาน</span>
   </button>
+  <button class="mobile-nav-btn" data-tab="tab-analytics">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17l-5-5-4 4-6-6"/></svg>
+    <span>กราฟ</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab="tab-assets">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>สุขภาพ</span>
+  </button>
   <button class="mobile-nav-btn" data-tab="tab-history">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>ประวัติ 3 ปี</span>
-  </button>
-  <button class="mobile-nav-btn" data-tab="tab-outage">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-    <span>สถิติไฟดับ</span>
+    <span>ประวัติ</span>
   </button>
   <button class="mobile-nav-btn" data-tab="tab-route">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a4.5 4.5 0 004.5-4.5v0a4.5 4.5 0 00-4.5-4.5H6"/><circle cx="18" cy="5" r="3"/></svg>
-    <span>GPS นำทาง</span>
-  </button>
-  <button class="mobile-nav-btn" data-tab="tab-form">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-    <span>ฟอร์ม</span>
-  </button>
-  <button class="mobile-nav-btn" data-tab="tab-anomaly">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-    <span>วิเคราะห์</span>
+    <span>GPS</span>
   </button>
 </nav>
 
@@ -854,7 +948,60 @@ table.data-table tr:hover td{background:var(--orange-light);}
 
 <script>
 /* ---------------- DATA STORE ---------------- */
-let currentSelectedYear = '2026'; // ค่าเริ่มต้นปี 2569
+let currentRole = 'admin';
+let currentSelectedYear = '2026';
+
+// ข้อมูลสถานะอุปกรณ์และดัชนีสุขภาพ (Asset Health Index - AHI)
+const ASSET_HEALTH_DATA = [
+  {
+    tag: 'TR-BP-0012',
+    name: 'หม้อแปลง TR-250kVA นิคมบางปู ซ.12',
+    area: 'อ.เมืองสมุทรปราการ · สถานีฯ ท้ายบ้าน',
+    ahi: 92,
+    status: 'good',
+    statusLabel: 'สมบูรณ์ (Good)',
+    color: '#16A34A',
+    dgaStatus: 'Normal (H2 < 10 ppm)',
+    tempMax: '48.5 °C',
+    lastPM: '28 ส.ค. 2569'
+  },
+  {
+    tag: 'FDR-TP-08',
+    name: 'สายป้อนแรงสูง Feeder 11 เทพารักษ์ กม.8',
+    area: 'อ.บางพลี · สถานีฯ เทพารักษ์',
+    ahi: 64,
+    status: 'warn',
+    statusLabel: 'เฝ้าระวัง (Watchlist)',
+    color: '#D97706',
+    dgaStatus: 'คราบเกลือสะสมปานกลาง',
+    tempMax: '58.2 °C',
+    lastPM: '15 มิ.ย. 2569'
+  },
+  {
+    tag: 'TR-BK-0085',
+    name: 'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19',
+    area: 'อ.บางพลี · บริเวณโรงงานบางโฉลง',
+    ahi: 42,
+    status: 'critical',
+    statusLabel: 'เสี่ยงสูง (Critical)',
+    color: '#DC2626',
+    dgaStatus: 'Hotspot ขั้วต่อสายเฟส B',
+    tempMax: '78.4 °C',
+    lastPM: '27 ส.ค. 2569'
+  },
+  {
+    tag: 'RMU-PS-004',
+    name: 'สวิตช์เกียร์ Ring Main Unit ซ.วัดด่าน',
+    area: 'อ.เมืองสมุทรปราการ · สำโรงเหนือ',
+    ahi: 88,
+    status: 'good',
+    statusLabel: 'สมบูรณ์ (Good)',
+    color: '#16A34A',
+    dgaStatus: 'SF6 Pressure: 0.55 MPa',
+    tempMax: '41.0 °C',
+    lastPM: '30 ส.ค. 2569'
+  }
+];
 
 let WORK_ORDERS = [
   {id:'WO-SP-69083', asset:'โคมไฟถนน LED ถ.สุขสวัสดิ์-ป้อมพระจุล', district:'อ.พระสมุทรเจดีย์', type:'เปลี่ยน Photo Switch & โคมไฟ', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมไฟสาธารณะ', status:'done', temp:'32.0', ground:'1.95'},
@@ -865,207 +1012,26 @@ let WORK_ORDERS = [
   {id:'WO-SP-69084', asset:'RMU สวิตช์เกียร์ ซ.วัดด่านสำโรง', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบ Ring Main Unit', isoDate:'2026-08-30', date:'30 ส.ค. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'41.0', ground:'2.15'}
 ];
 
-// ฐานข้อมูลประวัติย้อนหลัง 3 ปี (2567, 2568, 2569)
 let INSPECTION_HISTORY = [
-  // ปี 2569 (2026)
-  {
-    logId: 'LOG-SP-2026-0827-01', year: '2026', district: 'เมือง',
-    timestamp: '27 ส.ค. 2569 08:35 น.',
-    assetName: 'หม้อแปลงหน้า รร.นายเรือ (TR-SP-0012)',
-    inspector: 'สายตรวจ SP-CAR 01 (ช่างสมศักดิ์)',
-    temp: '36.4', ground: '1.85', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass',
-    note: 'ทำความสะอาดฝุ่นและตรวจวัดระดับน้ำมันฉนวน อยู่ในเกณฑ์มาตรฐาน'
-  },
-  {
-    logId: 'LOG-SP-2026-0826-03', year: '2026', district: 'พระสมุทรเจดีย์',
-    timestamp: '26 ส.ค. 2569 16:15 น.',
-    assetName: 'โคมไฟถนน LED ป้อมพระจุล (PL-PC-042)',
-    inspector: 'ทีมไฟสาธารณะ 02 (ช่างมานพ)',
-    temp: '32.0', ground: '2.10', result: 'แก้ไขแล้ว (เปลี่ยนชุดไฟ)', statusClass: 'pass',
-    note: 'เปลี่ยน Photo Switch และหลอดไฟ LED 150W จำนวน 2 ชุด'
-  },
-  {
-    logId: 'LOG-SP-2026-0826-02', year: '2026', district: 'เมือง',
-    timestamp: '26 ส.ค. 2569 14:00 น.',
-    assetName: 'หม้อแปลงโรงงานบางปู ซ.3 (TR-BP-0105)',
-    inspector: 'ทีมหม้อแปลง 01 (ช่างวิชัย)',
-    temp: '74.2', ground: '3.40', result: 'เฝ้าระวัง (Hotspot)', statusClass: 'warn',
-    note: 'พบจุดต่อสายเฟส B ร้อนกว่าปกติ ได้ขันแน่นและนัดตรวจซ้ำใน 7 วัน'
-  },
-  {
-    logId: 'LOG-SP-2026-0412-01', year: '2026', district: 'บางพลี',
-    timestamp: '12 เม.ย. 2569 10:30 น.',
-    assetName: 'สวิตช์เกียร์ RMU เทพารักษ์ กม.10',
-    inspector: 'ทีมอุปกรณ์พิเศษ (ช่างเอกชัย)',
-    temp: '41.2', ground: '2.05', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass',
-    note: 'ตรวจเช็กแรงดันแก๊ส SF6 และระบบ Interlock ป้องกันไฟดูด'
-  },
-
-  // ปี 2568 (2025)
-  {
-    logId: 'LOG-SP-2025-1118-04', year: '2025', district: 'บางพลี',
-    timestamp: '18 พ.ย. 2568 15:40 น.',
-    assetName: 'สายป้อน Feeder 08 เทพารักษ์ กม.5',
-    inspector: 'ทีมสายส่ง 02 (ช่างดำรงค์)',
-    temp: '37.5', ground: '2.90', result: 'ปกติ (ตัดกิ่งไม้)', statusClass: 'pass',
-    note: 'ตัดแต่งกิ่งไม้ใกล้แนวสายส่งระยะ 400 เมตร ป้องกันไฟลัดวงจร'
-  },
-  {
-    logId: 'LOG-SP-2025-0810-02', year: '2025', district: 'เมือง',
-    timestamp: '10 ส.ค. 2568 09:20 น.',
-    assetName: 'หม้อแปลงสถานีสูบน้ำท้ายบ้าน',
-    inspector: 'ทีมหม้อแปลง 02 (ช่างสมคิด)',
-    temp: '45.0', ground: '1.95', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass',
-    note: 'เปลี่ยนปะเก็นฝาถังและถ่ายกรองน้ำมันหม้อแปลงประจำปี'
-  },
-  {
-    logId: 'LOG-SP-2025-0524-01', year: '2025', district: 'พระสมุทรเจดีย์',
-    timestamp: '24 พ.ค. 2568 13:10 น.',
-    assetName: 'เสาไฟแรงสูง แหลมฟ้าผ่า กม.3',
-    inspector: 'ทีมสายส่ง 01 (ช่างวิวัฒน์)',
-    temp: '35.4', ground: '2.40', result: 'ปกติ (ล้างคราบเกลือ)', statusClass: 'pass',
-    note: 'ฉีดล้างลูกถ้วยฉนวนกันมลภาวะไอเค็มทะเลสะสมช่วงลมมรสุม'
-  },
-  {
-    logId: 'LOG-SP-2025-0215-03', year: '2025', district: 'บางบ่อ',
-    timestamp: '15 ก.พ. 2568 11:00 น.',
-    assetName: 'หม้อแปลงจำหน่าย ตลาดคลองด่าน',
-    inspector: 'ทีมฉุกเฉิน 24ชม. (ช่างธีระ)',
-    temp: '68.5', ground: '3.80', result: 'แก้ไขแล้ว (ปรับโหลด)', statusClass: 'pass',
-    note: 'สลับเฟสโหลดบาลานซ์เพื่อลดกระแสเกินพิกัดในเฟส A'
-  },
-
-  // ปี 2567 (2024)
-  {
-    logId: 'LOG-SP-2024-1205-02', year: '2024', district: 'เมือง',
-    timestamp: '5 ธ.ค. 2567 14:15 น.',
-    assetName: 'RMU ซ.ด่านสำโรง 14',
-    inspector: 'ทีมอุปกรณ์พิเศษ (ช่างเอกชัย)',
-    temp: '39.8', ground: '1.80', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass',
-    note: 'บำรุงรักษาเชิงป้องกันประจำรอบ 6 เดือน ทดสอบสวิตช์ตัดตอน'
-  },
-  {
-    logId: 'LOG-SP-2024-0919-01', year: '2024', district: 'บางพลี',
-    timestamp: '19 ก.ย. 2567 10:45 น.',
-    assetName: 'หม้อแปลง TR-500kVA ซ.กิ่งแก้ว 21',
-    inspector: 'ทีมหม้อแปลง 01 (ช่างวิชัย)',
-    temp: '82.0', ground: '4.50', result: 'เฝ้าระวัง (Overload)', statusClass: 'warn',
-    note: 'โรงงานเปิดเครื่องจักรขนานใหญ่ อุณหภูมิสูง แจ้งให้ติดตั้งพัดลมเป่าระบาย'
-  },
-  {
-    logId: 'LOG-SP-2024-0611-03', year: '2024', district: 'พระสมุทรเจดีย์',
-    timestamp: '11 มิ.ย. 2567 16:00 น.',
-    assetName: 'โคมไฟถนน สุขสวัสดิ์-คู่สร้าง',
-    inspector: 'ทีมไฟสาธารณะ 01 (ช่างประเสริฐ)',
-    temp: '31.5', ground: '2.15', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass',
-    note: 'ตรวจระบบตู้คอนโทรลตั้งเวลาและเปลี่ยนเบรกเกอร์กันดูด'
-  },
-  {
-    logId: 'LOG-SP-2024-0308-04', year: '2024', district: 'บางบ่อ',
-    timestamp: '8 มี.ค. 2567 09:30 น.',
-    assetName: 'เสาไฟฟ้าแรงสูง ถ.รัตนราช กม.4',
-    inspector: 'ทีมสายส่ง 02 (ช่างดำรงค์)',
-    temp: '34.0', ground: '2.60', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass',
-    note: 'ตรวจสอบกายภาพเสาและขันแน่นสลักเกลียวโครงสร้าง'
-  }
+  {logId: 'LOG-SP-2026-0827-01', year: '2026', district: 'เมือง', timestamp: '27 ส.ค. 2569 08:35 น.', assetName: 'หม้อแปลงหน้า รร.นายเรือ (TR-SP-0012)', inspector: 'สายตรวจ SP-CAR 01 (ช่างสมศักดิ์)', temp: '36.4', ground: '1.85', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass', note: 'ทำความสะอาดฝุ่นและตรวจวัดระดับน้ำมันฉนวน อยู่ในเกณฑ์มาตรฐาน'},
+  {logId: 'LOG-SP-2026-0826-03', year: '2026', district: 'พระสมุทรเจดีย์', timestamp: '26 ส.ค. 2569 16:15 น.', assetName: 'โคมไฟถนน LED ป้อมพระจุล (PL-PC-042)', inspector: 'ทีมไฟสาธารณะ 02 (ช่างมานพ)', temp: '32.0', ground: '2.10', result: 'แก้ไขแล้ว (เปลี่ยนชุดไฟ)', statusClass: 'pass', note: 'เปลี่ยน Photo Switch และหลอดไฟ LED 150W จำนวน 2 ชุด'},
+  {logId: 'LOG-SP-2026-0826-02', year: '2026', district: 'เมือง', timestamp: '26 ส.ค. 2569 14:00 น.', assetName: 'หม้อแปลงโรงงานบางปู ซ.3 (TR-BP-0105)', inspector: 'ทีมหม้อแปลง 01 (ช่างวิชัย)', temp: '74.2', ground: '3.40', result: 'เฝ้าระวัง (Hotspot)', statusClass: 'warn', note: 'พบจุดต่อสายเฟส B ร้อนกว่าปกติ ได้ขันแน่นและนัดตรวจซ้ำใน 7 วัน'},
+  {logId: 'LOG-SP-2025-1118-04', year: '2025', district: 'บางพลี', timestamp: '18 พ.ย. 2568 15:40 น.', assetName: 'สายป้อน Feeder 08 เทพารักษ์ กม.5', inspector: 'ทีมสายส่ง 02 (ช่างดำรงค์)', temp: '37.5', ground: '2.90', result: 'ปกติ (ตัดกิ่งไม้)', statusClass: 'pass', note: 'ตัดแต่งกิ่งไม้ใกล้แนวสายส่งระยะ 400 เมตร ป้องกันไฟลัดวงจร'},
+  {logId: 'LOG-SP-2024-1205-02', year: '2024', district: 'เมือง', timestamp: '5 ธ.ค. 2567 14:15 น.', assetName: 'RMU ซ.ด่านสำโรง 14', inspector: 'ทีมอุปกรณ์พิเศษ (ช่างเอกชัย)', temp: '39.8', ground: '1.80', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass', note: 'บำรุงรักษาเชิงป้องกันประจำรอบ 6 เดือน ทดสอบสวิตช์ตัดตอน'}
 ];
 
 const FEEDER_OUTAGE_DATA = [
-  {
-    code: 'FDR-TP-08',
-    name: 'สายป้อนเทพารักษ์ 08 (สถานีฯ บางพลี)',
-    area: 'อ.บางพลี (เทพารักษ์ กม.1 - กม.12)',
-    outageCount: 9,
-    totalDurationMin: 345,
-    saifi: 1.42,
-    saidi: 48.2,
-    mainCause: 'กิ่งไม้แตะสายช่วงลมแรง / จุดต่อสายร้อนสะสม',
-    risk: 'critical',
-    riskLabel: 'เสี่ยงสูง (Critical)'
-  },
-  {
-    code: 'FDR-BP-04',
-    name: 'สายป้อนบางปู 04 (สถานีฯ ท้ายบ้าน)',
-    area: 'อ.เมืองสมุทรปราการ (นิคมอุตสาหกรรมบางปู)',
-    outageCount: 7,
-    totalDurationMin: 220,
-    saifi: 1.15,
-    saidi: 32.5,
-    mainCause: 'คราบไอเค็มทะเลสะสมบนลูกถ้วยฉนวน (Salt Contamination)',
-    risk: 'critical',
-    riskLabel: 'เสี่ยงสูง (Critical)'
-  },
-  {
-    code: 'FDR-SS-02',
-    name: 'สายป้อนสุขสวัสดิ์ 02 (สถานีฯ พระสมุทรเจดีย์)',
-    area: 'อ.พระสมุทรเจดีย์ (สามแยกพระประแดง - ป้อมพระจุล)',
-    outageCount: 5,
-    totalDurationMin: 140,
-    saifi: 0.82,
-    saidi: 21.0,
-    mainCause: 'สัตว์เลื้อยคลาน / ลมพายุชายฝั่งพัดสายแกว่งชน',
-    risk: 'warning',
-    riskLabel: 'ปานกลาง (Watchlist)'
-  },
-  {
-    code: 'FDR-KK-11',
-    name: 'สายป้อนกิ่งแก้ว 11 (สถานีฯ ราชาเทวะ)',
-    area: 'อ.บางพลี / อ.บางเสาธง (ถ.กิ่งแก้ว)',
-    outageCount: 4,
-    totalDurationMin: 95,
-    saifi: 0.65,
-    saidi: 15.4,
-    mainCause: 'อุบัติเหตุรถเฉี่ยวชนเสาไฟฟ้า / งานก่อสร้างขยายถนน',
-    risk: 'warning',
-    riskLabel: 'ปานกลาง (Watchlist)'
-  },
-  {
-    code: 'FDR-BB-01',
-    name: 'สายป้อนบางบ่อ 01 (สถานีฯ บางบ่อ)',
-    area: 'อ.บางบ่อ (ถ.รัตนราช - คลองด่าน)',
-    outageCount: 2,
-    totalDurationMin: 45,
-    saifi: 0.28,
-    saidi: 7.2,
-    mainCause: 'อุปกรณ์ป้องกันเบรกเกอร์ทริปจากฟ้าผ่า',
-    risk: 'good',
-    riskLabel: 'ต่ำ / ปกติ (Normal)'
-  }
+  {code: 'FDR-TP-08', name: 'สายป้อนเทพารักษ์ 08 (สถานีฯ บางพลี)', area: 'อ.บางพลี (เทพารักษ์ กม.1 - กม.12)', outageCount: 9, totalDurationMin: 345, saifi: 1.42, saidi: 48.2, mainCause: 'กิ่งไม้แตะสายช่วงลมแรง / จุดต่อสายร้อนสะสม', risk: 'critical', riskLabel: 'เสี่ยงสูง (Critical)'},
+  {code: 'FDR-BP-04', name: 'สายป้อนบางปู 04 (สถานีฯ ท้ายบ้าน)', area: 'อ.เมืองสมุทรปราการ (นิคมอุตสาหกรรมบางปู)', outageCount: 7, totalDurationMin: 220, saifi: 1.15, saidi: 32.5, mainCause: 'คราบไอเค็มทะเลสะสมบนลูกถ้วยฉนวน (Salt Contamination)', risk: 'critical', riskLabel: 'เสี่ยงสูง (Critical)'},
+  {code: 'FDR-SS-02', name: 'สายป้อนสุขสวัสดิ์ 02 (สถานีฯ พระสมุทรเจดีย์)', area: 'อ.พระสมุทรเจดีย์ (สามแยกพระประแดง - ป้อมพระจุล)', outageCount: 5, totalDurationMin: 140, saifi: 0.82, saidi: 21.0, mainCause: 'สัตว์เลื้อยคลาน / ลมพายุชายฝั่งพัดสายแกว่งชน', risk: 'warning', riskLabel: 'ปานกลาง (Watchlist)'},
+  {code: 'FDR-KK-11', name: 'สายป้อนกิ่งแก้ว 11 (สถานีฯ ราชาเทวะ)', area: 'อ.บางพลี / อ.บางเสาธง (ถ.กิ่งแก้ว)', outageCount: 4, totalDurationMin: 95, saifi: 0.65, saidi: 15.4, mainCause: 'อุบัติเหตุรถเฉี่ยวชนเสาไฟฟ้า / งานก่อสร้างขยายถนน', risk: 'warning', riskLabel: 'ปานกลาง (Watchlist)'}
 ];
 
 const PATROL_PINS = [
-  {
-    id: 1,
-    name: 'หม้อแปลงหน้า รร.นายเรือ (ถ.สุขุมวิท)',
-    desc: 'วัดค่าความต้านทานกราวด์ดินและระดับน้ำมัน',
-    lat: 13.6062, lng: 100.5925,
-    status: 'completed',
-    assetCode: 'TR-SP-0012'
-  },
-  {
-    id: 2,
-    name: 'สายป้อนนิคมฯ บางปู ซ.9 (ถ.พัฒนา 1)',
-    desc: 'ตรวจคราบไอเกลือทะเลสะสมบนลูกถ้วยฉนวน',
-    lat: 13.5245, lng: 100.6710,
-    status: 'active',
-    assetCode: 'FEEDER-BP-09'
-  },
-  {
-    id: 3,
-    name: 'สวิตช์เกียร์แยกแพรกษา กม.4',
-    desc: 'สแกน Thermo-scan ขั้วต่อสายและตู้ RMU',
-    lat: 13.5685, lng: 100.6350,
-    status: 'pending',
-    assetCode: 'SWG-PS-04'
-  },
-  {
-    id: 4,
-    name: 'หม้อแปลงตลาดปากน้ำ (ถ.ท้ายบ้าน)',
-    desc: 'ตรวจบาลานซ์เฟสและโหลดการใช้ไฟช่วงค่ำ',
-    lat: 13.5950, lng: 100.5980,
-    status: 'pending',
-    assetCode: 'TR-PK-0088'
-  }
+  {id: 1, name: 'หม้อแปลงหน้า รร.นายเรือ (ถ.สุขุมวิท)', desc: 'วัดค่าความต้านทานกราวด์ดินและระดับน้ำมัน', lat: 13.6062, lng: 100.5925, status: 'completed', assetCode: 'TR-SP-0012'},
+  {id: 2, name: 'สายป้อนนิคมฯ บางปู ซ.9 (ถ.พัฒนา 1)', desc: 'ตรวจคราบไอเกลือทะเลสะสมบนลูกถ้วยฉนวน', lat: 13.5245, lng: 100.6710, status: 'active', assetCode: 'FEEDER-BP-09'},
+  {id: 3, name: 'สวิตช์เกียร์แยกแพรกษา กม.4', desc: 'สแกน Thermo-scan ขั้วต่อสายและตู้ RMU', lat: 13.5685, lng: 100.6350, status: 'pending', assetCode: 'SWG-PS-04'},
+  {id: 4, name: 'หม้อแปลงตลาดปากน้ำ (ถ.ท้ายบ้าน)', desc: 'ตรวจบาลานซ์เฟสและโหลดการใช้ไฟช่วงค่ำ', lat: 13.5950, lng: 100.5980, status: 'pending', assetCode: 'TR-PK-0088'}
 ];
 
 const ANOMALIES = [
@@ -1074,7 +1040,133 @@ const ANOMALIES = [
   {zone:'ถ.กิ่งแก้ว - บางพลี', score:'88%', title:'แรงดันตกชั่วขณะบ่อยครั้ง (Micro-Sag)', desc:'Voltage Sag 4 ครั้งใน 48 ชม. คาดเกิดจากกิ่งไม้แตะสายช่วงลมกระโชกแรง', advice:'► ส่งทีมตัดแต่งกิ่งไม้แนวสายส่งระยะ 800 เมตร', mid:false}
 ];
 
-/* ---------------- SORT BY DUE DATE ---------------- */
+/* ---------------- ROLE-BASED ACCESS CONTROL (RBAC) ---------------- */
+function handleRoleChange(){
+  currentRole = document.getElementById('userRoleSelector').value;
+  const labelEl = document.getElementById('activeRoleLabel');
+  const btnAdd = document.getElementById('btnTopAddWork');
+  const navForm = document.getElementById('navItemForm');
+
+  if(currentRole === 'admin'){
+    labelEl.textContent = 'ADMIN VIEW (สิทธิ์เต็ม)';
+    btnAdd.style.display = 'inline-flex';
+    navForm.style.display = 'flex';
+  } else if(currentRole === 'supervisor'){
+    labelEl.textContent = 'SUPERVISOR (วางแผน/อนุมัติ)';
+    btnAdd.style.display = 'inline-flex';
+    navForm.style.display = 'flex';
+  } else if(currentRole === 'technician'){
+    labelEl.textContent = 'TECHNICIAN (บันทึกภาคสนาม)';
+    btnAdd.style.display = 'none';
+    navForm.style.display = 'flex';
+  } else if(currentRole === 'executive'){
+    labelEl.textContent = 'EXECUTIVE (ดูสถิติ/อ่านอย่างเดียว)';
+    btnAdd.style.display = 'none';
+    navForm.style.display = 'none';
+  }
+  renderTable();
+}
+
+/* ---------------- CHARTS ENGINE (CHART.JS) ---------------- */
+let chartSaifiInstance = null;
+let chartTempInstance = null;
+
+function initCharts(){
+  // 1. Chart SAIFI / SAIDI Trend
+  const ctxSaifi = document.getElementById('chartSaifiSaidi');
+  if(ctxSaifi){
+    if(chartSaifiInstance) chartSaifiInstance.destroy();
+    chartSaifiInstance = new Chart(ctxSaifi, {
+      type: 'bar',
+      data: {
+        labels: ['ปี 2567 (2024)', 'ปี 2568 (2025)', 'ปี 2569 (2026 ปัจจุบัน)'],
+        datasets: [
+          {
+            label: 'SAIFI (ครั้ง/ราย/ปี)',
+            data: [1.25, 1.02, 0.84],
+            backgroundColor: '#EA580C',
+            borderRadius: 6
+          },
+          {
+            label: 'SAIDI (นาที/ราย/ปี)',
+            data: [42.1, 35.8, 28.5],
+            backgroundColor: '#0D9488',
+            borderRadius: 6,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: 'SAIFI (ครั้ง)' } },
+          y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'SAIDI (นาที)' } }
+        }
+      }
+    });
+  }
+
+  // 2. Chart Temperature Trend
+  const ctxTemp = document.getElementById('chartTempTrend');
+  if(ctxTemp){
+    if(chartTempInstance) chartTempInstance.destroy();
+    chartTempInstance = new Chart(ctxTemp, {
+      type: 'line',
+      data: {
+        labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.'],
+        datasets: [{
+          label: 'อุณหภูมิ Thermo-scan เฉลี่ย (°C)',
+          data: [38.2, 41.5, 48.0, 52.4, 46.8, 43.1, 42.0, 44.5],
+          borderColor: '#EA580C',
+          backgroundColor: 'rgba(234, 88, 12, 0.1)',
+          tension: 0.35,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { min: 25, max: 70 } }
+      }
+    });
+  }
+}
+
+/* ---------------- ASSET HEALTH INDEX (AHI) RENDER ---------------- */
+function renderAssetHealth(){
+  const container = document.getElementById('assetGridContainer');
+  container.innerHTML = ASSET_HEALTH_DATA.map(a => `
+    <div class="asset-card">
+      <div class="asset-head">
+        <div>
+          <span class="asset-tag">${a.tag}</span>
+          <div class="asset-name">${a.name}</div>
+          <div class="asset-sub">${a.area}</div>
+        </div>
+        <span class="badge" style="background:${a.status==='good'?'#DCFCE7':a.status==='warn'?'#FEF3C7':'#FEE2E2'}; color:${a.color};">${a.statusLabel}</span>
+      </div>
+
+      <div class="health-bar-wrap">
+        <div class="health-label">
+          <span>ดัชนีสุขภาพ AHI:</span>
+          <span style="color:${a.color}; font-family:var(--font-num); font-weight:700;">${a.ahi}%</span>
+        </div>
+        <div class="health-track">
+          <div class="health-fill" style="width:${a.ahi}%; background:${a.color};"></div>
+        </div>
+      </div>
+
+      <div class="asset-metrics-pill">
+        <span class="mpill">🧪 DGA: ${a.dgaStatus}</span>
+        <span class="mpill">🌡️ Max: ${a.tempMax}</span>
+        <span class="mpill">📅 ตรวจล่าสุด: ${a.lastPM}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ---------------- SORT BY DUE DATE & RENDER TABLE ---------------- */
 function sortWorkOrdersByDue(){
   WORK_ORDERS.sort((a, b) => new Date(a.isoDate) - new Date(b.isoDate));
 }
@@ -1085,7 +1177,6 @@ function resortWorkOrders(){
   alert('จัดเรียงลำดับตามกำหนดเสร็จใกล้สุดเรียบร้อย');
 }
 
-/* ---------------- RENDER TABLE ---------------- */
 function renderTable(){
   sortWorkOrdersByDue();
   const tbody = document.getElementById('tableBody');
@@ -1106,6 +1197,10 @@ function renderTable(){
       duePill = `<span class="due-pill due-normal">📅 ${wo.date}</span>`;
     }
 
+    const editBtn = (currentRole === 'admin' || currentRole === 'supervisor' || currentRole === 'technician')
+      ? `<button class="btn-mini" onclick="editWorkOrder(${i})">แก้ไข</button>`
+      : '';
+
     return `
       <tr>
         <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${wo.id}</strong></td>
@@ -1118,7 +1213,7 @@ function renderTable(){
         <td style="text-align:right;">
           <div class="row-actions" style="justify-content:flex-end;">
             <button class="btn-mini" onclick="viewWorkOrder(${i})">ดู</button>
-            <button class="btn-mini" onclick="editWorkOrder(${i})">แก้ไข</button>
+            ${editBtn}
           </div>
         </td>
       </tr>
@@ -1130,7 +1225,7 @@ function renderTable(){
   document.getElementById('statDueToday').innerHTML = `${dueTodayCount} <small>รายการ</small>`;
 }
 
-/* ---------------- 3-YEAR INSPECTION ARCHIVE (YEAR BUTTONS) ---------------- */
+/* ---------------- 3-YEAR INSPECTION ARCHIVE ---------------- */
 function updateYearButtonBadges(){
   const c2026 = INSPECTION_HISTORY.filter(h => h.year === '2026').length;
   const c2025 = INSPECTION_HISTORY.filter(h => h.year === '2025').length;
@@ -1141,7 +1236,6 @@ function updateYearButtonBadges(){
   document.getElementById('badge2025').textContent = c2025;
   document.getElementById('badge2024').textContent = c2024;
   document.getElementById('badgeALL').textContent = cALL;
-  document.getElementById('statHistoryTotal').innerHTML = `${cALL} <small>บันทึก</small>`;
 }
 
 function selectYearFilter(year){
@@ -1196,9 +1290,7 @@ function getFilteredHistoryData(){
   });
 }
 
-function filterHistoryTable(){
-  renderHistoryTable();
-}
+function filterHistoryTable(){ renderHistoryTable(); }
 
 function viewHistoryDetail(logId){
   const item = INSPECTION_HISTORY.find(h => h.logId === logId);
@@ -1229,16 +1321,9 @@ function viewHistoryDetail(logId){
 function exportHistoryToExcel(){
   const filteredData = getFilteredHistoryData();
   const exportData = filteredData.map(h => ({
-    "ปี (ค.ศ.)": h.year,
-    "ปี (พ.ศ.)": Number(h.year)+543,
-    "รหัสบันทึก": h.logId,
-    "วันที่-เวลา": h.timestamp,
-    "อุปกรณ์/สถานที่": h.assetName,
-    "ผู้ตรวจ": h.inspector,
-    "อุณหภูมิ (°C)": h.temp,
-    "กราวด์ (Ω)": h.ground,
-    "ผลการตรวจ": h.result,
-    "บันทึกเพิ่มเติม": h.note
+    "ปี (ค.ศ.)": h.year, "ปี (พ.ศ.)": Number(h.year)+543, "รหัสบันทึก": h.logId,
+    "วันที่-เวลา": h.timestamp, "อุปกรณ์/สถานที่": h.assetName, "ผู้ตรวจ": h.inspector,
+    "อุณหภูมิ (°C)": h.temp, "กราวด์ (Ω)": h.ground, "ผลการตรวจ": h.result, "บันทึกเพิ่มเติม": h.note
   }));
   const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
@@ -1297,15 +1382,9 @@ function renderFeederOutage(){
 
 function exportOutageToExcel(){
   const exportData = FEEDER_OUTAGE_DATA.map(f => ({
-    "รหัสสายป้อน": f.code,
-    "ชื่อสายป้อน": f.name,
-    "พื้นที่บริการ": f.area,
-    "จำนวนครั้งที่ดับ (ครั้ง)": f.outageCount,
-    "เวลารวมที่ดับ (นาที)": f.totalDurationMin,
-    "SAIFI (ครั้ง/ราย/ปี)": f.saifi,
-    "SAIDI (นาที/ราย/ปี)": f.saidi,
-    "สาเหตุหลัก": f.mainCause,
-    "ระดับความเสี่ยง": f.riskLabel
+    "รหัสสายป้อน": f.code, "ชื่อสายป้อน": f.name, "พื้นที่บริการ": f.area,
+    "จำนวนครั้งที่ดับ (ครั้ง)": f.outageCount, "เวลารวมที่ดับ (นาที)": f.totalDurationMin,
+    "SAIFI (ครั้ง/ราย/ปี)": f.saifi, "SAIDI (นาที/ราย/ปี)": f.saidi, "สาเหตุหลัก": f.mainCause, "ระดับความเสี่ยง": f.riskLabel
   }));
   const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
@@ -1322,10 +1401,8 @@ function initMap(){
   if(mapInstance) return;
 
   mapInstance = L.map('inspectionMap').setView([13.5750, 100.6250], 12);
-
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    maxZoom: 19
+    attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19
   }).addTo(mapInstance);
 
   renderMapMarkers();
@@ -1342,15 +1419,8 @@ function renderMapMarkers(){
 
   PATROL_PINS.forEach((p) => {
     latlngs.push([p.lat, p.lng]);
-
     const markerHtml = `<div class="custom-map-marker ${p.status}">${p.id}</div>`;
-    const customIcon = L.divIcon({
-      html: markerHtml,
-      className: '',
-      iconSize: [26, 26],
-      iconAnchor: [13, 13]
-    });
-
+    const customIcon = L.divIcon({ html: markerHtml, className: '', iconSize: [26, 26], iconAnchor: [13, 13] });
     const marker = L.marker([p.lat, p.lng], {icon: customIcon}).addTo(mapInstance);
     const gmapUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
     
@@ -1362,17 +1432,10 @@ function renderMapMarkers(){
         🗺️ เปิดนำทาง Google Maps
       </a>
     `);
-
     markerLayers.push(marker);
   });
 
-  routePolyline = L.polyline(latlngs, {
-    color: '#EA580C',
-    weight: 4,
-    opacity: 0.85,
-    dashArray: '8, 8'
-  }).addTo(mapInstance);
-
+  routePolyline = L.polyline(latlngs, { color: '#EA580C', weight: 4, opacity: 0.85, dashArray: '8, 8' }).addTo(mapInstance);
   mapInstance.fitBounds(routePolyline.getBounds(), {padding: [40, 40]});
 }
 
@@ -1383,7 +1446,6 @@ function openGoogleMapsNavigation(lat, lng){
 function focusCheckpoint(id){
   const pin = PATROL_PINS.find(p => p.id === id);
   if(!pin || !mapInstance) return;
-
   mapInstance.flyTo([pin.lat, pin.lng], 15, {duration: 1.2});
   const marker = markerLayers[id - 1];
   if(marker) marker.openPopup();
@@ -1489,6 +1551,9 @@ function switchTab(tabId){
 
   if(tabId === 'tab-route' && mapInstance){
     setTimeout(() => { mapInstance.invalidateSize(); }, 200);
+  }
+  if(tabId === 'tab-analytics'){
+    setTimeout(() => { initCharts(); }, 200);
   }
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
@@ -1615,15 +1680,9 @@ function handleFormSubmit(e){
 /* ---------------- EXCEL EXPORT (PLAN) ---------------- */
 function exportToExcel(){
   const exportData = WORK_ORDERS.map(w => ({
-    "รหัสใบสั่งงาน": w.id,
-    "อุปกรณ์/จุดติดตั้ง": w.asset,
-    "อำเภอ": w.district,
-    "ประเภทงาน": w.type,
-    "กำหนดเสร็จ (Due Date)": w.date,
-    "ทีมรับผิดชอบ": w.team,
-    "สถานะ": w.status,
-    "อุณหภูมิ (°C)": w.temp,
-    "กราวด์ (Ω)": w.ground
+    "รหัสใบสั่งงาน": w.id, "อุปกรณ์/จุดติดตั้ง": w.asset, "อำเภอ": w.district,
+    "ประเภทงาน": w.type, "กำหนดเสร็จ (Due Date)": w.date, "ทีมรับผิดชอบ": w.team,
+    "สถานะ": w.status, "อุณหภูมิ (°C)": w.temp, "กราวด์ (Ω)": w.ground
   }));
   const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
@@ -1636,7 +1695,6 @@ function startLiveTelemetry(){
   setInterval(() => {
     const now = new Date();
     document.getElementById('liveClock').textContent = now.toTimeString().split(' ')[0];
-    
     const load = (380 + Math.sin(now.getTime()/5000)*6 + Math.random()*2).toFixed(1);
     document.getElementById('rtLoad').textContent = load;
   }, 1000);
@@ -1648,6 +1706,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderRouteList();
   renderHistoryTable();
   renderTable();
+  renderAssetHealth();
   renderFeederOutage();
   renderAnomalies();
   startLiveTelemetry();
