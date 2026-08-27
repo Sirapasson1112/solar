@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS Smart Grid สมุทรปราการ (Site Photo Attachment Edition)</title>
+<title>CMMS Smart Grid สมุทรปราการ (Fixed Dual Charts Edition)</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -189,6 +189,17 @@ html,body{
 .section-head h3{font-size:16px; font-weight:700;}
 .section-head .sub{font-size:12px; color:var(--text-muted);}
 
+/* ---------------- CHARTS SECTION ---------------- */
+.chart-grid{
+  display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:20px;
+}
+.chart-card{
+  background:var(--bg-surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);
+}
+.chart-card h4{font-size:14px; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;}
+.chart-card .chart-container{position:relative; height:260px; width:100%;}
+
 /* ---------------- MONTHLY PLANNER CONTROLS ---------------- */
 .month-selector-bar{
   background:var(--bg-surface); border:1px solid var(--border);
@@ -286,12 +297,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
 }
 .btn-mini:hover{border-color:var(--orange-pri); color:var(--orange-pri); background:var(--orange-light);}
 
-/* CHARTS & ASSETS */
-.chart-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:20px;}
-.chart-card{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);}
-.chart-card h4{font-size:14px; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;}
-.chart-card .chart-container{position:relative; height:240px; width:100%;}
-
+/* ASSETS */
 .asset-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:16px; margin-bottom:20px;}
 .asset-card{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm);}
 .asset-head{display:flex; justify-content:space-between; align-items:flex-start;}
@@ -303,7 +309,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
 .health-track{height:8px; background:#F1F5F9; border-radius:4px; overflow:hidden;}
 .health-fill{height:100%; border-radius:4px;}
 
-/* ---------------- YEAR BUTTONS BAR ---------------- */
+/* YEAR BUTTONS BAR */
 .year-btn-group{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
 .btn-year{
   display:inline-flex; align-items:center; gap:6px;
@@ -383,7 +389,6 @@ table.data-table tr:hover td{background:var(--orange-light);}
 }
 .form-field input:focus, .form-field select:focus, .form-field textarea:focus{border-color:var(--orange-pri); outline:none; box-shadow:0 0 0 2px var(--orange-glow);}
 
-/* PHOTO UPLOAD BOX */
 .photo-upload-zone{
   border:2px dashed #FDBA74; background:var(--bg-card-alt); border-radius:var(--radius-sm);
   padding:18px; text-align:center; cursor:pointer; transition:.2s;
@@ -468,7 +473,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>SITE PHOTO ATTACH v5.4</span>
+        <span>MONTHLY PLANNER v5.5</span>
       </div>
     </div>
 
@@ -636,7 +641,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
       </div>
 
-      <!-- TAB 2: ANALYTICS & TREND CHARTS -->
+      <!-- TAB 2: ANALYTICS & TREND CHARTS (FIXED BOTH CHARTS) -->
       <div id="tab-analytics" class="tab-content">
         <div class="section-head">
           <div>
@@ -673,7 +678,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         <div class="asset-grid" id="assetGridContainer"></div>
       </div>
 
-      <!-- TAB 4: INSPECTION HISTORY ARCHIVE (ประวัติตรวจย้อนหลัง) -->
+      <!-- TAB 4: INSPECTION HISTORY ARCHIVE -->
       <div id="tab-history" class="tab-content">
         <div class="section-head">
           <div>
@@ -907,7 +912,7 @@ let currentSelectedYear = '2026';
 let currentSelectedMonth = 7;
 let currentPlannerYear = 2026;
 let currentPlannerViewMode = 'table';
-let uploadedPhotos = []; // เก็บ Base64 ของรูปที่ช่างแนบ
+let uploadedPhotos = [];
 
 const THAI_MONTHS = [
   'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -1269,11 +1274,10 @@ function handleFormSubmit(e){
     ground: document.getElementById('f_ground').value || '2.50',
     status: document.getElementById('f_status').value,
     team: 'ทีมสายตรวจ SP-01',
-    photos: [...uploadedPhotos] // แนบรูปถ่ายที่อัปโหลด
+    photos: [...uploadedPhotos]
   };
   WORK_ORDERS.push(newWO);
   
-  // Reset Form & Photo Uploads
   uploadedPhotos = [];
   renderPhotoPreviews();
   document.getElementById('woForm').reset();
@@ -1288,7 +1292,7 @@ function handleFormSubmit(e){
   switchTab('tab-plan');
 }
 
-/* ---------------- TAB ROUTING ---------------- */
+/* ---------------- TAB ROUTING & CHARTS TRIGGER ---------------- */
 function switchTab(tabId){
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
@@ -1515,17 +1519,51 @@ function renderRouteList(){
   `).join('');
 }
 
-/* ---------------- CHARTS ---------------- */
+/* ---------------- CHARTS ENGINE (แก้ไขให้โหลดพร้อมกันทั้ง 2 กราฟ) ---------------- */
+let chartSaifiInstance = null;
+let chartTempInstance = null;
+
 function initCharts(){
+  // กราฟที่ 1: SAIFI / SAIDI (Bar Chart)
   const ctxSaifi = document.getElementById('chartSaifiSaidi');
   if(ctxSaifi) {
-    new Chart(ctxSaifi, {
+    if(chartSaifiInstance) chartSaifiInstance.destroy();
+    chartSaifiInstance = new Chart(ctxSaifi, {
       type: 'bar',
       data: {
         labels: ['ปี 2567', 'ปี 2568', 'ปี 2569'],
-        datasets: [{ label: 'SAIFI (ครั้ง)', data: [1.25, 1.02, 0.84], backgroundColor: '#EA580C', borderRadius: 6 }]
+        datasets: [
+          { label: 'SAIFI (ครั้ง/ราย)', data: [1.25, 1.02, 0.84], backgroundColor: '#EA580C', borderRadius: 6 },
+          { label: 'SAIDI (นาที/ราย)', data: [42.1, 35.8, 28.5], backgroundColor: '#0D9488', borderRadius: 6 }
+        ]
       },
       options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // กราฟที่ 2: Thermo-scan Temperature Trend (Line Chart)
+  const ctxTemp = document.getElementById('chartTempTrend');
+  if(ctxTemp) {
+    if(chartTempInstance) chartTempInstance.destroy();
+    chartTempInstance = new Chart(ctxTemp, {
+      type: 'line',
+      data: {
+        labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.'],
+        datasets: [{
+          label: 'อุณหภูมิเฉลี่ย (°C)',
+          data: [38.2, 41.5, 48.0, 52.4, 46.8, 43.1, 42.0, 44.5],
+          borderColor: '#EA580C',
+          backgroundColor: 'rgba(234, 88, 12, 0.1)',
+          tension: 0.35,
+          fill: true,
+          pointBackgroundColor: '#EA580C'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { min: 25, max: 70 } }
+      }
     });
   }
 }
@@ -1539,6 +1577,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderRouteList();
   renderHistoryTable();
   initMap();
+  setTimeout(initCharts, 300);
 });
 </script>
 </body>
