@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CMMS Smart Grid สมุทรปราการ (Enterprise Edition v5.0)</title>
+<title>CMMS Smart Grid สมุทรปราการ (Monthly Planner & 3-Year Archive)</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,10 +14,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
-<!-- Chart.js สำหรับกราฟแนวโน้ม -->
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- SheetJS สำหรับ Export Excel -->
+<!-- SheetJS for Export Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -38,7 +38,6 @@
   --green-neon:#16A34A;
   --red-neon:#DC2626;
   --amber-soft:#D97706;
-  --purple-soft:#7C3AED;
 
   --text-main:#0F172A;
   --text-muted:#64748B;
@@ -49,7 +48,6 @@
   --radius:12px;
   --radius-sm:8px;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -1px rgba(0,0,0,0.03);
 }
 
 *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
@@ -87,7 +85,6 @@ html,body{
 .brand-text h2{font-size:15px; font-weight:700; color:var(--text-main);}
 .brand-text span{font-size:11px; color:var(--orange-pri); font-family:var(--font-num); font-weight:600;}
 
-/* USER ROLE BADGE */
 .role-switch-card{
   background:var(--bg-card-alt); border:1px solid #FED7AA;
   border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:14px;
@@ -192,124 +189,58 @@ html,body{
 .section-head h3{font-size:16px; font-weight:700;}
 .section-head .sub{font-size:12px; color:var(--text-muted);}
 
-/* ---------------- CHARTS SECTION ---------------- */
-.chart-grid{
-  display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:20px;
-}
-.chart-card{
+/* ---------------- MONTHLY PLANNER CONTROLS ---------------- */
+.month-selector-bar{
   background:var(--bg-surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);
+  border-radius:var(--radius); padding:14px 18px; margin-bottom:18px;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
+  box-shadow:var(--shadow-sm);
 }
-.chart-card h4{font-size:14px; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;}
-.chart-card .chart-container{position:relative; height:240px; width:100%;}
+.month-nav-controls{display:flex; align-items:center; gap:10px;}
+.month-title-display{font-size:16px; font-weight:700; color:var(--orange-pri); min-width:180px; text-align:center;}
 
-/* ---------------- ASSET HEALTH INDEX (AHI) ---------------- */
-.asset-grid{
-  display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:16px; margin-bottom:20px;
+.month-chips-scroll{
+  display:flex; gap:6px; overflow-x:auto; padding:4px 0; -webkit-overflow-scrolling:touch;
 }
-.asset-card{
+.chip-month{
+  padding:6px 12px; border-radius:20px; font-size:12px; font-weight:600;
+  background:#F8FAFC; border:1px solid var(--border); color:var(--text-muted);
+  cursor:pointer; white-space:nowrap; transition:.15s;
+}
+.chip-month:hover{border-color:var(--orange-pri); color:var(--orange-pri);}
+.chip-month.active{background:var(--orange-pri); color:#fff; border-color:var(--orange-pri);}
+
+.view-toggle-btns{display:flex; background:#F1F5F9; padding:3px; border-radius:8px;}
+.btn-toggle{
+  padding:5px 12px; border-radius:6px; border:none; background:transparent;
+  font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer;
+}
+.btn-toggle.active{background:#fff; color:var(--orange-pri); box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+
+/* CALENDAR GRID VIEW */
+.calendar-view-container{display:none;}
+.calendar-view-container.show{display:block;}
+.month-cal-grid{
+  display:grid; grid-template-columns:repeat(7, 1fr); gap:8px;
   background:var(--bg-surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm);
-  position:relative;
+  border-radius:var(--radius); padding:14px; box-shadow:var(--shadow-sm);
 }
-.asset-head{display:flex; justify-content:space-between; align-items:flex-start;}
-.asset-tag{font-family:var(--font-num); font-size:12px; color:var(--orange-pri); font-weight:700;}
-.asset-name{font-size:14px; font-weight:700; margin:3px 0 1px;}
-.asset-sub{font-size:11.5px; color:var(--text-muted);}
-
-.health-bar-wrap{margin:12px 0 10px;}
-.health-label{display:flex; justify-content:space-between; font-size:11.5px; font-weight:600; margin-bottom:4px;}
-.health-track{height:8px; background:#F1F5F9; border-radius:4px; overflow:hidden;}
-.health-fill{height:100%; border-radius:4px;}
-
-.asset-metrics-pill{
-  display:flex; gap:8px; flex-wrap:wrap; font-size:11px; font-family:var(--font-num);
+.cal-head-cell{
+  text-align:center; font-size:12px; font-weight:700; color:var(--orange-pri); padding:8px;
+  font-family:var(--font-main);
 }
-.mpill{background:#F8FAFC; border:1px solid var(--border); padding:3px 8px; border-radius:4px;}
-
-/* ---------------- YEAR BUTTONS ---------------- */
-.year-btn-group{
-  display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;
+.cal-day-cell{
+  background:#F8FAFC; border:1px solid var(--border); border-radius:8px;
+  min-height:90px; padding:6px; position:relative; font-size:11px;
 }
-.btn-year{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:9px 16px; border-radius:30px; font-size:13px; font-weight:600;
-  background:var(--bg-surface); border:1px solid var(--border);
-  color:var(--text-muted); cursor:pointer; transition:.2s ease;
-  box-shadow:var(--shadow-sm); font-family:var(--font-main);
+.cal-day-cell.blank{background:transparent; border-color:transparent;}
+.cal-day-cell.today{border-color:var(--orange-pri); background:var(--bg-card-alt);}
+.cal-day-num{font-family:var(--font-num); font-weight:700; color:var(--text-muted); margin-bottom:4px;}
+.cal-task-pill{
+  background:#fff; border:1px solid #FED7AA; border-left:3px solid var(--orange-pri);
+  padding:3px 5px; border-radius:4px; font-size:10px; margin-bottom:3px;
+  color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;
 }
-.btn-year:hover{
-  border-color:var(--orange-pri); color:var(--orange-pri); background:var(--orange-light);
-}
-.btn-year.active{
-  background:var(--orange-pri); color:#FFFFFF; border-color:var(--orange-pri);
-  box-shadow:0 3px 8px rgba(234, 88, 12, 0.3);
-}
-.btn-year .tag-count{
-  font-size:11px; font-family:var(--font-num); padding:1px 6px; border-radius:10px;
-  background:rgba(0,0,0,0.08); font-weight:700;
-}
-.btn-year.active .tag-count{
-  background:rgba(255,255,255,0.25); color:#FFFFFF;
-}
-
-/* ROUTE PATROL MODULE */
-.nav-mission-banner{
-  background:var(--bg-card-alt); border:1px solid #FED7AA; border-radius:var(--radius);
-  padding:16px 20px; margin-bottom:16px; display:flex; justify-content:space-between;
-  align-items:center; flex-wrap:wrap; gap:14px; box-shadow:var(--shadow-sm);
-}
-.mission-info h4{font-size:16px; font-weight:700; color:var(--orange-pri); display:flex; align-items:center; gap:8px;}
-.mission-info p{font-size:12.5px; color:var(--text-muted); margin-top:4px;}
-.mission-progress{display:flex; align-items:center; gap:12px;}
-.progress-bar-wrap{
-  width:140px; height:8px; background:#FED7AA; border-radius:4px; overflow:hidden; border:1px solid #FDBA74;
-}
-.progress-bar-fill{height:100%; background:var(--orange-pri); width:25%; transition:width .4s ease;}
-
-.route-layout{display:grid; grid-template-columns:360px 1fr; gap:18px;}
-.route-list{list-style:none; display:flex; flex-direction:column; gap:10px;}
-.route-item{
-  background:var(--bg-surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:14px; cursor:pointer; transition:.2s;
-  position:relative; box-shadow:var(--shadow-sm);
-}
-.route-item:hover{border-color:var(--orange-soft);}
-.route-item.active{
-  border-color:var(--orange-pri); background:var(--bg-card-alt);
-  box-shadow:inset 3px 0 0 var(--orange-pri), var(--shadow-sm);
-}
-.route-item.completed{opacity:0.7; background:#F8FAFC;}
-.route-item .top{display:flex; justify-content:space-between; font-size:11px; color:var(--orange-pri); font-family:var(--font-num); font-weight:600;}
-.route-item .name{font-size:13.5px; font-weight:600; margin:4px 0 2px; color:var(--text-main);}
-.route-item .desc{font-size:11.5px; color:var(--text-muted);}
-.route-item .actions-row{
-  display:flex; gap:8px; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);
-}
-
-.map-card-wrapper{
-  background:var(--bg-surface); border:1px solid var(--border);
-  border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column;
-  height:540px; box-shadow:var(--shadow-sm);
-}
-#inspectionMap{width:100%; flex:1; background:#F1F5F9; z-index:5;}
-
-.custom-map-marker{
-  width:26px; height:26px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--font-num); font-size:11px; font-weight:700;
-  color:#fff; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.3);
-}
-.custom-map-marker.active{background:var(--orange-pri); animation:pulse 1.5s infinite;}
-.custom-map-marker.completed{background:var(--green-neon);}
-.custom-map-marker.pending{background:var(--text-dim);}
-
-.leaflet-popup-content-wrapper{
-  background:#FFFFFF !important; color:var(--text-main) !important;
-  border:1px solid #FED7AA; border-radius:8px !important;
-  font-family:var(--font-main) !important; font-size:12px; box-shadow:var(--shadow-md) !important;
-}
-.leaflet-popup-tip{background:#FFFFFF !important;}
 
 /* TABLE STYLING */
 .table-card{
@@ -355,112 +286,129 @@ table.data-table tr:hover td{background:var(--orange-light);}
 }
 .btn-mini:hover{border-color:var(--orange-pri); color:var(--orange-pri); background:var(--orange-light);}
 
-/* FEEDER OUTAGE ANALYTICS STYLES */
-.feeder-grid{
-  display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; margin-bottom:20px;
+/* CHARTS & ASSETS */
+.chart-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:20px;}
+.chart-card{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm);}
+.chart-card h4{font-size:14px; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;}
+.chart-card .chart-container{position:relative; height:240px; width:100%;}
+
+.asset-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:16px; margin-bottom:20px;}
+.asset-card{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm);}
+.asset-head{display:flex; justify-content:space-between; align-items:flex-start;}
+.asset-tag{font-family:var(--font-num); font-size:12px; color:var(--orange-pri); font-weight:700;}
+.asset-name{font-size:14px; font-weight:700; margin:3px 0 1px;}
+.asset-sub{font-size:11.5px; color:var(--text-muted);}
+.health-bar-wrap{margin:12px 0 10px;}
+.health-label{display:flex; justify-content:space-between; font-size:11.5px; font-weight:600; margin-bottom:4px;}
+.health-track{height:8px; background:#F1F5F9; border-radius:4px; overflow:hidden;}
+.health-fill{height:100%; border-radius:4px;}
+
+/* 3-YEAR ARCHIVE */
+.year-btn-group{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+.btn-year{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 16px; border-radius:30px; font-size:13px; font-weight:600;
+  background:var(--bg-surface); border:1px solid var(--border);
+  color:var(--text-muted); cursor:pointer; transition:.2s ease;
+  box-shadow:var(--shadow-sm); font-family:var(--font-main);
 }
-.feeder-card{
-  background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:18px; position:relative; overflow:hidden; box-shadow:var(--shadow-sm);
+.btn-year:hover{border-color:var(--orange-pri); color:var(--orange-pri); background:var(--orange-light);}
+.btn-year.active{background:var(--orange-pri); color:#FFFFFF; border-color:var(--orange-pri); box-shadow:0 3px 8px rgba(234, 88, 12, 0.3);}
+.btn-year .tag-count{font-size:11px; font-family:var(--font-num); padding:1px 6px; border-radius:10px; background:rgba(0,0,0,0.08); font-weight:700;}
+.btn-year.active .tag-count{background:rgba(255,255,255,0.25); color:#FFFFFF;}
+
+/* ROUTE PATROL */
+.nav-mission-banner{
+  background:var(--bg-card-alt); border:1px solid #FED7AA; border-radius:var(--radius);
+  padding:16px 20px; margin-bottom:16px; display:flex; justify-content:space-between;
+  align-items:center; flex-wrap:wrap; gap:14px; box-shadow:var(--shadow-sm);
 }
+.mission-info h4{font-size:16px; font-weight:700; color:var(--orange-pri); display:flex; align-items:center; gap:8px;}
+.mission-info p{font-size:12.5px; color:var(--text-muted); margin-top:4px;}
+.mission-progress{display:flex; align-items:center; gap:12px;}
+.progress-bar-wrap{width:140px; height:8px; background:#FED7AA; border-radius:4px; overflow:hidden; border:1px solid #FDBA74;}
+.progress-bar-fill{height:100%; background:var(--orange-pri); width:25%; transition:width .4s ease;}
+
+.route-layout{display:grid; grid-template-columns:360px 1fr; gap:18px;}
+.route-list{list-style:none; display:flex; flex-direction:column; gap:10px;}
+.route-item{
+  background:var(--bg-surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px; cursor:pointer; transition:.2s;
+  position:relative; box-shadow:var(--shadow-sm);
+}
+.route-item:hover{border-color:var(--orange-soft);}
+.route-item.active{border-color:var(--orange-pri); background:var(--bg-card-alt); box-shadow:inset 3px 0 0 var(--orange-pri), var(--shadow-sm);}
+.route-item.completed{opacity:0.7; background:#F8FAFC;}
+.route-item .top{display:flex; justify-content:space-between; font-size:11px; color:var(--orange-pri); font-family:var(--font-num); font-weight:600;}
+.route-item .name{font-size:13.5px; font-weight:600; margin:4px 0 2px; color:var(--text-main);}
+.route-item .desc{font-size:11.5px; color:var(--text-muted);}
+.route-item .actions-row{display:flex; gap:8px; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);}
+
+.map-card-wrapper{
+  background:var(--bg-surface); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column;
+  height:540px; box-shadow:var(--shadow-sm);
+}
+#inspectionMap{width:100%; flex:1; background:#F1F5F9; z-index:5;}
+
+.custom-map-marker{
+  width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-num); font-size:11px; font-weight:700; color:#fff; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+.custom-map-marker.active{background:var(--orange-pri); animation:pulse 1.5s infinite;}
+.custom-map-marker.completed{background:var(--green-neon);}
+.custom-map-marker.pending{background:var(--text-dim);}
+
+/* FEEDER OUTAGE */
+.feeder-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; margin-bottom:20px;}
+.feeder-card{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; position:relative; box-shadow:var(--shadow-sm);}
 .feeder-card.critical{border-top:3px solid var(--red-neon);}
 .feeder-card.warning{border-top:3px solid var(--amber-soft);}
 .feeder-card.good{border-top:3px solid var(--green-neon);}
 .feeder-head{display:flex; justify-content:space-between; align-items:flex-start;}
 .feeder-code{font-family:var(--font-num); font-size:12px; color:var(--orange-pri); font-weight:700;}
 .feeder-title{font-size:14.5px; font-weight:700; margin:4px 0 2px;}
-.feeder-area{font-size:11.5px; color:var(--text-muted);}
-
-.feeder-metrics{
-  display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;
-  background:#F8FAFC; border:1px solid var(--border); border-radius:var(--radius-sm);
-  padding:10px; margin:12px 0 10px; text-align:center;
-}
+.feeder-metrics{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:#F8FAFC; border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px; margin:12px 0 10px; text-align:center;}
 .fm-label{font-size:10px; color:var(--text-dim); text-transform:uppercase; font-family:var(--font-num); font-weight:600;}
 .fm-val{font-family:var(--font-num); font-size:16px; font-weight:700; margin-top:2px;}
 
-.feeder-cause{font-size:11.5px; color:var(--text-muted); line-height:1.5;}
-.feeder-cause strong{color:var(--text-main);}
-
-/* FILTER BAR */
-.filter-bar{
-  display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; align-items:center;
-}
-.search-input, .select-filter{
-  background:var(--bg-surface); border:1px solid var(--border);
-  padding:8px 12px; border-radius:var(--radius-sm); font-size:12.5px;
-  color:var(--text-main); font-family:var(--font-main);
-}
-.search-input{min-width:240px;}
-.search-input:focus, .select-filter:focus{outline:none; border-color:var(--orange-pri); box-shadow:0 0 0 2px var(--orange-glow);}
-
-/* FORM */
-.form-wrap{
-  background:var(--bg-surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:22px; max-width:840px;
-  box-shadow:var(--shadow-sm);
-}
+/* FORM & ANOMALY */
+.form-wrap{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; max-width:840px; box-shadow:var(--shadow-sm);}
 .form-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px;}
 .form-field{display:flex; flex-direction:column; gap:6px;}
 .form-field.full{grid-column:1/-1;}
 .form-field label{font-size:12px; font-weight:600; color:var(--text-muted);}
 .form-field input, .form-field select, .form-field textarea{
-  background:var(--bg-surface); border:1px solid var(--border);
-  padding:10px 12px; border-radius:var(--radius-sm); font-size:13px;
-  color:var(--text-main); font-family:var(--font-main); transition:.2s;
+  background:var(--bg-surface); border:1px solid var(--border); padding:10px 12px; border-radius:var(--radius-sm); font-size:13px; color:var(--text-main); font-family:var(--font-main); transition:.2s;
 }
-.form-field input:focus, .form-field select:focus, .form-field textarea:focus{
-  border-color:var(--orange-pri); outline:none; box-shadow:0 0 0 2px var(--orange-glow);
-}
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus{border-color:var(--orange-pri); outline:none; box-shadow:0 0 0 2px var(--orange-glow);}
 
-/* ANOMALY */
 .anomaly-cards{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px;}
-.anomaly-item{
-  background:var(--bg-surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:16px; border-top:3px solid var(--red-neon);
-  box-shadow:var(--shadow-sm);
-}
+.anomaly-item{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; border-top:3px solid var(--red-neon); box-shadow:var(--shadow-sm);}
 .anomaly-item.mid{border-top-color:var(--amber-soft);}
 .anomaly-head{display:flex; justify-content:space-between; align-items:flex-start;}
 .anomaly-head .zone{font-size:11px; color:var(--text-dim); font-family:var(--font-num); font-weight:600;}
 .anomaly-head .score{font-size:18px; font-weight:700; font-family:var(--font-num); color:var(--red-neon);}
 .anomaly-item.mid .anomaly-head .score{color:var(--amber-soft);}
-.anomaly-item h4{font-size:14px; font-weight:600; margin:6px 0 4px;}
-.anomaly-item p{font-size:12px; color:var(--text-muted); line-height:1.5;}
-.anomaly-item .advice{
-  margin-top:12px; padding-top:8px; border-top:1px dashed var(--border);
-  font-size:11.5px; color:var(--orange-pri); font-weight:600;
-}
+
+/* FILTER BAR */
+.filter-bar{display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; align-items:center;}
+.search-input, .select-filter{background:var(--bg-surface); border:1px solid var(--border); padding:8px 12px; border-radius:var(--radius-sm); font-size:12.5px; color:var(--text-main); font-family:var(--font-main);}
+.search-input{min-width:240px;}
 
 /* MODAL */
-.modal{
-  position:fixed; inset:0; background:rgba(15, 23, 42, 0.5);
-  backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center;
-  z-index:100; padding:16px;
-}
+.modal{position:fixed; inset:0; background:rgba(15, 23, 42, 0.5); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:100; padding:16px;}
 .modal.open{display:flex;}
-.modal-box{
-  background:var(--bg-surface); border:1px solid #FED7AA;
-  border-radius:var(--radius); width:100%; max-width:540px; padding:22px;
-  box-shadow:0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-}
+.modal-box{background:var(--bg-surface); border:1px solid #FED7AA; border-radius:var(--radius); width:100%; max-width:540px; padding:22px; box-shadow:0 10px 25px -5px rgba(0, 0, 0, 0.1);}
 .modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
 .modal-head h3{font-size:16px; font-weight:700; color:var(--orange-pri);}
 .btn-x{background:none; border:none; font-size:22px; color:var(--text-muted); cursor:pointer;}
 
 /* MOBILE NAV */
 .mobile-nav{
-  display:none; position:fixed; bottom:0; left:0; right:0;
-  background:var(--bg-surface); border-top:1px solid var(--border);
-  z-index:30; padding:6px 10px; justify-content:space-around;
-  box-shadow:0 -2px 6px rgba(0,0,0,0.04);
+  display:none; position:fixed; bottom:0; left:0; right:0; background:var(--bg-surface); border-top:1px solid var(--border); z-index:30; padding:6px 10px; justify-content:space-around;
 }
-.mobile-nav-btn{
-  display:flex; flex-direction:column; align-items:center; gap:3px;
-  background:none; border:none; color:var(--text-dim);
-  font-size:9.5px; font-family:var(--font-main); font-weight:500;
-  padding:4px 4px; cursor:pointer;
-}
+.mobile-nav-btn{display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; color:var(--text-dim); font-size:9.5px; font-family:var(--font-main); font-weight:500; padding:4px 4px; cursor:pointer;}
 .mobile-nav-btn svg{width:18px; height:18px;}
 .mobile-nav-btn.active{color:var(--orange-pri); font-weight:700;}
 
@@ -471,15 +419,15 @@ table.data-table tr:hover td{background:var(--orange-light);}
   .mobile-nav{display:flex;}
   .content{padding:16px; padding-bottom:75px;}
   .topbar{padding:12px 16px;}
-  .chart-grid{grid-template-columns:1fr;}
-  .route-layout{grid-template-columns:1fr;}
+  .chart-grid, .route-layout, .feeder-grid{grid-template-columns:1fr;}
   .map-card-wrapper{height:380px;}
   .form-grid{grid-template-columns:1fr;}
-  .feeder-grid{grid-template-columns:1fr;}
+  .month-cal-grid{grid-template-columns:repeat(7, minmax(36px, 1fr)); gap:4px; padding:8px;}
+  .cal-day-cell{min-height:65px; font-size:9.5px; padding:3px;}
 }
 @media print{
   body{background:#fff; color:#000;}
-  .sidebar, .mobile-nav, .topbar, .actions-group, .map-card-wrapper, .nav-mission-banner, .filter-bar, .year-btn-group{display:none !important;}
+  .sidebar, .mobile-nav, .topbar, .actions-group, .map-card-wrapper, .nav-mission-banner, .filter-bar, .month-selector-bar{display:none !important;}
   .content{padding:0;}
   .table-card{border:none; box-shadow:none;}
   table.data-table th{background:#f1f5f9; color:#000;}
@@ -499,11 +447,10 @@ table.data-table tr:hover td{background:var(--orange-light);}
       </div>
       <div class="brand-text">
         <h2>CMMS สมุทรปราการ</h2>
-        <span>RBAC & CHARTS v5.0</span>
+        <span>MONTHLY PLANNER v5.2</span>
       </div>
     </div>
 
-    <!-- ROLE-BASED ACCESS CONTROL (RBAC) SELECTOR -->
     <div class="role-switch-card">
       <div class="lbl">👤 สิทธิ์ผู้ใช้งาน (User Role)</div>
       <select id="userRoleSelector" class="role-select" onchange="handleRoleChange()">
@@ -518,7 +465,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
       <li>
         <button class="nav-item active" data-tab="tab-plan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          ตารางวางแผนงาน (เรียงวัน)
+          ตารางวางแผนงานรายเดือน
         </button>
       </li>
       <li>
@@ -579,10 +526,6 @@ table.data-table tr:hover td{background:var(--orange-light);}
         <span class="stream-val" style="color:var(--amber-soft);">0.84 ครั้ง/ราย</span>
       </div>
       <div class="stream-row">
-        <span>SAIDI (สะสมปี 69):</span>
-        <span class="stream-val" style="color:var(--teal-soft);">28.5 นาที/ราย</span>
-      </div>
-      <div class="stream-row">
         <span>Patrol Unit:</span>
         <span class="stream-val" style="color:var(--orange-pri);" id="rtPatrolDist">อ.บางพลี</span>
       </div>
@@ -614,37 +557,46 @@ table.data-table tr:hover td{background:var(--orange-light);}
     <main class="content">
       <!-- STATS -->
       <section class="stats-grid">
-        <div class="stat-box" style="--accent-bar:var(--red-neon);">
-          <div class="lbl">งานครบกำหนดด่วนวันนี้ / พรุ่งนี้</div>
-          <div class="val" id="statDueToday" style="color:var(--red-neon);">3 <small>รายการ</small></div>
-        </div>
         <div class="stat-box" style="--accent-bar:var(--orange-pri);">
-          <div class="lbl">แผนงานบำรุงรักษาทั้งหมด</div>
-          <div class="val" id="statTotal">6 <small>รายการ</small></div>
+          <div class="lbl">แผนงานประจำเดือนที่เลือก</div>
+          <div class="val" id="statMonthTasks">0 <small>รายการ</small></div>
         </div>
-        <div class="stat-box" style="--accent-bar:var(--teal-soft);">
-          <div class="lbl">ดัชนีสุขภาพอุปกรณ์ (AHI Avg)</div>
-          <div class="val" style="color:var(--teal-soft);">88.2 <small>%</small></div>
+        <div class="stat-box" style="--accent-bar:var(--red-neon);">
+          <div class="lbl">งานด่วน / ครบกำหนดเร็วๆ นี้</div>
+          <div class="val" id="statDueToday" style="color:var(--red-neon);">0 <small>รายการ</small></div>
         </div>
         <div class="stat-box" style="--accent-bar:var(--green-neon);">
-          <div class="lbl">ความคืบหน้าสายตรวจ</div>
-          <div class="val" id="statPatrolProgress" style="color:var(--green-neon);">1 <small>/ 4 จุด</small></div>
+          <div class="lbl">งานที่เสร็จสิ้นแล้วในเดือนนี้</div>
+          <div class="val" id="statDoneInMonth" style="color:var(--green-neon);">0 <small>รายการ</small></div>
+        </div>
+        <div class="stat-box" style="--accent-bar:var(--teal-soft);">
+          <div class="lbl">ดัชนีสุขภาพอุปกรณ์ (AHI)</div>
+          <div class="val" style="color:var(--teal-soft);">88.2 <small>%</small></div>
         </div>
       </section>
 
-      <!-- TAB 1: MAINTENANCE PLANNER -->
+      <!-- TAB 1: MONTHLY MAINTENANCE PLANNER (ปรับปรุงใหม่เพื่อดูรายเดือน) -->
       <div id="tab-plan" class="tab-content active">
-        <div class="section-head">
-          <div>
-            <h3>ตารางวางแผนงานบำรุงรักษา (เรียงลำดับงานครบกำหนดใกล้สุดก่อน)</h3>
-            <span class="sub">ระบบจัดเรียงจากวันที่ใกล้ครบกำหนด (Earliest Due Date) เพื่อป้องกันงานค้างส่ง</span>
+        <!-- MONTH SELECTOR BAR -->
+        <div class="month-selector-bar">
+          <div class="month-nav-controls">
+            <button class="btn-mini" onclick="navigateMonth(-1)">◀ เดือนก่อน</button>
+            <div class="month-title-display" id="currentMonthDisplay">สิงหาคม 2569</div>
+            <button class="btn-mini" onclick="navigateMonth(1)">เดือนถัดไป ▶</button>
           </div>
-          <button class="btn" onclick="resortWorkOrders()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            เรียงลำดับใหม่
-          </button>
+
+          <!-- Quick Month Chips -->
+          <div class="month-chips-scroll" id="monthChipsContainer"></div>
+
+          <!-- Toggle Table / Calendar View -->
+          <div class="view-toggle-btns">
+            <button class="btn-toggle active" id="btnViewTable" onclick="setPlannerView('table')">📋 ตารางรายการ</button>
+            <button class="btn-toggle" id="btnViewCalendar" onclick="setPlannerView('calendar')">📅 ปฏิทินรายวัน</button>
+          </div>
         </div>
-        <div class="table-card">
+
+        <!-- 1. TABLE LIST VIEW -->
+        <div class="table-card" id="plannerTableView">
           <table class="data-table">
             <thead>
               <tr>
@@ -661,9 +613,14 @@ table.data-table tr:hover td{background:var(--orange-light);}
             <tbody id="tableBody"></tbody>
           </table>
         </div>
+
+        <!-- 2. MONTHLY CALENDAR GRID VIEW -->
+        <div class="calendar-view-container" id="plannerCalendarView">
+          <div class="month-cal-grid" id="monthCalendarGrid"></div>
+        </div>
       </div>
 
-      <!-- TAB 2: ANALYTICS & TREND CHARTS (NEW FEATURE) -->
+      <!-- TAB 2: ANALYTICS & TREND CHARTS -->
       <div id="tab-analytics" class="tab-content">
         <div class="section-head">
           <div>
@@ -671,31 +628,25 @@ table.data-table tr:hover td{background:var(--orange-light);}
             <span class="sub">วิเคราะห์เปรียบเทียบ SAIFI, SAIDI, การเกิด Hotspot และโหลดหม้อแปลงย้อนหลัง</span>
           </div>
         </div>
-
         <div class="chart-grid">
           <div class="chart-card">
             <h4>
               <span>📊 แนวโน้มดัชนี SAIFI / SAIDI รายปี</span>
               <small style="color:var(--green-neon); font-size:11.5px;">✓ ปรับปรุงดีขึ้น 18.2%</small>
             </h4>
-            <div class="chart-container">
-              <canvas id="chartSaifiSaidi"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="chartSaifiSaidi"></canvas></div>
           </div>
-
           <div class="chart-card">
             <h4>
               <span>🌡️ แนวโน้มอุณหภูมิ Thermo-scan เฉลี่ยรายเดือน</span>
               <small style="color:var(--orange-pri); font-size:11.5px;">Zone สมุทรปราการ</small>
             </h4>
-            <div class="chart-container">
-              <canvas id="chartTempTrend"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="chartTempTrend"></canvas></div>
           </div>
         </div>
       </div>
 
-      <!-- TAB 3: ASSET HEALTH & MAINTENANCE STATUS (NEW FEATURE) -->
+      <!-- TAB 3: ASSET HEALTH & MAINTENANCE STATUS -->
       <div id="tab-assets" class="tab-content">
         <div class="section-head">
           <div>
@@ -706,7 +657,7 @@ table.data-table tr:hover td{background:var(--orange-light);}
         <div class="asset-grid" id="assetGridContainer"></div>
       </div>
 
-      <!-- TAB 4: 3-YEAR INSPECTION HISTORY ARCHIVE (WITH YEAR BUTTONS) -->
+      <!-- TAB 4: 3-YEAR INSPECTION HISTORY ARCHIVE -->
       <div id="tab-history" class="tab-content">
         <div class="section-head">
           <div>
@@ -778,28 +729,6 @@ table.data-table tr:hover td{background:var(--orange-light);}
         </div>
 
         <div class="feeder-grid" id="feederCardsGrid"></div>
-
-        <div class="section-head" style="margin-top:24px;">
-          <h3>ตารางเปรียบเทียบสถิติสายป้อนหลัก (Feeder Reliability Ranking)</h3>
-          <span class="sub">จัดอันดับสายป้อนที่มีความเสี่ยงสูงเพื่อวางแผน PM ล่วงหน้า</span>
-        </div>
-        <div class="table-card">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>รหัสสายป้อน</th>
-                <th>ชื่อสายป้อน / สถานีต้นทาง</th>
-                <th>พื้นที่บริการ</th>
-                <th>จำนวนครั้งที่ดับ (ปี 69)</th>
-                <th>รวมเวลาดับ (นาที)</th>
-                <th>ดัชนี SAIFI</th>
-                <th>สาเหตุหลักที่ตรวจพบ</th>
-                <th>ระดับความเสี่ยง</th>
-              </tr>
-            </thead>
-            <tbody id="feederTableBody"></tbody>
-          </table>
-        </div>
       </div>
 
       <!-- TAB 6: ROUTE PATROL -->
@@ -921,10 +850,6 @@ table.data-table tr:hover td{background:var(--orange-light);}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17l-5-5-4 4-6-6"/></svg>
     <span>กราฟ</span>
   </button>
-  <button class="mobile-nav-btn" data-tab="tab-assets">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    <span>สุขภาพ</span>
-  </button>
   <button class="mobile-nav-btn" data-tab="tab-history">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     <span>ประวัติ</span>
@@ -947,84 +872,53 @@ table.data-table tr:hover td{background:var(--orange-light);}
 </div>
 
 <script>
-/* ---------------- DATA STORE ---------------- */
+/* ---------------- DATA & STATE ---------------- */
 let currentRole = 'admin';
 let currentSelectedYear = '2026';
+let currentSelectedMonth = 7; // สิงหาคม (0-indexed: 7 คือเดือนที่ 8)
+let currentPlannerYear = 2026;
+let currentPlannerViewMode = 'table'; // 'table' | 'calendar'
 
-// ข้อมูลสถานะอุปกรณ์และดัชนีสุขภาพ (Asset Health Index - AHI)
-const ASSET_HEALTH_DATA = [
-  {
-    tag: 'TR-BP-0012',
-    name: 'หม้อแปลง TR-250kVA นิคมบางปู ซ.12',
-    area: 'อ.เมืองสมุทรปราการ · สถานีฯ ท้ายบ้าน',
-    ahi: 92,
-    status: 'good',
-    statusLabel: 'สมบูรณ์ (Good)',
-    color: '#16A34A',
-    dgaStatus: 'Normal (H2 < 10 ppm)',
-    tempMax: '48.5 °C',
-    lastPM: '28 ส.ค. 2569'
-  },
-  {
-    tag: 'FDR-TP-08',
-    name: 'สายป้อนแรงสูง Feeder 11 เทพารักษ์ กม.8',
-    area: 'อ.บางพลี · สถานีฯ เทพารักษ์',
-    ahi: 64,
-    status: 'warn',
-    statusLabel: 'เฝ้าระวัง (Watchlist)',
-    color: '#D97706',
-    dgaStatus: 'คราบเกลือสะสมปานกลาง',
-    tempMax: '58.2 °C',
-    lastPM: '15 มิ.ย. 2569'
-  },
-  {
-    tag: 'TR-BK-0085',
-    name: 'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19',
-    area: 'อ.บางพลี · บริเวณโรงงานบางโฉลง',
-    ahi: 42,
-    status: 'critical',
-    statusLabel: 'เสี่ยงสูง (Critical)',
-    color: '#DC2626',
-    dgaStatus: 'Hotspot ขั้วต่อสายเฟส B',
-    tempMax: '78.4 °C',
-    lastPM: '27 ส.ค. 2569'
-  },
-  {
-    tag: 'RMU-PS-004',
-    name: 'สวิตช์เกียร์ Ring Main Unit ซ.วัดด่าน',
-    area: 'อ.เมืองสมุทรปราการ · สำโรงเหนือ',
-    ahi: 88,
-    status: 'good',
-    statusLabel: 'สมบูรณ์ (Good)',
-    color: '#16A34A',
-    dgaStatus: 'SF6 Pressure: 0.55 MPa',
-    tempMax: '41.0 °C',
-    lastPM: '30 ส.ค. 2569'
-  }
+const THAI_MONTHS = [
+  'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
 ];
 
+// ข้อมูลแผนงานรายเดือน (ปี 2569 / 2026)
 let WORK_ORDERS = [
+  // เดือนสิงหาคม 2569 (2026-08)
   {id:'WO-SP-69083', asset:'โคมไฟถนน LED ถ.สุขสวัสดิ์-ป้อมพระจุล', district:'อ.พระสมุทรเจดีย์', type:'เปลี่ยน Photo Switch & โคมไฟ', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมไฟสาธารณะ', status:'done', temp:'32.0', ground:'1.95'},
   {id:'WO-SP-69085', asset:'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', district:'อ.บางพลี', type:'แก้ไขจุดต่อร้อน (Hotspot)', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมฉุกเฉิน 24ชม.', status:'high', temp:'78.4', ground:'4.80'},
   {id:'WO-SP-69086', asset:'สายป้อน Feeder 04 ถนนท้ายบ้าน', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบฉนวนสายส่ง', isoDate:'2026-08-27', date:'27 ส.ค. 69', team:'ทีมสายส่ง 01', status:'done', temp:'35.6', ground:'2.00'},
   {id:'WO-SP-69081', asset:'หม้อแปลง TR-250kVA นิคมบางปู ซ.12', district:'อ.เมืองสมุทรปราการ', type:'ตรวจวัดค่าฉนวนน้ำมัน (DGA)', isoDate:'2026-08-28', date:'28 ส.ค. 69', team:'ทีมหม้อแปลง 01', status:'doing', temp:'48.5', ground:'2.40'},
   {id:'WO-SP-69082', asset:'เสาแรงสูง Feeder 11 เทพารักษ์ กม.8', district:'อ.บางพลี', type:'ล้างลูกถ้วยฉนวนกันคราบไอเกลือ', isoDate:'2026-08-29', date:'29 ส.ค. 69', team:'ทีมสายส่ง 02', status:'pending', temp:'38.2', ground:'3.10'},
-  {id:'WO-SP-69084', asset:'RMU สวิตช์เกียร์ ซ.วัดด่านสำโรง', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบ Ring Main Unit', isoDate:'2026-08-30', date:'30 ส.ค. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'41.0', ground:'2.15'}
+  {id:'WO-SP-69084', asset:'RMU สวิตช์เกียร์ ซ.วัดด่านสำโรง', district:'อ.เมืองสมุทรปราการ', type:'ตรวจสอบ Ring Main Unit', isoDate:'2026-08-30', date:'30 ส.ค. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'41.0', ground:'2.15'},
+
+  // เดือนกันยายน 2569 (2026-09)
+  {id:'WO-SP-69091', asset:'หม้อแปลง TR-400kVA นิคมบางพลี ซ.4', district:'อ.บางพลี', type:'ตรวจสอบระบบระบายความร้อน', isoDate:'2026-09-04', date:'4 ก.ย. 69', team:'ทีมหม้อแปลง 02', status:'pending', temp:'42.0', ground:'2.10'},
+  {id:'WO-SP-69092', asset:'เสาไฟฟ้าแรงสูง ถ.สุขสวัสดิ์ กม.12', district:'อ.พระสมุทรเจดีย์', type:'ล้างลูกถ้วยฉนวนกันคราบเกลือ', isoDate:'2026-09-12', date:'12 ก.ย. 69', team:'ทีมสายส่ง 01', status:'pending', temp:'35.0', ground:'2.30'},
+  {id:'WO-SP-69093', asset:'สวิตช์เกียร์ RMU ตลาดปากน้ำ', district:'อ.เมืองสมุทรปราการ', type:'ตรวจวัดค่าความเป็นฉนวนแก๊ส', isoDate:'2026-09-22', date:'22 ก.ย. 69', team:'ทีมอุปกรณ์พิเศษ', status:'pending', temp:'39.5', ground:'1.85'},
+
+  // เดือนตุลาคม 2569 (2026-10)
+  {id:'WO-SP-69101', asset:'หม้อแปลงสถานีสูบน้ำคลองด่าน', district:'อ.บางบ่อ', type:'เปลี่ยนถ่ายน้ำมันหม้อแปลง', isoDate:'2026-10-08', date:'8 ต.ค. 69', team:'ทีมหม้อแปลง 01', status:'pending', temp:'44.0', ground:'2.05'},
+  {id:'WO-SP-69102', asset:'ระบบไฟส่องสว่าง ถ.กิ่งแก้ว', district:'อ.บางพลี', type:'เปลี่ยนโคมไฟถนน LED', isoDate:'2026-10-18', date:'18 ต.ค. 69', team:'ทีมไฟสาธารณะ', status:'pending', temp:'31.0', ground:'1.90'}
+];
+
+const ASSET_HEALTH_DATA = [
+  {tag: 'TR-BP-0012', name: 'หม้อแปลง TR-250kVA นิคมบางปู ซ.12', area: 'อ.เมืองสมุทรปราการ · สถานีฯ ท้ายบ้าน', ahi: 92, status: 'good', statusLabel: 'สมบูรณ์ (Good)', color: '#16A34A', dgaStatus: 'Normal (H2 < 10 ppm)', tempMax: '48.5 °C', lastPM: '28 ส.ค. 2569'},
+  {tag: 'FDR-TP-08', name: 'สายป้อนแรงสูง Feeder 11 เทพารักษ์ กม.8', area: 'อ.บางพลี · สถานีฯ เทพารักษ์', ahi: 64, status: 'warn', statusLabel: 'เฝ้าระวัง (Watchlist)', color: '#D97706', dgaStatus: 'คราบเกลือสะสมปานกลาง', tempMax: '58.2 °C', lastPM: '15 มิ.ย. 2569'},
+  {tag: 'TR-BK-0085', name: 'หม้อแปลงจำหน่าย ถ.บางนา-ตราด กม.19', area: 'อ.บางพลี · บริเวณโรงงานบางโฉลง', ahi: 42, status: 'critical', statusLabel: 'เสี่ยงสูง (Critical)', color: '#DC2626', dgaStatus: 'Hotspot ขั้วต่อสายเฟส B', tempMax: '78.4 °C', lastPM: '27 ส.ค. 2569'},
+  {tag: 'RMU-PS-004', name: 'สวิตช์เกียร์ Ring Main Unit ซ.วัดด่าน', area: 'อ.เมืองสมุทรปราการ · สำโรงเหนือ', ahi: 88, status: 'good', statusLabel: 'สมบูรณ์ (Good)', color: '#16A34A', dgaStatus: 'SF6 Pressure: 0.55 MPa', tempMax: '41.0 °C', lastPM: '30 ส.ค. 2569'}
 ];
 
 let INSPECTION_HISTORY = [
   {logId: 'LOG-SP-2026-0827-01', year: '2026', district: 'เมือง', timestamp: '27 ส.ค. 2569 08:35 น.', assetName: 'หม้อแปลงหน้า รร.นายเรือ (TR-SP-0012)', inspector: 'สายตรวจ SP-CAR 01 (ช่างสมศักดิ์)', temp: '36.4', ground: '1.85', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass', note: 'ทำความสะอาดฝุ่นและตรวจวัดระดับน้ำมันฉนวน อยู่ในเกณฑ์มาตรฐาน'},
-  {logId: 'LOG-SP-2026-0826-03', year: '2026', district: 'พระสมุทรเจดีย์', timestamp: '26 ส.ค. 2569 16:15 น.', assetName: 'โคมไฟถนน LED ป้อมพระจุล (PL-PC-042)', inspector: 'ทีมไฟสาธารณะ 02 (ช่างมานพ)', temp: '32.0', ground: '2.10', result: 'แก้ไขแล้ว (เปลี่ยนชุดไฟ)', statusClass: 'pass', note: 'เปลี่ยน Photo Switch และหลอดไฟ LED 150W จำนวน 2 ชุด'},
-  {logId: 'LOG-SP-2026-0826-02', year: '2026', district: 'เมือง', timestamp: '26 ส.ค. 2569 14:00 น.', assetName: 'หม้อแปลงโรงงานบางปู ซ.3 (TR-BP-0105)', inspector: 'ทีมหม้อแปลง 01 (ช่างวิชัย)', temp: '74.2', ground: '3.40', result: 'เฝ้าระวัง (Hotspot)', statusClass: 'warn', note: 'พบจุดต่อสายเฟส B ร้อนกว่าปกติ ได้ขันแน่นและนัดตรวจซ้ำใน 7 วัน'},
-  {logId: 'LOG-SP-2025-1118-04', year: '2025', district: 'บางพลี', timestamp: '18 พ.ย. 2568 15:40 น.', assetName: 'สายป้อน Feeder 08 เทพารักษ์ กม.5', inspector: 'ทีมสายส่ง 02 (ช่างดำรงค์)', temp: '37.5', ground: '2.90', result: 'ปกติ (ตัดกิ่งไม้)', statusClass: 'pass', note: 'ตัดแต่งกิ่งไม้ใกล้แนวสายส่งระยะ 400 เมตร ป้องกันไฟลัดวงจร'},
-  {logId: 'LOG-SP-2024-1205-02', year: '2024', district: 'เมือง', timestamp: '5 ธ.ค. 2567 14:15 น.', assetName: 'RMU ซ.ด่านสำโรง 14', inspector: 'ทีมอุปกรณ์พิเศษ (ช่างเอกชัย)', temp: '39.8', ground: '1.80', result: 'ปกติ (ผ่านเกณฑ์)', statusClass: 'pass', note: 'บำรุงรักษาเชิงป้องกันประจำรอบ 6 เดือน ทดสอบสวิตช์ตัดตอน'}
+  {logId: 'LOG-SP-2026-0826-03', year: '2026', district: 'พระสมุทรเจดีย์', timestamp: '26 ส.ค. 2569 16:15 น.', assetName: 'โคมไฟถนน LED ป้อมพระจุล (PL-PC-042)', inspector: 'ทีมไฟสาธารณะ 02 (ช่างมานพ)', temp: '32.0', ground: '2.10', result: 'แก้ไขแล้ว (เปลี่ยนชุดไฟ)', statusClass: 'pass', note: 'เปลี่ยน Photo Switch และหลอดไฟ LED 150W จำนวน 2 ชุด'}
 ];
 
 const FEEDER_OUTAGE_DATA = [
   {code: 'FDR-TP-08', name: 'สายป้อนเทพารักษ์ 08 (สถานีฯ บางพลี)', area: 'อ.บางพลี (เทพารักษ์ กม.1 - กม.12)', outageCount: 9, totalDurationMin: 345, saifi: 1.42, saidi: 48.2, mainCause: 'กิ่งไม้แตะสายช่วงลมแรง / จุดต่อสายร้อนสะสม', risk: 'critical', riskLabel: 'เสี่ยงสูง (Critical)'},
-  {code: 'FDR-BP-04', name: 'สายป้อนบางปู 04 (สถานีฯ ท้ายบ้าน)', area: 'อ.เมืองสมุทรปราการ (นิคมอุตสาหกรรมบางปู)', outageCount: 7, totalDurationMin: 220, saifi: 1.15, saidi: 32.5, mainCause: 'คราบไอเค็มทะเลสะสมบนลูกถ้วยฉนวน (Salt Contamination)', risk: 'critical', riskLabel: 'เสี่ยงสูง (Critical)'},
-  {code: 'FDR-SS-02', name: 'สายป้อนสุขสวัสดิ์ 02 (สถานีฯ พระสมุทรเจดีย์)', area: 'อ.พระสมุทรเจดีย์ (สามแยกพระประแดง - ป้อมพระจุล)', outageCount: 5, totalDurationMin: 140, saifi: 0.82, saidi: 21.0, mainCause: 'สัตว์เลื้อยคลาน / ลมพายุชายฝั่งพัดสายแกว่งชน', risk: 'warning', riskLabel: 'ปานกลาง (Watchlist)'},
-  {code: 'FDR-KK-11', name: 'สายป้อนกิ่งแก้ว 11 (สถานีฯ ราชาเทวะ)', area: 'อ.บางพลี / อ.บางเสาธง (ถ.กิ่งแก้ว)', outageCount: 4, totalDurationMin: 95, saifi: 0.65, saidi: 15.4, mainCause: 'อุบัติเหตุรถเฉี่ยวชนเสาไฟฟ้า / งานก่อสร้างขยายถนน', risk: 'warning', riskLabel: 'ปานกลาง (Watchlist)'}
+  {code: 'FDR-BP-04', name: 'สายป้อนบางปู 04 (สถานีฯ ท้ายบ้าน)', area: 'อ.เมืองสมุทรปราการ (นิคมอุตสาหกรรมบางปู)', outageCount: 7, totalDurationMin: 220, saifi: 1.15, saidi: 32.5, mainCause: 'คราบไอเค็มทะเลสะสมบนลูกถ้วยฉนวน (Salt Contamination)', risk: 'critical', riskLabel: 'เสี่ยงสูง (Critical)'}
 ];
 
 const PATROL_PINS = [
@@ -1036,11 +930,156 @@ const PATROL_PINS = [
 
 const ANOMALIES = [
   {zone:'อ.พระสมุทรเจดีย์ (โซนชายฝั่ง)', score:'94%', title:'ความเสี่ยง Flashover จากไอเกลือทะเล', desc:'กระแสรั่วไหลบนลูกถ้วยฉนวนแตะระดับ 32mA หลังมีลมมรสุมพัดเข้าอ่าวไทย', advice:'► จัดทีมฉีดล้างลูกถ้วยแรงสูงภายใน 12 ชม.', mid:false},
-  {zone:'นิคมอุตสาหกรรมบางปู', score:'78%', title:'ฮาร์มอนิกและโหลดเกินพิกัด', desc:'โหลดความร้อนสะสมแกนเหล็กหม้อแปลง 84.5°C ในช่วงชั่วโมงการผลิตสูงสุด', advice:'► ปรับบาลานซ์เฟสและเปิดพัดลมระบายอากาศ', mid:true},
-  {zone:'ถ.กิ่งแก้ว - บางพลี', score:'88%', title:'แรงดันตกชั่วขณะบ่อยครั้ง (Micro-Sag)', desc:'Voltage Sag 4 ครั้งใน 48 ชม. คาดเกิดจากกิ่งไม้แตะสายช่วงลมกระโชกแรง', advice:'► ส่งทีมตัดแต่งกิ่งไม้แนวสายส่งระยะ 800 เมตร', mid:false}
+  {zone:'นิคมอุตสาหกรรมบางปู', score:'78%', title:'ฮาร์มอนิกและโหลดเกินพิกัด', desc:'โหลดความร้อนสะสมแกนเหล็กหม้อแปลง 84.5°C ในช่วงชั่วโมงการผลิตสูงสุด', advice:'► ปรับบาลานซ์เฟสและเปิดพัดลมระบายอากาศ', mid:true}
 ];
 
-/* ---------------- ROLE-BASED ACCESS CONTROL (RBAC) ---------------- */
+/* ---------------- MONTHLY PLANNER LOGIC ---------------- */
+function renderMonthChips(){
+  const container = document.getElementById('monthChipsContainer');
+  container.innerHTML = THAI_MONTHS.map((mName, idx) => {
+    // Count tasks for this month
+    const targetMonthStr = `${currentPlannerYear}-${String(idx+1).padStart(2,'0')}`;
+    const count = WORK_ORDERS.filter(w => w.isoDate.startsWith(targetMonthStr)).length;
+    const isActive = idx === currentSelectedMonth ? 'active' : '';
+
+    return `
+      <button class="chip-month ${isActive}" onclick="selectMonth(${idx})">
+        ${mName} (${count})
+      </button>
+    `;
+  }).join('');
+}
+
+function selectMonth(monthIdx){
+  currentSelectedMonth = monthIdx;
+  document.getElementById('currentMonthDisplay').textContent = `${THAI_MONTHS[monthIdx]} ${currentPlannerYear+543}`;
+  renderMonthChips();
+  renderPlanner();
+}
+
+function navigateMonth(step){
+  let newMonth = currentSelectedMonth + step;
+  if(newMonth < 0){
+    newMonth = 11;
+    currentPlannerYear -= 1;
+  } else if(newMonth > 11){
+    newMonth = 0;
+    currentPlannerYear += 1;
+  }
+  selectMonth(newMonth);
+}
+
+function setPlannerView(mode){
+  currentPlannerViewMode = mode;
+  document.getElementById('btnViewTable').classList.toggle('active', mode === 'table');
+  document.getElementById('btnViewCalendar').classList.toggle('active', mode === 'calendar');
+
+  document.getElementById('plannerTableView').style.display = mode === 'table' ? 'block' : 'none';
+  document.getElementById('plannerCalendarView').classList.toggle('show', mode === 'calendar');
+
+  renderPlanner();
+}
+
+function renderPlanner(){
+  const targetMonthStr = `${currentPlannerYear}-${String(currentSelectedMonth+1).padStart(2,'0')}`;
+  const monthTasks = WORK_ORDERS.filter(w => w.isoDate.startsWith(targetMonthStr));
+  monthTasks.sort((a, b) => new Date(a.isoDate) - new Date(b.isoDate));
+
+  // Update Stats Cards
+  document.getElementById('statMonthTasks').innerHTML = `${monthTasks.length} <small>รายการ</small>`;
+  const doneInMonth = monthTasks.filter(x => x.status === 'done').length;
+  document.getElementById('statDoneInMonth').innerHTML = `${doneInMonth} <small>/ ${monthTasks.length}</small>`;
+  const dueTodayCount = monthTasks.filter(x => x.isoDate <= '2026-08-28' && x.status !== 'done').length;
+  document.getElementById('statDueToday').innerHTML = `${dueTodayCount} <small>รายการ</small>`;
+
+  if(currentPlannerViewMode === 'table'){
+    renderMonthlyTable(monthTasks);
+  } else {
+    renderMonthlyCalendar(monthTasks);
+  }
+}
+
+function renderMonthlyTable(tasks){
+  const tbody = document.getElementById('tableBody');
+  if(tasks.length === 0){
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:28px; color:var(--text-muted);">ไม่มีแผนงานบำรุงรักษาในเดือน ${THAI_MONTHS[currentSelectedMonth]} ${currentPlannerYear+543}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = tasks.map((wo, i) => {
+    let badgeClass = 'pending', badgeText = 'รอดำเนินการ';
+    if(wo.status === 'done'){ badgeClass = 'done'; badgeText = 'เสร็จสมบูรณ์'; }
+    else if(wo.status === 'doing'){ badgeClass = 'doing'; badgeText = 'กำลังทำ'; }
+    else if(wo.status === 'high'){ badgeClass = 'high'; badgeText = 'เร่งด่วน'; }
+
+    let duePill = '';
+    if(wo.isoDate === '2026-08-27'){
+      duePill = `<span class="due-pill due-urgent">⚡ วันนี้ (${wo.date})</span>`;
+    } else if(wo.isoDate === '2026-08-28'){
+      duePill = `<span class="due-pill due-near">⏳ พรุ่งนี้ (${wo.date})</span>`;
+    } else {
+      duePill = `<span class="due-pill due-normal">📅 ${wo.date}</span>`;
+    }
+
+    const editBtn = (currentRole === 'admin' || currentRole === 'supervisor' || currentRole === 'technician')
+      ? `<button class="btn-mini" onclick="editWorkOrderById('${wo.id}')">แก้ไข</button>`
+      : '';
+
+    return `
+      <tr>
+        <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${wo.id}</strong></td>
+        <td>${wo.asset}</td>
+        <td>${wo.district}</td>
+        <td>${wo.type}</td>
+        <td>${duePill}</td>
+        <td>${wo.team}</td>
+        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+        <td style="text-align:right;">
+          <div class="row-actions" style="justify-content:flex-end;">
+            <button class="btn-mini" onclick="viewWorkOrderById('${wo.id}')">ดู</button>
+            ${editBtn}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderMonthlyCalendar(tasks){
+  const grid = document.getElementById('monthCalendarGrid');
+  const dows = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+  let html = dows.map(d => `<div class="cal-head-cell">${d}</div>`).join('');
+
+  const firstDay = new Date(currentPlannerYear, currentSelectedMonth, 1).getDay();
+  const daysInMonth = new Date(currentPlannerYear, currentSelectedMonth + 1, 0).getDate();
+
+  for(let i = 0; i < firstDay; i++){
+    html += `<div class="cal-day-cell blank"></div>`;
+  }
+
+  for(let day = 1; day <= daysInMonth; day++){
+    const dayStr = `${currentPlannerYear}-${String(currentSelectedMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayTasks = tasks.filter(t => t.isoDate === dayStr);
+    const isToday = (dayStr === '2026-08-27');
+
+    let taskPills = dayTasks.map(t => `
+      <div class="cal-task-pill" onclick="viewWorkOrderById('${t.id}')" title="${t.asset}">
+        ● ${t.asset.split(' ')[0]} (${t.id})
+      </div>
+    `).join('');
+
+    html += `
+      <div class="cal-day-cell ${isToday ? 'today' : ''}">
+        <div class="cal-day-num">${day}</div>
+        ${taskPills}
+      </div>
+    `;
+  }
+
+  grid.innerHTML = html;
+}
+
+/* ---------------- ROLE ACCESS & ACTIONS ---------------- */
 function handleRoleChange(){
   currentRole = document.getElementById('userRoleSelector').value;
   const labelEl = document.getElementById('activeRoleLabel');
@@ -1064,536 +1103,27 @@ function handleRoleChange(){
     btnAdd.style.display = 'none';
     navForm.style.display = 'none';
   }
-  renderTable();
+  renderPlanner();
 }
 
-/* ---------------- CHARTS ENGINE (CHART.JS) ---------------- */
-let chartSaifiInstance = null;
-let chartTempInstance = null;
-
-function initCharts(){
-  // 1. Chart SAIFI / SAIDI Trend
-  const ctxSaifi = document.getElementById('chartSaifiSaidi');
-  if(ctxSaifi){
-    if(chartSaifiInstance) chartSaifiInstance.destroy();
-    chartSaifiInstance = new Chart(ctxSaifi, {
-      type: 'bar',
-      data: {
-        labels: ['ปี 2567 (2024)', 'ปี 2568 (2025)', 'ปี 2569 (2026 ปัจจุบัน)'],
-        datasets: [
-          {
-            label: 'SAIFI (ครั้ง/ราย/ปี)',
-            data: [1.25, 1.02, 0.84],
-            backgroundColor: '#EA580C',
-            borderRadius: 6
-          },
-          {
-            label: 'SAIDI (นาที/ราย/ปี)',
-            data: [42.1, 35.8, 28.5],
-            backgroundColor: '#0D9488',
-            borderRadius: 6,
-            yAxisID: 'y1'
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true, title: { display: true, text: 'SAIFI (ครั้ง)' } },
-          y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'SAIDI (นาที)' } }
-        }
-      }
-    });
-  }
-
-  // 2. Chart Temperature Trend
-  const ctxTemp = document.getElementById('chartTempTrend');
-  if(ctxTemp){
-    if(chartTempInstance) chartTempInstance.destroy();
-    chartTempInstance = new Chart(ctxTemp, {
-      type: 'line',
-      data: {
-        labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.'],
-        datasets: [{
-          label: 'อุณหภูมิ Thermo-scan เฉลี่ย (°C)',
-          data: [38.2, 41.5, 48.0, 52.4, 46.8, 43.1, 42.0, 44.5],
-          borderColor: '#EA580C',
-          backgroundColor: 'rgba(234, 88, 12, 0.1)',
-          tension: 0.35,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { y: { min: 25, max: 70 } }
-      }
-    });
-  }
-}
-
-/* ---------------- ASSET HEALTH INDEX (AHI) RENDER ---------------- */
-function renderAssetHealth(){
-  const container = document.getElementById('assetGridContainer');
-  container.innerHTML = ASSET_HEALTH_DATA.map(a => `
-    <div class="asset-card">
-      <div class="asset-head">
-        <div>
-          <span class="asset-tag">${a.tag}</span>
-          <div class="asset-name">${a.name}</div>
-          <div class="asset-sub">${a.area}</div>
-        </div>
-        <span class="badge" style="background:${a.status==='good'?'#DCFCE7':a.status==='warn'?'#FEF3C7':'#FEE2E2'}; color:${a.color};">${a.statusLabel}</span>
-      </div>
-
-      <div class="health-bar-wrap">
-        <div class="health-label">
-          <span>ดัชนีสุขภาพ AHI:</span>
-          <span style="color:${a.color}; font-family:var(--font-num); font-weight:700;">${a.ahi}%</span>
-        </div>
-        <div class="health-track">
-          <div class="health-fill" style="width:${a.ahi}%; background:${a.color};"></div>
-        </div>
-      </div>
-
-      <div class="asset-metrics-pill">
-        <span class="mpill">🧪 DGA: ${a.dgaStatus}</span>
-        <span class="mpill">🌡️ Max: ${a.tempMax}</span>
-        <span class="mpill">📅 ตรวจล่าสุด: ${a.lastPM}</span>
-      </div>
-    </div>
-  `).join('');
-}
-
-/* ---------------- SORT BY DUE DATE & RENDER TABLE ---------------- */
-function sortWorkOrdersByDue(){
-  WORK_ORDERS.sort((a, b) => new Date(a.isoDate) - new Date(b.isoDate));
-}
-
-function resortWorkOrders(){
-  sortWorkOrdersByDue();
-  renderTable();
-  alert('จัดเรียงลำดับตามกำหนดเสร็จใกล้สุดเรียบร้อย');
-}
-
-function renderTable(){
-  sortWorkOrdersByDue();
-  const tbody = document.getElementById('tableBody');
-  const todayStr = '2026-08-27';
-
-  tbody.innerHTML = WORK_ORDERS.map((wo, i) => {
-    let badgeClass = 'pending', badgeText = 'รอดำเนินการ';
-    if(wo.status === 'done'){ badgeClass = 'done'; badgeText = 'เสร็จสมบูรณ์'; }
-    else if(wo.status === 'doing'){ badgeClass = 'doing'; badgeText = 'กำลังทำ'; }
-    else if(wo.status === 'high'){ badgeClass = 'high'; badgeText = 'เร่งด่วน'; }
-
-    let duePill = '';
-    if(wo.isoDate === todayStr){
-      duePill = `<span class="due-pill due-urgent">⚡ วันนี้ (${wo.date})</span>`;
-    } else if(wo.isoDate === '2026-08-28'){
-      duePill = `<span class="due-pill due-near">⏳ พรุ่งนี้ (${wo.date})</span>`;
-    } else {
-      duePill = `<span class="due-pill due-normal">📅 ${wo.date}</span>`;
-    }
-
-    const editBtn = (currentRole === 'admin' || currentRole === 'supervisor' || currentRole === 'technician')
-      ? `<button class="btn-mini" onclick="editWorkOrder(${i})">แก้ไข</button>`
-      : '';
-
-    return `
-      <tr>
-        <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${wo.id}</strong></td>
-        <td>${wo.asset}</td>
-        <td>${wo.district}</td>
-        <td>${wo.type}</td>
-        <td>${duePill}</td>
-        <td>${wo.team}</td>
-        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
-        <td style="text-align:right;">
-          <div class="row-actions" style="justify-content:flex-end;">
-            <button class="btn-mini" onclick="viewWorkOrder(${i})">ดู</button>
-            ${editBtn}
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  document.getElementById('statTotal').innerHTML = `${WORK_ORDERS.length} <small>รายการ</small>`;
-  const dueTodayCount = WORK_ORDERS.filter(x => x.isoDate <= '2026-08-28' && x.status !== 'done').length;
-  document.getElementById('statDueToday').innerHTML = `${dueTodayCount} <small>รายการ</small>`;
-}
-
-/* ---------------- 3-YEAR INSPECTION ARCHIVE ---------------- */
-function updateYearButtonBadges(){
-  const c2026 = INSPECTION_HISTORY.filter(h => h.year === '2026').length;
-  const c2025 = INSPECTION_HISTORY.filter(h => h.year === '2025').length;
-  const c2024 = INSPECTION_HISTORY.filter(h => h.year === '2024').length;
-  const cALL = INSPECTION_HISTORY.length;
-
-  document.getElementById('badge2026').textContent = c2026;
-  document.getElementById('badge2025').textContent = c2025;
-  document.getElementById('badge2024').textContent = c2024;
-  document.getElementById('badgeALL').textContent = cALL;
-}
-
-function selectYearFilter(year){
-  currentSelectedYear = year;
-  document.querySelectorAll('.btn-year').forEach(b => b.classList.remove('active'));
-  const activeBtn = document.getElementById('btnYear' + year);
-  if(activeBtn) activeBtn.classList.add('active');
-  renderHistoryTable();
-}
-
-function renderHistoryTable(){
-  updateYearButtonBadges();
-  const tbody = document.getElementById('historyTableBody');
-  const items = getFilteredHistoryData();
-
-  if(items.length === 0){
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">ไม่พบข้อมูลประวัติสำหรับเงื่อนไขที่เลือก</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = items.map((item) => `
-    <tr>
-      <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${item.logId}</strong></td>
-      <td style="font-family:var(--font-num); font-size:12px;">
-        <span class="badge" style="background:#F1F5F9; color:var(--text-main); margin-right:4px;">${item.year}</span>
-        ${item.timestamp}
-      </td>
-      <td>${item.assetName}</td>
-      <td>${item.inspector}</td>
-      <td style="font-family:var(--font-num); font-weight:600;">${item.temp} °C</td>
-      <td style="font-family:var(--font-num);">${item.ground} Ω</td>
-      <td><span class="badge ${item.statusClass}">${item.result}</span></td>
-      <td style="text-align:right;">
-        <button class="btn-mini" onclick="viewHistoryDetail('${item.logId}')">ดูข้อมูล</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function getFilteredHistoryData(){
-  const distVal = document.getElementById('filterDistrictSelect').value;
-  const query = document.getElementById('searchHistoryInput').value.toLowerCase();
-
-  return INSPECTION_HISTORY.filter(h => {
-    const matchYear = currentSelectedYear === 'ALL' || h.year === currentSelectedYear;
-    const matchDist = distVal === 'ALL' || (h.district && h.district.includes(distVal)) || h.assetName.includes(distVal);
-    const matchQuery = h.logId.toLowerCase().includes(query) ||
-                       h.assetName.toLowerCase().includes(query) ||
-                       h.inspector.toLowerCase().includes(query) ||
-                       h.result.toLowerCase().includes(query);
-    return matchYear && matchDist && matchQuery;
-  });
-}
-
-function filterHistoryTable(){ renderHistoryTable(); }
-
-function viewHistoryDetail(logId){
-  const item = INSPECTION_HISTORY.find(h => h.logId === logId);
-  if(!item) return;
-
-  modalTitle.textContent = `บันทึกประวัติการตรวจ : ${item.logId}`;
-  modalContent.innerHTML = `
-    <div style="font-size:13.5px; line-height:1.8;">
-      <p><strong>ปีงบประมาณ:</strong> <span style="font-family:var(--font-num); font-weight:700; color:var(--orange-pri);">${item.year} (พ.ศ. ${Number(item.year)+543})</span></p>
-      <p><strong>วันที่/เวลาเข้าตรวจ:</strong> <span style="font-family:var(--font-num);">${item.timestamp}</span></p>
-      <p><strong>อุปกรณ์/พิกัด:</strong> ${item.assetName}</p>
-      <p><strong>ผู้เข้าตรวจ:</strong> ${item.inspector}</p>
-      <p><strong>อุณหภูมิ Thermo-scan:</strong> <span style="color:var(--orange-pri); font-family:var(--font-num); font-weight:700;">${item.temp} °C</span></p>
-      <p><strong>ความต้านทานกราวด์ดิน:</strong> <span style="color:var(--green-neon); font-family:var(--font-num); font-weight:700;">${item.ground} Ω</span></p>
-      <p><strong>สรุปผลการประเมิน:</strong> <span class="badge ${item.statusClass}">${item.result}</span></p>
-      <div style="margin-top:8px; padding:10px; background:#F8FAFC; border-radius:6px; border:1px solid var(--border);">
-        <strong>บันทึกรายละเอียดงาน:</strong>
-        <p style="color:var(--text-muted); font-size:12.5px; margin-top:2px;">${item.note}</p>
-      </div>
-    </div>
-    <div style="margin-top:18px; text-align:right;">
-      <button class="btn" onclick="closeModal()">ปิด</button>
-    </div>
-  `;
-  modal.classList.add('open');
-}
-
-function exportHistoryToExcel(){
-  const filteredData = getFilteredHistoryData();
-  const exportData = filteredData.map(h => ({
-    "ปี (ค.ศ.)": h.year, "ปี (พ.ศ.)": Number(h.year)+543, "รหัสบันทึก": h.logId,
-    "วันที่-เวลา": h.timestamp, "อุปกรณ์/สถานที่": h.assetName, "ผู้ตรวจ": h.inspector,
-    "อุณหภูมิ (°C)": h.temp, "กราวด์ (Ω)": h.ground, "ผลการตรวจ": h.result, "บันทึกเพิ่มเติม": h.note
-  }));
-  const ws = XLSX.utils.json_to_sheet(exportData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Inspection_History");
-  XLSX.writeFile(wb, `ประวัติการตรวจงาน_สมุทรปราการ_ปี_${currentSelectedYear}.xlsx`);
-}
-
-/* ---------------- FEEDER OUTAGE MODULE ---------------- */
-function renderFeederOutage(){
-  const grid = document.getElementById('feederCardsGrid');
-  const tbody = document.getElementById('feederTableBody');
-
-  grid.innerHTML = FEEDER_OUTAGE_DATA.map(f => `
-    <div class="feeder-card ${f.risk}">
-      <div class="feeder-head">
-        <div>
-          <span class="feeder-code">${f.code}</span>
-          <div class="feeder-title">${f.name}</div>
-          <div class="feeder-area">${f.area}</div>
-        </div>
-        <span class="badge ${f.risk === 'critical' ? 'high' : f.risk === 'warning' ? 'pending' : 'pass'}">${f.riskLabel}</span>
-      </div>
-      <div class="feeder-metrics">
-        <div>
-          <div class="fm-label">ดับสะสม</div>
-          <div class="fm-val" style="color:${f.risk==='critical'?'var(--red-neon)':'var(--text-main)'}">${f.outageCount} <small style="font-size:11px;">ครั้ง</small></div>
-        </div>
-        <div>
-          <div class="fm-label">เวลารวม</div>
-          <div class="fm-val">${f.totalDurationMin} <small style="font-size:11px;">นาที</small></div>
-        </div>
-        <div>
-          <div class="fm-label">SAIFI</div>
-          <div class="fm-val" style="color:var(--orange-pri)">${f.saifi}</div>
-        </div>
-      </div>
-      <div class="feeder-cause">
-        <strong>สาเหตุหลัก:</strong> ${f.mainCause}
-      </div>
-    </div>
-  `).join('');
-
-  tbody.innerHTML = FEEDER_OUTAGE_DATA.map(f => `
-    <tr>
-      <td><strong style="color:var(--orange-pri); font-family:var(--font-num);">${f.code}</strong></td>
-      <td><strong>${f.name}</strong></td>
-      <td>${f.area}</td>
-      <td style="font-family:var(--font-num); font-weight:700; color:${f.outageCount>=7?'var(--red-neon)':'var(--text-main)'}">${f.outageCount} ครั้ง</td>
-      <td style="font-family:var(--font-num);">${f.totalDurationMin} นาที</td>
-      <td style="font-family:var(--font-num); font-weight:700; color:var(--orange-pri);">${f.saifi}</td>
-      <td>${f.mainCause}</td>
-      <td><span class="badge ${f.risk==='critical'?'high':f.risk==='warning'?'pending':'pass'}">${f.riskLabel}</span></td>
-    </tr>
-  `).join('');
-}
-
-function exportOutageToExcel(){
-  const exportData = FEEDER_OUTAGE_DATA.map(f => ({
-    "รหัสสายป้อน": f.code, "ชื่อสายป้อน": f.name, "พื้นที่บริการ": f.area,
-    "จำนวนครั้งที่ดับ (ครั้ง)": f.outageCount, "เวลารวมที่ดับ (นาที)": f.totalDurationMin,
-    "SAIFI (ครั้ง/ราย/ปี)": f.saifi, "SAIDI (นาที/ราย/ปี)": f.saidi, "สาเหตุหลัก": f.mainCause, "ระดับความเสี่ยง": f.riskLabel
-  }));
-  const ws = XLSX.utils.json_to_sheet(exportData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Feeder_Outage_Stats");
-  XLSX.writeFile(wb, "สถิติไฟฟ้าดับรายสายป้อน_สมุทรปราการ.xlsx");
-}
-
-/* ---------------- LEAFLET MAP ENGINE ---------------- */
-let mapInstance = null;
-let markerLayers = [];
-let routePolyline = null;
-
-function initMap(){
-  if(mapInstance) return;
-
-  mapInstance = L.map('inspectionMap').setView([13.5750, 100.6250], 12);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19
-  }).addTo(mapInstance);
-
-  renderMapMarkers();
-}
-
-function renderMapMarkers(){
-  if(!mapInstance) return;
-
-  markerLayers.forEach(m => mapInstance.removeLayer(m));
-  markerLayers = [];
-  if(routePolyline) mapInstance.removeLayer(routePolyline);
-
-  const latlngs = [];
-
-  PATROL_PINS.forEach((p) => {
-    latlngs.push([p.lat, p.lng]);
-    const markerHtml = `<div class="custom-map-marker ${p.status}">${p.id}</div>`;
-    const customIcon = L.divIcon({ html: markerHtml, className: '', iconSize: [26, 26], iconAnchor: [13, 13] });
-    const marker = L.marker([p.lat, p.lng], {icon: customIcon}).addTo(mapInstance);
-    const gmapUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
-    
-    marker.bindPopup(`
-      <strong style="color:var(--orange-pri); font-size:13px;">จุดที่ ${p.id}: ${p.name}</strong><br>
-      <span style="color:#64748B;">รหัสอุปกรณ์: ${p.assetCode}</span><br>
-      <span style="display:block; margin:6px 0;">${p.desc}</span>
-      <a href="${gmapUrl}" target="_blank" class="btn gmap" style="color:#fff; text-decoration:none; padding:4px 8px; font-size:11px; display:inline-block; border-radius:4px;">
-        🗺️ เปิดนำทาง Google Maps
-      </a>
-    `);
-    markerLayers.push(marker);
-  });
-
-  routePolyline = L.polyline(latlngs, { color: '#EA580C', weight: 4, opacity: 0.85, dashArray: '8, 8' }).addTo(mapInstance);
-  mapInstance.fitBounds(routePolyline.getBounds(), {padding: [40, 40]});
-}
-
-function openGoogleMapsNavigation(lat, lng){
-  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
-}
-
-function focusCheckpoint(id){
-  const pin = PATROL_PINS.find(p => p.id === id);
-  if(!pin || !mapInstance) return;
-  mapInstance.flyTo([pin.lat, pin.lng], 15, {duration: 1.2});
-  const marker = markerLayers[id - 1];
-  if(marker) marker.openPopup();
-}
-
-function renderRouteList(){
-  const listEl = document.getElementById('routeList');
-  listEl.innerHTML = PATROL_PINS.map((p) => {
-    let statusBadge = '<span class="badge pending">รอดำเนินการ</span>';
-    if(p.status === 'completed') statusBadge = '<span class="badge done">✓ ตรวจเสร็จแล้ว</span>';
-    else if(p.status === 'active') statusBadge = '<span class="badge doing">📍 กำลังตรวจจุดนี้</span>';
-
-    return `
-      <li class="route-item ${p.status === 'active' ? 'active' : ''} ${p.status === 'completed' ? 'completed' : ''}" onclick="focusCheckpoint(${p.id})">
-        <div class="top">
-          <span>ลำดับที่ ${p.id} · ${p.assetCode}</span>
-          ${statusBadge}
-        </div>
-        <div class="name">${p.name}</div>
-        <div class="desc">${p.desc}</div>
-        <div class="actions-row" onclick="event.stopPropagation();">
-          <button class="btn gmap" style="padding:4px 10px; font-size:11px;" onclick="openGoogleMapsNavigation(${p.lat}, ${p.lng})">
-            🗺️ นำทาง Google Maps
-          </button>
-          <button class="btn" style="padding:4px 10px; font-size:11px;" onclick="quickCheckin(${p.id})">
-            บันทึกผลจุดนี้
-          </button>
-        </div>
-      </li>
-    `;
-  }).join('');
-
-  updateMissionBanner();
-}
-
-function updateMissionBanner(){
-  const activePin = PATROL_PINS.find(p => p.status === 'active');
-  const completedCount = PATROL_PINS.filter(p => p.status === 'completed').length;
-  const total = PATROL_PINS.length;
-  const pct = Math.round((completedCount / total) * 100);
-
-  document.getElementById('statPatrolProgress').innerHTML = `${completedCount} <small>/ ${total} จุด</small>`;
-  document.getElementById('progressText').textContent = `ความคืบหน้า ${pct}% (${completedCount}/${total})`;
-  document.getElementById('progressBarFill').style.width = `${pct}%`;
-
-  if(activePin){
-    document.getElementById('currentMissionTitle').textContent = `📍 จุดที่ ${activePin.id}: ${activePin.name}`;
-    document.getElementById('currentMissionDesc').textContent = `${activePin.desc} (${activePin.assetCode})`;
-  } else {
-    document.getElementById('currentMissionTitle').textContent = `🎉 ตรวจครบทุกจุดในแผนงานแล้ว`;
-    document.getElementById('currentMissionDesc').textContent = `สายตรวจ SP-CAR 01 ปฏิบัติภารกิจเสร็จสมบูรณ์ 100%`;
-  }
-}
-
-function completeCurrentAndNext(){
-  const activeIdx = PATROL_PINS.findIndex(p => p.status === 'active');
-  if(activeIdx !== -1){
-    const completedPin = PATROL_PINS[activeIdx];
-    completedPin.status = 'completed';
-
-    const now = new Date();
-    const newHistory = {
-      logId: `LOG-SP-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(10 + Math.random()*90)}`,
-      year: String(now.getFullYear()),
-      district: 'เมือง',
-      timestamp: `${now.getDate()} ส.ค. ${now.getFullYear()+543} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} น.`,
-      assetName: `${completedPin.name} (${completedPin.assetCode})`,
-      inspector: 'สายตรวจ SP-CAR 01',
-      temp: (34 + Math.random()*4).toFixed(1),
-      ground: (1.8 + Math.random()*0.8).toFixed(2),
-      result: 'ปกติ (ผ่านเกณฑ์)',
-      statusClass: 'pass',
-      note: 'ตรวจเช็กตามแผนงานประจำวันเรียบร้อย ไม่พบสิ่งผิดปกติ'
-    };
-    INSPECTION_HISTORY.unshift(newHistory);
-    renderHistoryTable();
-
-    if(activeIdx + 1 < PATROL_PINS.length){
-      PATROL_PINS[activeIdx + 1].status = 'active';
-      focusCheckpoint(PATROL_PINS[activeIdx + 1].id);
-    }
-    renderRouteList();
-    renderMapMarkers();
-  }
-}
-
-function quickCheckin(id){
-  const pin = PATROL_PINS.find(p => p.id === id);
-  if(!pin) return;
-  document.getElementById('f_asset').value = `${pin.name} (${pin.assetCode})`;
-  document.getElementById('f_id').value = `WO-SP-${Math.floor(10000 + Math.random()*90000)}`;
-  switchTab('tab-form');
-}
-
-/* ---------------- TAB ROUTING ---------------- */
-function switchTab(tabId){
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tabId);
-  });
-  const target = document.getElementById(tabId);
-  if(target) target.classList.add('active');
-
-  if(tabId === 'tab-route' && mapInstance){
-    setTimeout(() => { mapInstance.invalidateSize(); }, 200);
-  }
-  if(tabId === 'tab-analytics'){
-    setTimeout(() => { initCharts(); }, 200);
-  }
-  window.scrollTo({top: 0, behavior: 'smooth'});
-}
-
-document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
-
-/* ---------------- RENDER ANOMALIES ---------------- */
-function renderAnomalies(){
-  const container = document.getElementById('anomalyContainer');
-  container.innerHTML = ANOMALIES.map(a => `
-    <div class="anomaly-item ${a.mid ? 'mid' : ''}">
-      <div class="anomaly-head">
-        <span class="zone">${a.zone}</span>
-        <span class="score">${a.score}</span>
-      </div>
-      <h4>${a.title}</h4>
-      <p>${a.desc}</p>
-      <div class="advice">${a.advice}</div>
-    </div>
-  `).join('');
-}
-
-/* ---------------- MODALS ---------------- */
+/* ---------------- MODALS & WORK ORDER HANDLERS ---------------- */
 const modal = document.getElementById('dataModal');
 const modalTitle = document.getElementById('modalTitle');
 const modalContent = document.getElementById('modalContent');
 
 function closeModal(){ modal.classList.remove('open'); }
 
-function viewWorkOrder(index){
-  const wo = WORK_ORDERS[index];
-  modalTitle.textContent = `รายละเอียด : ${wo.id}`;
+function viewWorkOrderById(id){
+  const wo = WORK_ORDERS.find(w => w.id === id);
+  if(!wo) return;
+
+  modalTitle.textContent = `รายละเอียดใบสั่งงาน : ${wo.id}`;
   modalContent.innerHTML = `
     <div style="font-size:13.5px; line-height:1.8;">
       <p><strong>จุดติดตั้ง:</strong> ${wo.asset}</p>
       <p><strong>อำเภอ:</strong> ${wo.district}</p>
       <p><strong>ประเภทงาน:</strong> ${wo.type}</p>
-      <p><strong>กำหนดแล้วเสร็จ (Due Date):</strong> <span style="color:var(--orange-pri); font-family:var(--font-num); font-weight:700;">${wo.date}</span></p>
+      <p><strong>กำหนดแล้วเสร็จ (Due Date):</strong> <span style="color:var(--orange-pri); font-family:var(--font-num); font-weight:700;">${wo.date} (${wo.isoDate})</span></p>
       <p><strong>ทีมรับผิดชอบ:</strong> ${wo.team}</p>
       <p><strong>ค่า Thermo-scan:</strong> <span style="color:var(--orange-pri); font-family:var(--font-num); font-weight:700;">${wo.temp || '-'} °C</span></p>
       <p><strong>ค่าความต้านทานดิน:</strong> <span style="color:var(--green-neon); font-family:var(--font-num); font-weight:700;">${wo.ground || '-'} Ω</span></p>
@@ -1606,11 +1136,13 @@ function viewWorkOrder(index){
   modal.classList.add('open');
 }
 
-function editWorkOrder(index){
-  const wo = WORK_ORDERS[index];
+function editWorkOrderById(id){
+  const wo = WORK_ORDERS.find(w => w.id === id);
+  if(!wo) return;
+
   modalTitle.textContent = `แก้ไขสถานะ : ${wo.id}`;
   modalContent.innerHTML = `
-    <form onsubmit="saveEdit(event, ${index})">
+    <form onsubmit="saveEdit(event, '${wo.id}')">
       <div class="form-field" style="margin-bottom:12px;">
         <label>สถานะงาน</label>
         <select id="e_status">
@@ -1641,16 +1173,21 @@ function editWorkOrder(index){
   modal.classList.add('open');
 }
 
-function saveEdit(e, index){
+function saveEdit(e, id){
   e.preventDefault();
-  WORK_ORDERS[index].status = document.getElementById('e_status').value;
+  const idx = WORK_ORDERS.findIndex(w => w.id === id);
+  if(idx === -1) return;
+
+  WORK_ORDERS[idx].status = document.getElementById('e_status').value;
   const newIso = document.getElementById('e_isoDate').value;
-  WORK_ORDERS[index].isoDate = newIso;
+  WORK_ORDERS[idx].isoDate = newIso;
   const dObj = new Date(newIso);
-  WORK_ORDERS[index].date = `${dObj.getDate()} ส.ค. 69`;
-  WORK_ORDERS[index].team = document.getElementById('e_team').value;
-  WORK_ORDERS[index].temp = document.getElementById('e_temp').value;
-  renderTable();
+  WORK_ORDERS[idx].date = `${dObj.getDate()} ${THAI_MONTHS[dObj.getMonth()].slice(0,3)}. ${String(dObj.getFullYear()+543).slice(-2)}`;
+  WORK_ORDERS[idx].team = document.getElementById('e_team').value;
+  WORK_ORDERS[idx].temp = document.getElementById('e_temp').value;
+  
+  renderMonthChips();
+  renderPlanner();
   closeModal();
 }
 
@@ -1664,52 +1201,153 @@ function handleFormSubmit(e){
     asset: document.getElementById('f_asset').value,
     type: document.getElementById('f_type').value,
     isoDate: rawDate,
-    date: `${dObj.getDate()} ส.ค. 69`,
+    date: `${dObj.getDate()} ${THAI_MONTHS[dObj.getMonth()].slice(0,3)}. ${String(dObj.getFullYear()+543).slice(-2)}`,
     temp: document.getElementById('f_temp').value || '35.0',
     ground: document.getElementById('f_ground').value || '2.50',
     status: document.getElementById('f_status').value,
     team: 'ทีมสายตรวจ SP-01'
   };
   WORK_ORDERS.push(newWO);
-  renderTable();
+  
+  // Auto-switch to the added task's month
+  currentPlannerYear = dObj.getFullYear();
+  currentSelectedMonth = dObj.getMonth();
+  document.getElementById('currentMonthDisplay').textContent = `${THAI_MONTHS[currentSelectedMonth]} ${currentPlannerYear+543}`;
+  
+  renderMonthChips();
+  renderPlanner();
   document.getElementById('woForm').reset();
   alert('บันทึกเอกสารบำรุงรักษาเรียบร้อย!');
   switchTab('tab-plan');
 }
 
-/* ---------------- EXCEL EXPORT (PLAN) ---------------- */
+/* ---------------- TAB ROUTING ---------------- */
+function switchTab(tabId){
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
+  });
+  const target = document.getElementById(tabId);
+  if(target) target.classList.add('active');
+
+  if(tabId === 'tab-route' && mapInstance){
+    setTimeout(() => { mapInstance.invalidateSize(); }, 200);
+  }
+  if(tabId === 'tab-analytics'){
+    setTimeout(() => { initCharts(); }, 200);
+  }
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+document.querySelectorAll('.nav-item, .mobile-nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+/* ---------------- EXCEL EXPORT (MONTHLY) ---------------- */
 function exportToExcel(){
-  const exportData = WORK_ORDERS.map(w => ({
+  const targetMonthStr = `${currentPlannerYear}-${String(currentSelectedMonth+1).padStart(2,'0')}`;
+  const monthTasks = WORK_ORDERS.filter(w => w.isoDate.startsWith(targetMonthStr));
+
+  const exportData = monthTasks.map(w => ({
     "รหัสใบสั่งงาน": w.id, "อุปกรณ์/จุดติดตั้ง": w.asset, "อำเภอ": w.district,
     "ประเภทงาน": w.type, "กำหนดเสร็จ (Due Date)": w.date, "ทีมรับผิดชอบ": w.team,
     "สถานะ": w.status, "อุณหภูมิ (°C)": w.temp, "กราวด์ (Ω)": w.ground
   }));
   const ws = XLSX.utils.json_to_sheet(exportData);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "CMMS_SamutPrakan");
-  XLSX.writeFile(wb, "รายงานแผนบำรุงรักษา_สมุทรปราการ.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, `Plan_${currentSelectedMonth+1}_${currentPlannerYear}`);
+  XLSX.writeFile(wb, `แผนบำรุงรักษา_สมุทรปราการ_เดือน_${THAI_MONTHS[currentSelectedMonth]}_${currentPlannerYear+543}.xlsx`);
 }
 
-/* ---------------- REAL-TIME TELEMETRY ---------------- */
-function startLiveTelemetry(){
-  setInterval(() => {
-    const now = new Date();
-    document.getElementById('liveClock').textContent = now.toTimeString().split(' ')[0];
-    const load = (380 + Math.sin(now.getTime()/5000)*6 + Math.random()*2).toFixed(1);
-    document.getElementById('rtLoad').textContent = load;
-  }, 1000);
+/* ---------------- OTHER MODULES RENDERING ---------------- */
+function renderAssetHealth(){
+  const container = document.getElementById('assetGridContainer');
+  container.innerHTML = ASSET_HEALTH_DATA.map(a => `
+    <div class="asset-card">
+      <div class="asset-head">
+        <div>
+          <span class="asset-tag">${a.tag}</span>
+          <div class="asset-name">${a.name}</div>
+          <div class="asset-sub">${a.area}</div>
+        </div>
+        <span class="badge" style="background:${a.status==='good'?'#DCFCE7':a.status==='warn'?'#FEF3C7':'#FEE2E2'}; color:${a.color};">${a.statusLabel}</span>
+      </div>
+      <div class="health-bar-wrap">
+        <div class="health-label"><span>AHI Health:</span><span style="color:${a.color}; font-family:var(--font-num); font-weight:700;">${a.ahi}%</span></div>
+        <div class="health-track"><div class="health-fill" style="width:${a.ahi}%; background:${a.color};"></div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderFeederOutage(){
+  const grid = document.getElementById('feederCardsGrid');
+  grid.innerHTML = FEEDER_OUTAGE_DATA.map(f => `
+    <div class="feeder-card ${f.risk}">
+      <div class="feeder-head">
+        <div><span class="feeder-code">${f.code}</span><div class="feeder-title">${f.name}</div></div>
+        <span class="badge ${f.risk==='critical'?'high':'pending'}">${f.riskLabel}</span>
+      </div>
+      <div class="feeder-metrics">
+        <div><div class="fm-label">ดับสะสม</div><div class="fm-val">${f.outageCount} ครั้ง</div></div>
+        <div><div class="fm-label">เวลารวม</div><div class="fm-val">${f.totalDurationMin} นาที</div></div>
+        <div><div class="fm-label">SAIFI</div><div class="fm-val" style="color:var(--orange-pri)">${f.saifi}</div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ---------------- LEAFLET MAP & GPS ---------------- */
+let mapInstance = null;
+function initMap(){
+  if(mapInstance) return;
+  mapInstance = L.map('inspectionMap').setView([13.5750, 100.6250], 12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(mapInstance);
+  
+  const latlngs = PATROL_PINS.map(p => [p.lat, p.lng]);
+  PATROL_PINS.forEach(p => {
+    const customIcon = L.divIcon({ html: `<div class="custom-map-marker ${p.status}">${p.id}</div>`, iconSize:[26,26], iconAnchor:[13,13] });
+    L.marker([p.lat, p.lng], {icon: customIcon}).addTo(mapInstance);
+  });
+  L.polyline(latlngs, { color: '#EA580C', weight: 4, opacity: 0.85, dashArray: '8, 8' }).addTo(mapInstance);
+}
+
+function renderRouteList(){
+  document.getElementById('routeList').innerHTML = PATROL_PINS.map(p => `
+    <li class="route-item ${p.status==='active'?'active':''}">
+      <div class="top"><span>ลำดับที่ ${p.id} · ${p.assetCode}</span><span class="badge ${p.status==='completed'?'done':'doing'}">${p.status}</span></div>
+      <div class="name">${p.name}</div>
+      <div class="desc">${p.desc}</div>
+      <div class="actions-row">
+        <button class="btn gmap" style="padding:4px 10px; font-size:11px;" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}','_blank')">🗺️ Google Maps</button>
+      </div>
+    </li>
+  `).join('');
+}
+
+/* ---------------- CHARTS ---------------- */
+function initCharts(){
+  const ctxSaifi = document.getElementById('chartSaifiSaidi');
+  if(ctxSaifi) {
+    new Chart(ctxSaifi, {
+      type: 'bar',
+      data: {
+        labels: ['ปี 2567', 'ปี 2568', 'ปี 2569'],
+        datasets: [{ label: 'SAIFI (ครั้ง)', data: [1.25, 1.02, 0.84], backgroundColor: '#EA580C', borderRadius: 6 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
 }
 
 /* ---------------- INIT ---------------- */
 window.addEventListener('DOMContentLoaded', () => {
-  initMap();
-  renderRouteList();
-  renderHistoryTable();
-  renderTable();
+  renderMonthChips();
+  renderPlanner();
   renderAssetHealth();
   renderFeederOutage();
-  renderAnomalies();
-  startLiveTelemetry();
+  renderRouteList();
+  initMap();
 });
 </script>
 </body>
